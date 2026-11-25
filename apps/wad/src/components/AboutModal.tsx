@@ -89,7 +89,7 @@ export default function AboutModal({ open, onClose, restoreFocusRef }: AboutModa
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-neutral-400">
                             About •{' '}
                             <a
-                                href="https://mjolnir3286.github.io/horse_pocket/"
+                                href="../"
                                 className="underline underline-offset-2 hover:text-gray-800 dark:hover:text-neutral-200"
                             >
                                 Horse Pocket
@@ -113,22 +113,25 @@ export default function AboutModal({ open, onClose, restoreFocusRef }: AboutModa
                     </button>
                 </div>
 
-                <div id={descId} className="space-y-3 text-sm text-gray-600 dark:text-neutral-300">
-                    <p>
+                <div id={descId} className="text-sm text-gray-600 dark:text-neutral-300">
+                    <p className="mb-3">
                         A simple take-home budget and paycheck calculator that runs entirely in your browser.
                     </p>
-                    <p className="text-gray-900 dark:text-neutral-100">
+                    <p className="text-gray-900 dark:text-neutral-100 mb-1">
                         Made by{' '}
                         <a
                             href="https://github.com/mjolnir3286"
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="underline underline-offset-2"
                         >
                             Kale G.
                         </a>
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-neutral-400">
+                    <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3.5">
+                        Built with Grok Bot
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-neutral-400">
                         Everything stays on your device — nothing is sent to a server.
                     </p>
                 </div>

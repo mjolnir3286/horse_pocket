@@ -3,6 +3,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, ReferenceLine,
 } from 'recharts'
+import type { CompoundFreq, ContribFreq, PlanState } from '../types'
 import { formatCurrency } from '../utils'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -69,15 +70,16 @@ const labelClass =
 
 // ─── Savings Goal ─────────────────────────────────────────────────────────────
 
-type ContribFreq = 'weekly' | 'biweekly' | 'monthly'
 const CONTRIB_PERIODS: Record<ContribFreq, number> = { weekly: 52, biweekly: 26, monthly: 12 }
 
-function SavingsGoal() {
+interface SavingsGoalProps {
+    state: PlanState['savingsGoal']
+    onChange: (next: PlanState['savingsGoal']) => void
+}
+
+function SavingsGoal({ state, onChange }: SavingsGoalProps) {
     const isDark = useDarkMode()
-    const [goal, setGoal] = useState(0)
-    const [contribution, setContribution] = useState(0)
-    const [freq, setFreq] = useState<ContribFreq>('monthly')
-    const [rate, setRate] = useState(0)
+    const { goal, contribution, freq, rate } = state
 
     const periodsPerYear = CONTRIB_PERIODS[freq]
     const r = rate / 100 / periodsPerYear
@@ -126,19 +128,39 @@ function SavingsGoal() {
                     <label className={labelClass}>Goal Amount</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                        <input type="number" min="0" step="1" value={goal || ''} onChange={e => setGoal(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pl-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={goal || ''}
+                            onChange={e => onChange({ ...state, goal: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pl-6`}
+                        />
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Contribution</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                        <input type="number" min="0" step="1" value={contribution || ''} onChange={e => setContribution(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pl-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={contribution || ''}
+                            onChange={e => onChange({ ...state, contribution: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pl-6`}
+                        />
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Frequency</label>
-                    <select value={freq} onChange={e => setFreq(e.target.value as ContribFreq)} className={`${inputClass} cursor-pointer`}>
+                    <select
+                        value={freq}
+                        onChange={e => onChange({ ...state, freq: e.target.value as ContribFreq })}
+                        className={`${inputClass} cursor-pointer`}
+                    >
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
                         <option value="monthly">Monthly</option>
@@ -147,7 +169,16 @@ function SavingsGoal() {
                 <div>
                     <label className={labelClass}>Annual Interest %</label>
                     <div className="relative">
-                        <input type="number" min="0" max="100" step="0.1" value={rate || ''} onChange={e => setRate(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pr-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={rate || ''}
+                            onChange={e => onChange({ ...state, rate: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pr-6`}
+                        />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                     </div>
                 </div>
@@ -166,7 +197,11 @@ function SavingsGoal() {
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                             <XAxis dataKey="label" tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                             <YAxis tickFormatter={fmtShort} tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} width={48} />
-                            <Tooltip formatter={(v: unknown) => [formatCurrency(v as number), 'Balance']} contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }} labelStyle={{ fontWeight: 600 }} />
+                            <Tooltip
+                                formatter={(v) => [formatCurrency(Number(v ?? 0)), 'Balance']}
+                                contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }}
+                                labelStyle={{ fontWeight: 600 }}
+                            />
                             <ReferenceLine y={goal} stroke={ACCENT} strokeDasharray="4 4" label={{ value: 'Goal', fill: ACCENT, fontSize: 10, position: 'insideTopRight' }} />
                             <Area type="monotone" dataKey="balance" stroke={MONEY} strokeWidth={2} fill="url(#sgGrad)" dot={false} />
                         </AreaChart>
@@ -184,15 +219,16 @@ function SavingsGoal() {
 
 // ─── Compound Interest ────────────────────────────────────────────────────────
 
-type CompoundFreq = 'daily' | 'monthly' | 'annually'
 const COMPOUND_N: Record<CompoundFreq, number> = { daily: 365, monthly: 12, annually: 1 }
 
-function CompoundInterest() {
+interface CompoundInterestProps {
+    state: PlanState['compoundInterest']
+    onChange: (next: PlanState['compoundInterest']) => void
+}
+
+function CompoundInterest({ state, onChange }: CompoundInterestProps) {
     const isDark = useDarkMode()
-    const [principal, setPrincipal] = useState(0)
-    const [rate, setRate] = useState(0)
-    const [compFreq, setCompFreq] = useState<CompoundFreq>('monthly')
-    const [years, setYears] = useState(0)
+    const { principal, rate, compFreq, years } = state
 
     const chartData = (() => {
         if (principal <= 0 || years <= 0) return []
@@ -221,19 +257,40 @@ function CompoundInterest() {
                     <label className={labelClass}>Starting Amount</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                        <input type="number" min="0" step="1" value={principal || ''} onChange={e => setPrincipal(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pl-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={principal || ''}
+                            onChange={e => onChange({ ...state, principal: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pl-6`}
+                        />
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Annual Rate</label>
                     <div className="relative">
-                        <input type="number" min="0" max="100" step="0.1" value={rate || ''} onChange={e => setRate(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pr-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={rate || ''}
+                            onChange={e => onChange({ ...state, rate: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pr-6`}
+                        />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Compounding</label>
-                    <select value={compFreq} onChange={e => setCompFreq(e.target.value as CompoundFreq)} className={`${inputClass} cursor-pointer`}>
+                    <select
+                        value={compFreq}
+                        onChange={e => onChange({ ...state, compFreq: e.target.value as CompoundFreq })}
+                        className={`${inputClass} cursor-pointer`}
+                    >
                         <option value="daily">Daily</option>
                         <option value="monthly">Monthly</option>
                         <option value="annually">Annually</option>
@@ -241,7 +298,15 @@ function CompoundInterest() {
                 </div>
                 <div>
                     <label className={labelClass}>Years</label>
-                    <input type="number" min="0" step="1" value={years || ''} onChange={e => setYears(parseInt(e.target.value) || 0)} placeholder="0" className={inputClass} />
+                    <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={years || ''}
+                        onChange={e => onChange({ ...state, years: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                        placeholder="0"
+                        className={inputClass}
+                    />
                 </div>
             </div>
 
@@ -258,7 +323,14 @@ function CompoundInterest() {
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} />
                             <YAxis tickFormatter={fmtShort} tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} width={48} />
-                            <Tooltip formatter={((v: unknown, name: string) => [formatCurrency(v as number), name === 'withInterest' ? 'With Interest' : 'Principal']) as any} contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }} labelStyle={{ fontWeight: 600 }} />
+                            <Tooltip
+                                formatter={(v, name) => [
+                                    formatCurrency(Number(v ?? 0)),
+                                    name === 'withInterest' ? 'With Interest' : 'Principal',
+                                ]}
+                                contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }}
+                                labelStyle={{ fontWeight: 600 }}
+                            />
                             <Area type="monotone" dataKey="withoutInterest" stroke={flatColor} strokeWidth={1.5} fill={flatColor} fillOpacity={0.2} dot={false} />
                             <Area type="monotone" dataKey="withInterest" stroke={MONEY} strokeWidth={2} fill="url(#ciGrad)" dot={false} />
                         </AreaChart>
@@ -276,12 +348,14 @@ function CompoundInterest() {
 
 // ─── Investment Return ────────────────────────────────────────────────────────
 
-function InvestmentReturn() {
+interface InvestmentReturnProps {
+    state: PlanState['investmentReturn']
+    onChange: (next: PlanState['investmentReturn']) => void
+}
+
+function InvestmentReturn({ state, onChange }: InvestmentReturnProps) {
     const isDark = useDarkMode()
-    const [initial, setInitial] = useState(0)
-    const [monthly, setMonthly] = useState(0)
-    const [rate, setRate] = useState(0)
-    const [years, setYears] = useState(0)
+    const { initial, monthly, rate, years } = state
 
     const chartData = (() => {
         if (years <= 0 || (initial <= 0 && monthly <= 0)) return []
@@ -312,26 +386,59 @@ function InvestmentReturn() {
                     <label className={labelClass}>Initial Investment</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                        <input type="number" min="0" step="1" value={initial || ''} onChange={e => setInitial(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pl-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={initial || ''}
+                            onChange={e => onChange({ ...state, initial: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pl-6`}
+                        />
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Monthly Contribution</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                        <input type="number" min="0" step="1" value={monthly || ''} onChange={e => setMonthly(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pl-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={monthly || ''}
+                            onChange={e => onChange({ ...state, monthly: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pl-6`}
+                        />
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Annual Return %</label>
                     <div className="relative">
-                        <input type="number" min="0" max="100" step="0.1" value={rate || ''} onChange={e => setRate(parseFloat(e.target.value) || 0)} placeholder="0" className={`${inputClass} pr-6`} />
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={rate || ''}
+                            onChange={e => onChange({ ...state, rate: Math.max(0, parseFloat(e.target.value) || 0) })}
+                            placeholder="0"
+                            className={`${inputClass} pr-6`}
+                        />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                     </div>
                 </div>
                 <div>
                     <label className={labelClass}>Years</label>
-                    <input type="number" min="0" step="1" value={years || ''} onChange={e => setYears(parseInt(e.target.value) || 0)} placeholder="0" className={inputClass} />
+                    <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={years || ''}
+                        onChange={e => onChange({ ...state, years: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                        placeholder="0"
+                        className={inputClass}
+                    />
                 </div>
             </div>
 
@@ -348,7 +455,14 @@ function InvestmentReturn() {
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} />
                             <YAxis tickFormatter={fmtShort} tick={{ fontSize: 10, fill: axisColor }} tickLine={false} axisLine={false} width={48} />
-                            <Tooltip formatter={((v: unknown, name: string) => [formatCurrency(v as number), name === 'value' ? 'Total Value' : 'Contributed']) as any} contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }} labelStyle={{ fontWeight: 600 }} />
+                            <Tooltip
+                                formatter={(v, name) => [
+                                    formatCurrency(Number(v ?? 0)),
+                                    name === 'value' ? 'Total Value' : 'Contributed',
+                                ]}
+                                contentStyle={{ background: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: 8, fontSize: 12 }}
+                                labelStyle={{ fontWeight: 600 }}
+                            />
                             <Area type="monotone" dataKey="contributed" stroke={contribColor} strokeWidth={1.5} fill={contribColor} fillOpacity={0.25} dot={false} />
                             <Area type="monotone" dataKey="value" stroke={MONEY} strokeWidth={2} fill="url(#irGrad)" dot={false} />
                         </AreaChart>
@@ -364,28 +478,41 @@ function InvestmentReturn() {
     )
 }
 
-
 // ─── Main Planning Tab ────────────────────────────────────────────────────────
 
-export default function PlanningTab() {
+interface PlanningTabProps {
+    plan: PlanState
+    onChangePlan: (updater: (prev: PlanState) => PlanState) => void
+}
+
+export default function PlanningTab({ plan, onChangePlan }: PlanningTabProps) {
     return (
         <div className="space-y-6">
             <div className="bg-gray-50 dark:bg-neutral-900 rounded-lg p-6 border border-gray-200 dark:border-neutral-700">
                 <h3 className="text-accent font-bold text-lg mb-1">Savings Goal</h3>
                 <p className="text-xs text-gray-500 dark:text-neutral-400 mb-4">How long will it take to save a target amount?</p>
-                <SavingsGoal />
+                <SavingsGoal
+                    state={plan.savingsGoal}
+                    onChange={savingsGoal => onChangePlan(prev => ({ ...prev, savingsGoal }))}
+                />
             </div>
 
             <div className="bg-gray-50 dark:bg-neutral-900 rounded-lg p-6 border border-gray-200 dark:border-neutral-700">
                 <h3 className="text-accent font-bold text-lg mb-1">Compound Interest</h3>
                 <p className="text-xs text-gray-500 dark:text-neutral-400 mb-4">How much will a lump sum grow over time?</p>
-                <CompoundInterest />
+                <CompoundInterest
+                    state={plan.compoundInterest}
+                    onChange={compoundInterest => onChangePlan(prev => ({ ...prev, compoundInterest }))}
+                />
             </div>
 
             <div className="bg-gray-50 dark:bg-neutral-900 rounded-lg p-6 border border-gray-200 dark:border-neutral-700">
                 <h3 className="text-accent font-bold text-lg mb-1">Investment Return</h3>
                 <p className="text-xs text-gray-500 dark:text-neutral-400 mb-4">Project the future value of regular investments.</p>
-                <InvestmentReturn />
+                <InvestmentReturn
+                    state={plan.investmentReturn}
+                    onChange={investmentReturn => onChangePlan(prev => ({ ...prev, investmentReturn }))}
+                />
             </div>
         </div>
     )

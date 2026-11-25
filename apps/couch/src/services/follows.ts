@@ -113,8 +113,18 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * Check every followed show on TVmaze. The first check after following only records a
  * baseline; after that, an alert is produced only for an aired episode we haven't seen.
  */
+const CHECK_TTL_MS = 6 * 60 * 60 * 1000;
+
+function isFresh(checkedAt?: string): boolean {
+  if (!checkedAt) return false;
+  const t = new Date(checkedAt).getTime();
+  return Number.isFinite(t) && Date.now() - t < CHECK_TTL_MS;
+}
+
+/** Check followed shows. On open, skip a show if it was checked in the last 6 hours. Manual refresh passes force=true. */
 export async function checkFollowedShows(
-  follows: FollowedTitle[]
+  follows: FollowedTitle[],
+  force = false
 ): Promise<{ follows: FollowedTitle[]; alerts: NewEpisodeAlert[]; errors: number }> {
   const now = new Date().toISOString();
   const alerts: NewEpisodeAlert[] = [];
@@ -135,8 +145,12 @@ export async function checkFollowedShows(
       updated.push(f);
       continue;
     }
+    if (!force && isFresh(f.lastStatus?.checkedAt)) {
+      updated.push(f);
+      continue;
+    }
     try {
-      const status = await getShowStatus(f.tvmazeId);
+      const status = await getShowStatus(f.tvmazeId, force);
       const prev = status.previous;
       if (prev) {
         if (f.lastNotifiedEpisodeId == null) {

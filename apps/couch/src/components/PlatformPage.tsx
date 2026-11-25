@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DollarSign, ExternalLink, TrendingUp } from 'lucide-react';
 import type { UpcomingReleaseLead } from '../types/collector';
 import type { StreamingPlatform } from '../types/streaming';
-import { getPopularOnProvider, type TmdbTitle } from '../services/tmdb';
+import { getPopularOnProvider, peekPopularOnProvider, type TmdbTitle } from '../services/tmdb';
 
 interface PlatformPageProps {
   platforms: StreamingPlatform[];
@@ -19,35 +19,52 @@ const PopularList: React.FC<{ platform: StreamingPlatform; onSelectTitle: (t: Tm
   platform,
   onSelectTitle,
 }) => {
-  const [titles, setTitles] = useState<TmdbTitle[] | null | undefined>(undefined);
-  useEffect(() => {
-    let active = true;
+  const cached = peekPopularOnProvider('tv', platform.tmdbProviderIds, 3);
+  const [open, setOpen] = useState(Boolean(cached));
+  const [titles, setTitles] = useState<TmdbTitle[] | null | undefined>(cached);
+  const [loading, setLoading] = useState(false);
+
+  const load = () => {
+    setOpen(true);
+    if (titles && titles !== undefined) return;
+    const again = peekPopularOnProvider('tv', platform.tmdbProviderIds, 3);
+    if (again) {
+      setTitles(again);
+      return;
+    }
+    setLoading(true);
     getPopularOnProvider('tv', platform.tmdbProviderIds, 3)
-      .then((t) => active && setTitles(t))
-      .catch(() => active && setTitles(null));
-    return () => {
-      active = false;
-    };
-  }, [platform]);
+      .then(setTitles)
+      .catch(() => setTitles(null))
+      .finally(() => setLoading(false));
+  };
 
   return (
     <div className="top3-list">
       <div className="top3-heading">
         <TrendingUp size={13} /> Popular shows streaming on {platform.name}
       </div>
-      {titles === undefined && <div className="muted small">Loading…</div>}
-      {titles === null && <div className="muted small">Unavailable right now.</div>}
-      {titles?.length === 0 && <div className="muted small">No titles listed.</div>}
-      {titles?.map((t, idx) => (
-        <button key={t.id} type="button" className="top3-item" onClick={() => onSelectTitle(t)}>
-          <span className="top3-left">
-            <span className="top3-rank">{idx + 1}</span>
-            <span className="top3-name">{t.title}</span>
-          </span>
-          <span className="muted small">{t.year ?? ''}</span>
+      {!open ? (
+        <button type="button" className="pill-btn popular-load" onClick={load}>
+          Show popular shows
         </button>
-      ))}
-      <div className="fineprint">Ranked by TMDB popularity among shows TMDB lists as streaming here (US). Not an official chart.</div>
+      ) : (
+        <>
+          {loading && <div className="muted small">Loading…</div>}
+          {titles === null && <div className="muted small">Unavailable right now.</div>}
+          {titles?.length === 0 && <div className="muted small">No titles listed.</div>}
+          {titles?.map((t, idx) => (
+            <button key={t.id} type="button" className="top3-item" onClick={() => onSelectTitle(t)}>
+              <span className="top3-left">
+                <span className="top3-rank">{idx + 1}</span>
+                <span className="top3-name">{t.title}</span>
+              </span>
+              <span className="muted small">{t.year ?? ''}</span>
+            </button>
+          ))}
+          <div className="fineprint">Ranked by TMDB popularity among shows TMDB lists as streaming here (US). Not an official chart. Saved on this device for 24 hours.</div>
+        </>
+      )}
     </div>
   );
 };

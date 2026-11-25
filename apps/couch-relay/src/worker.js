@@ -9,7 +9,7 @@
  * - CORS only for https://mjolnir3286.github.io and http://localhost:* / 127.0.0.1:*
  *   Requests without an allowed Origin are refused with 403.
  * - Adds `Authorization: Bearer <TMDB_TOKEN>` (Worker secret) server-side.
- * - Caches successful responses briefly with the Workers Cache API.
+ * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, and discover).
  * - Returns only TMDB's JSON body.
  */
 
@@ -19,11 +19,11 @@ const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
 
 // path regex -> cache seconds
 const ROUTES = [
-  [/^\/search\/(multi|movie|tv)$/, 600],
-  [/^\/(movie|tv)\/\d{1,9}$/, 3600],
-  [/^\/(movie|tv)\/\d{1,9}\/watch\/providers$/, 3600],
+  [/^\/search\/(multi|movie|tv)$/, 1800],
+  [/^\/(movie|tv)\/\d{1,9}$/, 86400],
+  [/^\/(movie|tv)\/\d{1,9}\/watch\/providers$/, 86400],
   [/^\/tv\/\d{1,9}\/external_ids$/, 86400],
-  [/^\/discover\/(movie|tv)$/, 3600],
+  [/^\/discover\/(movie|tv)$/, 86400],
   [/^\/configuration$/, 86400],
 ];
 
@@ -152,7 +152,7 @@ export default {
       status,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': status === 200 ? `public, max-age=${Math.min(ttl, 600)}` : 'no-store',
+        'Cache-Control': status === 200 ? `public, max-age=${ttl}` : 'no-store',
         'X-Relay-Cache': cacheState,
         ...corsHeaders(origin),
       },

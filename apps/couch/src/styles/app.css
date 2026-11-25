@@ -1146,3 +1146,9 @@ input {
 .about-tmdb img { width: 64px; height: auto; opacity: 0.85; }
 .about-tmdb .about-fineprint { margin: 0; }
 .search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+
+.search-row { display: flex; align-items: stretch; gap: 8px; }
+.search-row .search-box { flex: 1; min-width: 0; }
+.search-submit { flex-shrink: 0; padding: 0 14px; }
+.search-input { padding-right: 38px; }
+.popular-load { margin-top: 6px; }

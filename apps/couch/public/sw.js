@@ -1,48 +1,146 @@
-/* Couch Service Worker (PWA Shell + Episode Alert Notifications) */
-const CACHE_NAME = 'couch-v2';
-const BASE = self.registration.scope; // the app's scope URL, including any subpath
+/* Couch Service Worker: static assets, upcoming JSON, and relay/TVmaze/image caching. */
+const SHELL_CACHE = 'couch-shell-v3';
+const RELAY_CACHE = 'couch-relay-v1';
+const DATA_CACHE = 'couch-data-v1';
+const IMAGE_CACHE = 'couch-images-v1';
+const RELAY_MAX = 80;
+const DATA_MAX = 20;
+const IMAGE_MAX = 60;
+const BASE = self.registration.scope;
+const RELAY_HOST = 'couch-relay.mjolnir3286.workers.dev';
+const TVMAZE_HOST = 'api.tvmaze.com';
+const TMDB_IMAGE_HOST = 'image.tmdb.org';
 
 const SHELL_ASSETS = [
   BASE,
   `${BASE}index.html`,
   `${BASE}manifest.webmanifest`,
   `${BASE}favicon.svg`,
+  `${BASE}tmdb-logo.svg`,
   `${BASE}icons/icon-192.png`,
   `${BASE}icons/icon-512.png`,
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_ASSETS)).catch(() => undefined)
+    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS)).catch(() => undefined)
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
+  const keep = new Set([SHELL_CACHE, RELAY_CACHE, DATA_CACHE, IMAGE_CACHE]);
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
 
+function isAsset(url) {
+  return url.origin === self.location.origin && url.pathname.includes('/assets/');
+}
+
+function isHtml(url) {
+  return url.origin === self.location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html'));
+}
+
+function isUpcoming(url) {
+  return url.origin === self.location.origin && url.pathname.endsWith('upcoming-releases.json');
+}
+
+async function putCapped(cacheName, request, response, maxEntries) {
+  const cache = await caches.open(cacheName);
+  await cache.put(request, response);
+  const keys = await cache.keys();
+  if (keys.length > maxEntries) {
+    await cache.delete(keys[0]);
+  }
+}
+
+function isFresh(response, fallbackSeconds) {
+  const ctrl = response.headers.get('Cache-Control') || '';
+  const maxAge = /max-age=(\d+)/i.exec(ctrl);
+  const ageHdr = response.headers.get('Date');
+  const seconds = maxAge ? Number(maxAge[1]) : fallbackSeconds;
+  if (!ageHdr || !Number.isFinite(seconds)) return false;
+  const born = new Date(ageHdr).getTime();
+  return Number.isFinite(born) && Date.now() - born < seconds * 1000;
+}
+
+async function staleWhileRevalidate(event, cacheName, maxEntries, freshSeconds) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(event.request);
+  const fetchAndStore = fetch(event.request)
+    .then((res) => {
+      if (res && res.ok) {
+        event.waitUntil(putCapped(cacheName, event.request, res.clone(), maxEntries));
+      }
+      return res;
+    })
+    .catch(() => cached);
+  if (cached && isFresh(cached, freshSeconds)) return cached;
+  if (cached) {
+    event.waitUntil(fetchAndStore);
+    return cached;
+  }
+  return fetchAndStore;
+}
+
+async function cacheFirst(event, cacheName, maxEntries) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(event.request);
+  if (cached) return cached;
+  const res = await fetch(event.request);
+  if (res && res.ok) {
+    event.waitUntil(putCapped(cacheName, event.request, res.clone(), maxEntries));
+  }
+  return res;
+}
+
+async function networkFirst(event, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const res = await fetch(event.request);
+    if (res && res.ok) event.waitUntil(cache.put(event.request, res.clone()));
+    return res;
+  } catch (err) {
+    const cached = await cache.match(event.request);
+    if (cached) return cached;
+    throw err;
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+
+  if (url.hostname === RELAY_HOST) {
+    event.respondWith(staleWhileRevalidate(event, RELAY_CACHE, RELAY_MAX, 1800));
+    return;
+  }
+  if (url.hostname === TVMAZE_HOST) {
+    event.respondWith(staleWhileRevalidate(event, DATA_CACHE, DATA_MAX, 6 * 60 * 60));
+    return;
+  }
+  if (url.hostname === TMDB_IMAGE_HOST) {
+    event.respondWith(cacheFirst(event, IMAGE_CACHE, IMAGE_MAX));
+    return;
+  }
   if (url.origin !== self.location.origin) return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match(BASE)))
-  );
+  if (isUpcoming(url)) {
+    event.respondWith(staleWhileRevalidate(event, DATA_CACHE, DATA_MAX, 6 * 60 * 60));
+    return;
+  }
+  if (isAsset(url) || url.pathname.endsWith('.webmanifest') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.png')) {
+    event.respondWith(cacheFirst(event, SHELL_CACHE, 40));
+    return;
+  }
+  if (isHtml(url) || url.pathname.endsWith('sw.js')) {
+    event.respondWith(networkFirst(event, SHELL_CACHE));
+    return;
+  }
+  event.respondWith(networkFirst(event, SHELL_CACHE));
 });
 
 self.addEventListener('push', (event) => {
@@ -69,34 +167,15 @@ self.addEventListener('push', (event) => {
   );
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SHOW_EPISODE_NOTIFICATION') {
-    const { title, body, tag } = event.data.payload || {};
-    event.waitUntil(
-      self.registration.showNotification(title || 'Couch — New Episode', {
-        body: body || 'New episode available to stream.',
-        icon: `${BASE}icons/icon-192.png`,
-        badge: `${BASE}icons/icon-192.png`,
-        tag: tag || 'couch-sim',
-        data: { url: `${BASE}?tab=watchlist` },
-      })
-    );
-  }
-});
-
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = (event.notification.data && event.notification.data.url) || BASE;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {
-        if ('focus' in client) {
-          return client.focus();
-        }
+        if ('focus' in client) return client.focus();
       }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
-      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
       return undefined;
     })
   );

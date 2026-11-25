@@ -25,7 +25,7 @@ import {
   saveFollows,
   type FollowedTitle,
 } from './services/follows';
-import { getWatchOptions, RelayError, searchTitles, type TmdbTitle, type WatchOptions } from './services/tmdb';
+import { RelayError, peekWatchOptions, searchCacheKey, searchTitles, type TmdbTitle, type WatchOptions } from './services/tmdb';
 import { SITE } from './config/site';
 import { assetUrl } from './lib/baseUrl';
 import { PLATFORMS } from './data/platforms';
@@ -42,7 +42,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 /** Name-only follows from the Upcoming feed (leads with no TVmaze id). */
 const FOLLOWED_LEADS_STORAGE_KEY = 'horse_pocket_followed_leads_v1';
-const PROVIDER_LOOKUPS_PER_SEARCH = 12;
 
 function normalizeTitle(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -59,11 +58,13 @@ export const App: React.FC = () => {
   const [collectorData, setCollectorData] = useState<CollectorOutput | null>(null);
 
   const [queryText, setQueryText] = useState('');
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'movie' | 'tv'>('all');
   const [results, setResults] = useState<TmdbTitle[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [optionsByKey, setOptionsByKey] = useState<Record<string, WatchOptions | null>>({});
+  const searchAbort = useRef<AbortController | null>(null);
   const [selected, setSelected] = useState<TmdbTitle | null>(null);
 
   const [follows, setFollows] = useState<FollowedTitle[]>(loadFollows);
@@ -122,7 +123,7 @@ export const App: React.FC = () => {
     checkingRef.current = true;
     setChecking(true);
     try {
-      const result = await checkFollowedShows(current);
+      const result = await checkFollowedShows(current, manual);
       // Merge so follows added or removed during the check aren't lost.
       setFollows((prev) => prev.map((f) => result.follows.find((u) => u.key === f.key) ?? f));
       setLastCheckedAt(new Date().toISOString());
@@ -159,7 +160,7 @@ export const App: React.FC = () => {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
       const last = readLastCheck();
-      if (!last || Date.now() - new Date(last).getTime() > 30 * 60 * 1000) void runEpisodeCheck(false);
+      if (!last || Date.now() - new Date(last).getTime() > 6 * 60 * 60 * 1000) void runEpisodeCheck(false);
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => {
@@ -172,48 +173,45 @@ export const App: React.FC = () => {
     if (checkRequest > 0) void runEpisodeCheck(false);
   }, [checkRequest, runEpisodeCheck]);
 
-  // ---- Search as you type (debounced), then where-to-watch for the top results ----
-  useEffect(() => {
-    const q = queryText.trim();
-    if (q.length < 2) {
-      setResults([]);
-      setSearchError(null);
-      setSearching(false);
-      return;
-    }
+  // ---- Search only when the user presses Enter or taps Search ----
+  const runSearch = useCallback(async (raw: string) => {
+    const key = searchCacheKey(raw);
+    if (!key) return;
+    if (key === submittedQuery && (results.length > 0 || searchError)) return;
+
+    searchAbort.current?.abort();
     const ctrl = new AbortController();
+    searchAbort.current = ctrl;
     setSearching(true);
-    const timer = setTimeout(async () => {
-      try {
-        const found = await searchTitles(q, ctrl.signal);
-        if (ctrl.signal.aborted) return;
-        setResults(found);
-        setSearchError(null);
-        found.slice(0, PROVIDER_LOOKUPS_PER_SEARCH).forEach((t) => {
-          const key = followKey(t.mediaType, t.id);
-          getWatchOptions(t.mediaType, t.id, ctrl.signal)
-            .then((o) => setOptionsByKey((prev) => ({ ...prev, [key]: o })))
-            .catch(() => {
-              if (!ctrl.signal.aborted) setOptionsByKey((prev) => ({ ...prev, [key]: null }));
-            });
-        });
-      } catch (err) {
-        if (ctrl.signal.aborted) return;
-        setResults([]);
-        setSearchError(
-          err instanceof RelayError && err.status === 503
-            ? 'Search is not set up yet (the data relay is missing its key).'
-            : 'Search is unavailable right now. Please try again shortly.'
-        );
-      } finally {
-        if (!ctrl.signal.aborted) setSearching(false);
+    setSearchError(null);
+    setSubmittedQuery(key);
+    try {
+      const found = await searchTitles(key, ctrl.signal);
+      if (ctrl.signal.aborted) return;
+      setResults(found);
+      const cached: Record<string, WatchOptions | null> = {};
+      for (const t of found) {
+        const peeked = peekWatchOptions(t.mediaType, t.id);
+        if (peeked) cached[followKey(t.mediaType, t.id)] = peeked;
       }
-    }, 350);
-    return () => {
-      clearTimeout(timer);
-      ctrl.abort();
-    };
-  }, [queryText]);
+      setOptionsByKey(cached);
+    } catch (err) {
+      if (ctrl.signal.aborted) return;
+      setResults([]);
+      setSearchError(
+        err instanceof RelayError && err.status === 503
+          ? 'Search is not set up yet (the data relay is missing its key).'
+          : 'Search is unavailable right now. Please try again shortly.'
+      );
+    } finally {
+      if (!ctrl.signal.aborted) setSearching(false);
+    }
+  }, [submittedQuery, results.length, searchError]);
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    void runSearch(queryText);
+  };
 
   const visibleResults = useMemo(
     () => (typeFilter === 'all' ? results : results.filter((r) => r.mediaType === typeFilter)),
@@ -405,23 +403,28 @@ export const App: React.FC = () => {
       <main className="app-main">
         {activeTab === 'discover' && (
           <div>
-            <div className="search-box">
-              <Search size={18} className="search-icon" />
-              <input
-                type="search"
-                className="search-input"
-                placeholder="Search any movie or show"
-                value={queryText}
-                onChange={(e) => setQueryText(e.target.value)}
-                aria-label="Search movies and shows"
-                autoComplete="off"
-              />
-              {queryText && (
-                <button type="button" className="search-clear" onClick={() => setQueryText('')} aria-label="Clear search">
-                  <X size={16} />
-                </button>
-              )}
-            </div>
+            <form className="search-row" onSubmit={handleSearchSubmit} role="search">
+              <div className="search-box">
+                <Search size={18} className="search-icon" />
+                <input
+                  type="search"
+                  className="search-input"
+                  placeholder="Search any movie or show"
+                  value={queryText}
+                  onChange={(e) => setQueryText(e.target.value)}
+                  aria-label="Search movies and shows"
+                  autoComplete="off"
+                />
+                {queryText && (
+                  <button type="button" className="search-clear" onClick={() => setQueryText('')} aria-label="Clear search">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <button type="submit" className="primary-btn search-submit" disabled={searching || !queryText.trim()}>
+                Search
+              </button>
+            </form>
 
             <div className="chip-scroll" aria-label="Filter by type">
               {(
@@ -437,9 +440,9 @@ export const App: React.FC = () => {
               ))}
             </div>
 
-            {queryText.trim().length < 2 ? (
+            {!submittedQuery && !searching ? (
               <div className="panel empty-panel">
-                Type a title to see where it’s streaming, free, or for rent or purchase in the US.
+                Type a title, then press Enter or tap Search to see where it streams, plays free, or is for rent or purchase in the US.
               </div>
             ) : searchError ? (
               <div className="panel empty-panel">{searchError}</div>
@@ -530,7 +533,7 @@ export const App: React.FC = () => {
 
       <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={helpButtonRef} />
       <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={aboutButtonRef} />
-      <TitleDetailModal item={selected} follow={selected ? followsByKey.get(followKey(selected.mediaType, selected.id)) : undefined} onToggleFollow={toggleFollowTitle} onClose={closeDetail} />
+      <TitleDetailModal item={selected} follow={selected ? followsByKey.get(followKey(selected.mediaType, selected.id)) : undefined} onToggleFollow={toggleFollowTitle} onClose={closeDetail} onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
     </div>
   );
 };

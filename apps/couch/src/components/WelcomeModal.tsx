@@ -171,7 +171,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </span>
             <div>
               <strong>Where to watch</strong>
-              <p>Search any movie or show to see where it streams, plays free, or rents in the US.</p>
+              <p>Type a title and press Search to see where it streams, plays free, or rents in the US.</p>
             </div>
           </li>
           <li>

@@ -27,8 +27,7 @@ Live at `https://couch-relay.mjolnir3286.workers.dev`.
 - **Query parameters:** only `query, page, language, region, include_adult, watch_region,
   with_watch_providers, with_watch_monetization_types, sort_by, vote_count.gte, append_to_response`
   (and `append_to_response` only with `watch/providers` / `external_ids`). Others are dropped.
-- Successful answers are cached briefly with the Workers Cache API (10 minutes for search, 1 hour for
-  details/providers/discover, 1 day for external ids/configuration). The response body is TMDB's JSON only.
+- Successful answers are cached briefly with the Workers Cache API (30 minutes for search, 24 hours for details, providers, discover, and external ids). The response body is TMDB's JSON only.
 
 The `Origin` check stops other websites from using the relay from visitors' browsers. A script outside a
 browser can fake an `Origin` header, so this is a fence, not a lock: the worst case is someone using up the

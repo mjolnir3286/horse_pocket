@@ -60,7 +60,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowe
             </>
           )}
         </div>
-        <WatchOptionsSummary options={options} />
+        {options ? (
+          <WatchOptionsSummary options={options} />
+        ) : (
+          <div className="watch-summary muted">Tap for where to watch</div>
+        )}
       </div>
     </div>
   );

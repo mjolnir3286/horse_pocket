@@ -9,6 +9,7 @@ interface TitleDetailModalProps {
   follow: FollowedTitle | undefined;
   onToggleFollow: (item: TmdbTitle) => void;
   onClose: () => void;
+  onOptionsLoaded?: (item: TmdbTitle, options: WatchOptions) => void;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -17,7 +18,7 @@ function formatDate(iso: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow, onToggleFollow, onClose }) => {
+export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow, onToggleFollow, onClose, onOptionsLoaded }) => {
   const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
 
   useEffect(() => {
@@ -25,7 +26,10 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow
     const ctrl = new AbortController();
     setOptions(undefined);
     getWatchOptions(item.mediaType, item.id, ctrl.signal)
-      .then(setOptions)
+      .then((o) => {
+        setOptions(o);
+        onOptionsLoaded?.(item, o);
+      })
       .catch(() => {
         if (!ctrl.signal.aborted) setOptions(null);
       });

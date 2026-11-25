@@ -479,6 +479,29 @@ input {
   color: var(--text-muted);
 }
 
+.watchlist-heading {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.watchlist-heading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.watchlist-heading .watched-toggle {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.empty-panel .text-btn {
+  display: block;
+  margin: 8px auto 0;
+  color: var(--accent-bright);
+}
+
 /* Title Cards */
 .card-grid {
   display: grid;

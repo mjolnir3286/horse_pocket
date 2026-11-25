@@ -69,7 +69,7 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Eye size={16} aria-hidden="true" />,
     label: 'Hide watched',
-    text: 'The eye next to Platforms and Sort hides titles you’re caught up on in Upcoming and Discover, including the Popular and Trending rows.',
+    text: 'The eye hides titles you’re caught up on in Upcoming, Discover, and Watchlist. A show with new unwatched episodes stays visible.',
   },
   {
     icon: <Bookmark size={16} aria-hidden="true" />,
@@ -79,7 +79,7 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Sparkles size={16} aria-hidden="true" />,
     label: 'Watch Next',
-    text: 'Tap the heading on the Watchlist tab for suggestions based on what you’ve watched. They refresh about once a day.',
+    text: 'Tap the heading on the Watchlist tab for suggestions based on what you’ve watched. It never lists a title you’re already caught up on. They refresh about once a day.',
   },
   {
     icon: <Sparkles size={16} aria-hidden="true" />,

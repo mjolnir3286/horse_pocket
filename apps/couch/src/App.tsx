@@ -24,7 +24,7 @@ import {
   type WatchedRef,
   type WatchedStore,
 } from './services/watched';
-import { getLatestAiredEpisode, type TvmazeEpisode } from './services/tvmaze';
+import { getLatestAiredEpisode, getShowEpisodes, type TvmazeEpisode } from './services/tvmaze';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
 import { HelpModal } from './components/HelpModal';
@@ -133,6 +133,8 @@ export const App: React.FC = () => {
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
   const [helpOpen, setHelpOpen] = useState(false);
   const [discoverEpisodes, setDiscoverEpisodes] = useState<Record<string, EpisodeRef[]>>({});
+  const [followEpisodes, setFollowEpisodes] = useState<Record<number, EpisodeRef[]>>({});
+
   const [aboutOpen, setAboutOpen] = useState(false);
   const [backupGeneration, setBackupGeneration] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -414,6 +416,24 @@ export const App: React.FC = () => {
   }, [follows, followedLeadNames]);
   const followedTvmazeIds = useMemo(() => new Set(follows.map((f) => f.tvmazeId).filter((x): x is number => x != null)), [follows]);
 
+  useEffect(() => {
+    if (activeTab !== 'watchlist' || followedTvmazeIds.size === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      [...followedTvmazeIds].map(async (id) => {
+        try {
+          const episodes = await getShowEpisodes(id);
+          if (!cancelled && episodes.length) setFollowEpisodes((prev) => ({ ...prev, [id]: episodes }));
+        } catch {
+          // Watchlist falls back to the last previous/next check.
+        }
+      })
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, followedTvmazeIds]);
+
   const isLeadFollowed = useCallback(
     (lead: UpcomingReleaseLead) =>
       (lead.tvmaze?.showId != null && followedTvmazeIds.has(lead.tvmaze.showId)) || followedNames.has(normalizeTitle(lead.showTitle)),
@@ -515,6 +535,7 @@ export const App: React.FC = () => {
   };
 
   const episodesFromFollow = (f: FollowedTitle): EpisodeRef[] => {
+    if (f.tvmazeId != null && followEpisodes[f.tvmazeId]?.length) return followEpisodes[f.tvmazeId];
     const st = f.lastStatus;
     return [st?.previous, st?.next].filter((e): e is TvmazeEpisode => e != null);
   };
@@ -598,14 +619,16 @@ export const App: React.FC = () => {
   };
 
   const sources = useMemo(() => watchedSources(watched), [watched]);
-  const isTmdbWatched = useCallback(
-    (t: TmdbTitle) => Boolean(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id, title: t.title })),
-    [watched]
-  );
   const isTmdbFollowed = useCallback((t: TmdbTitle) => followsByKey.has(followKey(t.mediaType, t.id)), [followsByKey]);
   const isTmdbCaughtUp = useCallback(
-    (t: TmdbTitle) => isTitleWatched(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id })),
-    [watched]
+    (t: TmdbTitle) => {
+      const key = followKey(t.mediaType, t.id);
+      const entry = findWatched(watched, { key, mediaType: t.mediaType, tmdbId: t.id, title: t.title });
+      const follow = followsByKey.get(key);
+      const episodes = follow ? episodesFromFollow(follow) : discoverEpisodes[key];
+      return isTitleWatched(entry, episodes);
+    },
+    [watched, followsByKey, followEpisodes, discoverEpisodes]
   );
   /** Discover rows and More like this hide titles you're caught up on when Hide watched is on. */
   const isRowHidden = useCallback((t: TmdbTitle) => hideWatched && isTmdbCaughtUp(t), [hideWatched, isTmdbCaughtUp]);
@@ -880,10 +903,12 @@ export const App: React.FC = () => {
             onClearAlerts={() => setAlerts([])}
             watchedState={watchedFollowState}
             onToggleWatched={toggleFollowWatched}
+            hideWatched={hideWatched}
+            onHideWatchedChange={setHideWatched}
             watchNext={
               <WatchNext
                 sources={sources}
-                isWatched={isTmdbWatched}
+                isWatched={isTmdbCaughtUp}
                 isFollowed={isTmdbFollowed}
                 onToggleFollow={(t) => void toggleFollowTitle(t)}
                 onToggleWatched={(t) => toggleTitleWatched(t)}

@@ -10,11 +10,12 @@ when the patterns change.
 - `apps/portal/` — hub at `/horse_pocket/` (Vite 8). Tiles live in `src/apps.ts`.
 - `apps/couch/` — movies and shows PWA at `/horse_pocket/couch/` (React 19, Vite 6). Title and credits are in `src/config/site.ts`. The daily collector is in `collector/`.
 - `apps/wad/` — budget app at `/horse_pocket/wad/` (React 19, Tailwind, Vite 8).
+- `apps/shed/` — nutrition label scanner and calorie log PWA at `/horse_pocket/shed/` (React 19, Vite 6). Title and credits are in `src/config/site.ts`. Label reading uses Tesseract.js on-device; `scripts/copy-ocr-assets.mjs` copies its worker, WASM cores, and English model into `public/ocr/` (gitignored) on every dev/build, so nothing loads from a CDN. Parser and target math have unit tests (`npm test`). `src/lib/pwa.ts` + `public/sw.js` + `public/manifest.webmanifest` are the reusable PWA setup (planned for Wad).
 - `apps/couch-relay/` — Cloudflare Worker that forwards an allowlist of TMDB reads so the token never ships in the public site (`https://couch-relay.mjolnir3286.workers.dev`).
-- `.github/workflows/deploy.yml` — builds the three apps and publishes one GitHub Pages artifact.
+- `.github/workflows/deploy.yml` — builds the four apps and publishes one GitHub Pages artifact.
 - `.github/workflows/collect.yml` — runs Couch's collector daily at 12:00 UTC (7:00 AM America/New_York), commits `apps/couch/public/data/upcoming-releases.json` when it changes, then calls deploy.
 
-Each app has its own `package.json` and lockfile. Vite bases are `/horse_pocket/`, `/horse_pocket/couch/`, and `/horse_pocket/wad/`. Build output: portal `dist/`, Couch `www/`, Wad `dist/`. Those folders are gitignored.
+Each app has its own `package.json` and lockfile. Vite bases are `/horse_pocket/`, `/horse_pocket/couch/`, `/horse_pocket/wad/`, and `/horse_pocket/shed/`. Build output: portal `dist/`, Couch `www/`, Wad `dist/`, Shed `dist/`. Those folders are gitignored.
 
 ## Build and deploy
 
@@ -23,6 +24,7 @@ A push to `main` (or a manual / `workflow_call` run) deploys. The workflow uses 
 - `apps/portal/dist/` → `www/`
 - `apps/couch/www/` → `www/couch/`
 - `apps/wad/dist/` → `www/wad/`
+- `apps/shed/dist/` → `www/shed/`
 
 The root `www/` folder is the Pages artifact, not a source tree.
 
@@ -52,7 +54,7 @@ Reuse these theme colors; do not invent a new palette.
 
 ## Icons
 
-Reuse the user's artwork; do not redraw it. The Wad icon is the user's original with the word removed (`wad-icon.png`). The portal mark is a hand-drawn SVG horse head in a clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). Couch is a two-color loveseat SVG (`--couch-outline`, `--couch-fill`). An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
+Reuse the user's artwork; do not redraw it. The Wad icon is the user's original with the word removed (`wad-icon.png`). The portal mark is a hand-drawn SVG horse head in a clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). Couch is a two-color loveseat SVG (`--couch-outline`, `--couch-fill`). Shed is the top of a Nutrition Facts label (blank text lines, thick and thin bars) in the clipped-corner frame (`--shed-outline`, `--shed-fill`, same colors as the horse mark), with a simplified `favicon.svg` for 16px. An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
 
 ## Shared app patterns
 
@@ -61,7 +63,7 @@ Each mini app should have a left SideMenu with:
 - a ‹ Horse Pocket link back to the portal
 - Help
 - About
-- Install, only if the app is a PWA (Couch is; Wad is not)
+- Install, only if the app is a PWA (Couch and Shed are; Wad is not yet)
 - a Your Data section with Export and Import JSON, plus the note that data is saved on this device only and that clearing browser data erases it
 
 Help is a sheet with collapsible sections and icons (see Couch's `HelpModal`). About has a short description, "Made by Kale G.", "Built with Grok Bot", and compact source credits. Couch also credits TVmaze, TMDB, and JustWatch. Dialogs use a focus trap.

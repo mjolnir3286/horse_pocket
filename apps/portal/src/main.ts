@@ -38,8 +38,19 @@ const couchIconSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
   <rect fill="var(--couch-fill)" stroke="var(--couch-outline)" x="32" y="30.5" width="18.5" height="11.8" rx="3.4" stroke-width="3.4" stroke-linejoin="round"/>
 </svg>`;
 
+const shedIconSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <polygon fill="var(--shed-outline)" points="4,12 12,4 52,4 60,12 60,52 52,60 12,60 4,52"/>
+  <path fill="var(--shed-fill)" d="M8 12 L12 8 L52 8 L56 12 L56 52 L52 56 L12 56 L8 52 Z"/>
+  <rect fill="var(--shed-outline)" x="10" y="19" width="44" height="6"/>
+  <rect fill="var(--shed-outline)" x="10" y="32" width="44" height="6"/>
+  <rect fill="var(--shed-outline)" x="10" y="41" width="44" height="2"/>
+  <rect fill="var(--shed-outline)" x="10" y="46" width="44" height="2"/>
+  <rect fill="var(--shed-outline)" x="10" y="50" width="44" height="2"/>
+</svg>`;
+
 function renderTileIcon(kind: PortalApp['icon']): string {
   if (kind === 'couch') return couchIconSvg;
+  if (kind === 'shed') return shedIconSvg;
   return `<img class="app-tile-img" src="${appUrl('wad-icon.png')}" alt="" width="68" height="68" />`;
 }
 

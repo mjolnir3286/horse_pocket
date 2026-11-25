@@ -5,7 +5,7 @@ export interface PortalApp {
   category: string;
   description: string;
   cta: string;
-  icon: 'couch' | 'wad';
+  icon: 'couch' | 'wad' | 'shed';
 }
 
 export const PORTAL_META = {
@@ -37,5 +37,15 @@ export const PORTAL_APPS: readonly PortalApp[] = [
       'Estimate take-home pay, taxes, expenses, and savings goals with local CSV export and import.',
     cta: 'Open Wad',
     icon: 'wad',
+  },
+  {
+    id: 'shed',
+    name: 'Shed',
+    path: 'shed/',
+    category: 'Nutrition & Calories',
+    description:
+      'Scan nutrition labels on your device, work out what you ate, and log calories against a daily target.',
+    cta: 'Open Shed',
+    icon: 'shed',
   },
 ];

@@ -11,6 +11,7 @@ import { loadMyServices, MyServicesContext, providerIdsFor, sanitizeMyServices, 
 import { useMediaQuery } from './lib/useMediaQuery';
 import {
   findWatched,
+  isCaughtUpForHide,
   isTitleWatched,
   loadHideWatched,
   loadWatched,
@@ -423,9 +424,9 @@ export const App: React.FC = () => {
       [...followedTvmazeIds].map(async (id) => {
         try {
           const episodes = await getShowEpisodes(id);
-          if (!cancelled && episodes.length) setFollowEpisodes((prev) => ({ ...prev, [id]: episodes }));
+          if (!cancelled) setFollowEpisodes((prev) => ({ ...prev, [id]: episodes }));
         } catch {
-          // Watchlist falls back to the last previous/next check.
+          // Leave the show unloaded so hide and Watch Next keep it visible.
         }
       })
     );
@@ -534,10 +535,14 @@ export const App: React.FC = () => {
     return [{ id: 0, airstamp: null, airdate: d }];
   };
 
+  const followListReady = (f: FollowedTitle): boolean =>
+    f.tvmazeId == null || Object.prototype.hasOwnProperty.call(followEpisodes, f.tvmazeId);
+
   const episodesFromFollow = (f: FollowedTitle): EpisodeRef[] => {
-    if (f.tvmazeId != null && followEpisodes[f.tvmazeId]?.length) return followEpisodes[f.tvmazeId];
-    const st = f.lastStatus;
-    return [st?.previous, st?.next].filter((e): e is TvmazeEpisode => e != null);
+    if (f.tvmazeId != null && Object.prototype.hasOwnProperty.call(followEpisodes, f.tvmazeId)) {
+      return followEpisodes[f.tvmazeId];
+    }
+    return [];
   };
 
   const toggleWatchedRef = (ref: WatchedRef, ensureFollowed: () => void, currentlyWatched?: boolean, knownEpisodes?: EpisodeRef[]) => {
@@ -606,7 +611,10 @@ export const App: React.FC = () => {
 
   const watchedFollowState = (f: FollowedTitle) => {
     const entry = findWatched(watched, refForFollow(f));
-    const isW = isTitleWatched(entry, episodesFromFollow(f));
+    const ready = followListReady(f);
+    const episodes = ready ? episodesFromFollow(f) : undefined;
+    const isW = isTitleWatched(entry, episodes);
+    const caughtUp = isCaughtUpForHide(entry, episodes, ready);
     const n = entry ? Object.values(entry.episodes).filter(Boolean).length : 0;
     const partial = isW
       ? null
@@ -615,7 +623,7 @@ export const App: React.FC = () => {
         : n > 0
           ? `${n} episode${n === 1 ? '' : 's'} watched`
           : null;
-    return { watched: isW, partial };
+    return { watched: isW, partial, caughtUp };
   };
 
   const sources = useMemo(() => watchedSources(watched), [watched]);
@@ -625,8 +633,8 @@ export const App: React.FC = () => {
       const key = followKey(t.mediaType, t.id);
       const entry = findWatched(watched, { key, mediaType: t.mediaType, tmdbId: t.id, title: t.title });
       const follow = followsByKey.get(key);
-      const episodes = follow ? episodesFromFollow(follow) : discoverEpisodes[key];
-      return isTitleWatched(entry, episodes);
+      if (follow) return isCaughtUpForHide(entry, episodesFromFollow(follow), followListReady(follow));
+      return isTitleWatched(entry, discoverEpisodes[key]);
     },
     [watched, followsByKey, followEpisodes, discoverEpisodes]
   );

@@ -150,6 +150,36 @@ const RECS = {
   'tv-401': recEntry([]),
 };
 
+const ep = (id, season, number, name, airdate) => ({
+  id,
+  season,
+  number,
+  name,
+  airdate,
+  airstamp: `${airdate}T20:00:00.000Z`,
+});
+const episodeStore = (ids) => {
+  const data = {};
+  for (const id of ids) data[String(id)] = EPISODE_LISTS[String(id)];
+  return data;
+};
+const EPISODE_LISTS = {
+  '900201': recEntry([
+    ep(2011, 1, 8, 'Old', LAST_YEAR),
+    ep(2012, 1, 9, 'Soon', FUTURE),
+  ]),
+  '900301': recEntry([
+    ep(3010, 1, 10, 'Before', LAST_YEAR),
+    ep(3012, 2, 1, 'New', YESTERDAY),
+    ep(3013, 2, 2, 'Later', FUTURE),
+  ]),
+  '900401': recEntry([
+    ep(4011, 1, 1, 'One', LAST_YEAR),
+    ep(4012, 1, 2, 'Two', YESTERDAY),
+    ep(4013, 1, 3, 'Three', FUTURE),
+  ]),
+};
+
 async function openWatchlist(page) {
   const clicked = await page.evaluate(() => {
     const tabs = [...document.querySelectorAll('.nav-tab')];
@@ -165,12 +195,19 @@ async function openWatchlist(page) {
   }, { timeout: 5000 });
 }
 
-async function fixture({ hide = false, onlyCaughtUp = false } = {}) {
+async function fixture({ hide = false, onlyCaughtUp = false, loadEpisodes = true } = {}) {
   const follows = onlyCaughtUp ? FOLLOWS.filter((f) => f.key === 'movie-101' || f.key === 'tv-201') : FOLLOWS;
   const watched = onlyCaughtUp
     ? { 'movie-101': WATCHED['movie-101'], 'tv-201': WATCHED['tv-201'] }
     : WATCHED;
-  return { follows, watched, hide, recs: RECS };
+  const tvmazeIds = follows.map((f) => f.tvmazeId).filter((id) => id != null);
+  return {
+    follows,
+    watched,
+    hide,
+    recs: RECS,
+    episodes: loadEpisodes ? episodeStore(tvmazeIds) : null,
+  };
 }
 
 async function openSeeded(browser, width, height, opts = {}) {
@@ -180,18 +217,33 @@ async function openSeeded(browser, width, height, opts = {}) {
   await page.setViewport({ width, height, deviceScaleFactor: 1, hasTouch: width < 768, isMobile: width < 768 });
   await page.setBypassServiceWorker(true);
   const payload = await fixture(opts);
+  if (!payload.episodes) {
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      if (req.url().includes('api.tvmaze.com')) return req.abort();
+      return req.continue();
+    });
+  }
   await page.evaluateOnNewDocument((payload) => {
     localStorage.clear();
+    sessionStorage.clear();
     localStorage.setItem('horse_pocket_welcome_dismissed_v1', 'true');
     localStorage.setItem('couch_follows_v1', JSON.stringify(payload.follows));
     localStorage.setItem('couch_watched_v1', JSON.stringify(payload.watched));
     localStorage.setItem('couch_tmdb_recommendations_v1', JSON.stringify(payload.recs));
     if (payload.hide) localStorage.setItem('couch_hide_watched_v1', 'true');
     else localStorage.removeItem('couch_hide_watched_v1');
+    if (payload.episodes) sessionStorage.setItem('couch_tvmaze_episodes_v1', JSON.stringify(payload.episodes));
   }, payload);
   await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('.nav-tab', { timeout: 15000 });
   await openWatchlist(page);
+  if (payload.hide && payload.episodes) {
+    await page.waitForFunction(() => {
+      const list = [...document.querySelectorAll('.watch-row[data-title]')].map((el) => el.getAttribute('data-title'));
+      return !list.includes('Caught Up Show');
+    }, { timeout: 8000 });
+  }
   page.__pageerrors = errors;
   return page;
 }
@@ -215,6 +267,10 @@ async function runViewport(browser, width, height) {
 
   await toggle.click();
   await page.waitForFunction(() => document.querySelector('.watchlist-heading .watched-toggle')?.getAttribute('aria-label') === 'Show watched');
+  await page.waitForFunction(() => {
+    const list = [...document.querySelectorAll('.watch-row[data-title]')].map((el) => el.getAttribute('data-title'));
+    return !list.includes('Caught Up Show') && list.includes('New Episode Show');
+  }, { timeout: 8000 });
   const hidden = await titles(page);
   assert.ok(!hidden.includes('Test Movie'), `${width}px: watched movie should hide`);
   assert.ok(!hidden.includes('Caught Up Show'), `${width}px: caught-up show should hide`);
@@ -276,6 +332,15 @@ async function runViewport(browser, width, height) {
   const remembered = await titles(page);
   assert.ok(!remembered.includes('Test Movie') && remembered.includes('New Episode Show'), `${width}px: remembered hide on load, got ${remembered}`);
   if (page.__pageerrors.length) throw new Error(`${width}px page errors: ${page.__pageerrors.join(' | ')}`);
+  await page.close();
+
+  // Until the full episode list loads, a marked show must stay visible (no previous/next fallback).
+  page = await openSeeded(browser, width, height, { hide: true, onlyCaughtUp: true, loadEpisodes: false });
+  await new Promise((r) => setTimeout(r, 400));
+  const pending = await titles(page);
+  assert.ok(!pending.includes('Test Movie'), `${width}px: watched movie still hides before lists load, got ${pending}`);
+  assert.ok(pending.includes('Caught Up Show'), `${width}px: caught-up show stays visible until its episode list loads, got ${pending}`);
+  if (page.__pageerrors.length) throw new Error(`${width}px page errors (pending list): ${page.__pageerrors.join(' | ')}`);
   await page.close();
   console.log(`OK ${width}x${height}`);
 }

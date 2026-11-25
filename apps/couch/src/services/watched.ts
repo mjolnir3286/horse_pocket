@@ -164,6 +164,21 @@ export function isTitleWatched(entry: WatchedEntry | undefined, episodes?: Episo
   return true;
 }
 
+/**
+ * Caught-up check for hiding titles and leaving them out of Watch Next.
+ * A show whose full episode list has not loaded yet is treated as not caught
+ * up, so it stays visible. Do not pass a previous/next snapshot as the list —
+ * that can look complete and hide the show for a moment, then pop it back.
+ */
+export function isCaughtUpForHide(
+  entry: WatchedEntry | undefined,
+  episodes: EpisodeRef[] | undefined,
+  listReady: boolean,
+): boolean {
+  if (!listReady) return false;
+  return isTitleWatched(entry, episodes);
+}
+
 function airedBy(ep: EpisodeRef, iso: string): boolean {
   const stamp = ep.airstamp ?? (ep.airdate ? `${ep.airdate}T23:59:59Z` : null);
   return stamp != null && stamp <= iso;

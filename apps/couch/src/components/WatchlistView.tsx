@@ -18,7 +18,7 @@ interface WatchlistViewProps {
   onUnfollow: (key: string) => void;
   onOpen: (follow: FollowedTitle) => void;
   onClearAlerts: () => void;
-  watchedState: (follow: FollowedTitle) => { watched: boolean; partial: string | null };
+  watchedState: (follow: FollowedTitle) => { watched: boolean; partial: string | null; caughtUp: boolean };
   onToggleWatched: (follow: FollowedTitle) => void;
   hideWatched: boolean;
   onHideWatchedChange: (hide: boolean) => void;
@@ -72,7 +72,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
     const bn = b.lastStatus?.next?.airdate ?? '9999';
     return an.localeCompare(bn) || a.title.localeCompare(b.title);
   });
-  const visible = hideWatched ? sorted.filter((f) => !watchedState(f).watched) : sorted;
+  const visible = hideWatched ? sorted.filter((f) => !watchedState(f).caughtUp) : sorted;
 
   return (
     <div>

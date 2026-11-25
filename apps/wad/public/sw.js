@@ -1,5 +1,5 @@
 /* Wad Service Worker: static app shell caching and clean version updates. */
-const SHELL_CACHE = 'wad-shell-v1';
+const SHELL_CACHE = 'wad-shell-v2';
 const BASE = self.registration.scope;
 
 const SHELL_ASSETS = [

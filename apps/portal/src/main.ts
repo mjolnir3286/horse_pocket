@@ -82,6 +82,13 @@ if (root) {
           <span>${PORTAL_META.builtWith}</span>
         </div>
         <span>Client-side apps · No accounts</span>
+        <div class="portal-footer-note">
+          <p>${PORTAL_META.devNotice}</p>
+          <p>
+            <a href="${PORTAL_META.reportIssueUrl}" target="_blank" rel="noopener noreferrer">${PORTAL_META.reportIssueLabel}</a>.
+            ${PORTAL_META.reportIssueNote}
+          </p>
+        </div>
       </footer>
     </div>
   `;

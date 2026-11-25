@@ -53,6 +53,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onClose, restoreFo
           </a>
         </p>
         <p className="about-built-with">{SITE.builtWith}</p>
+        <p className="about-fineprint">{SITE.devNotice}</p>
         <p className="about-fineprint">
           {SITE.credits.map((c, i) => (
             <React.Fragment key={c.url}>

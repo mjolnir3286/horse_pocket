@@ -10,6 +10,8 @@ export const SITE = {
   makerName: 'Kale G.',
   makerUrl: 'https://github.com/mjolnir3286/horse_pocket',
   builtWith: 'Built with Grok Bot',
+  devNotice:
+    'These apps are in active development, so expect occasional bugs and changes.',
   tmdb: {
     notice: 'This product uses the TMDB API but is not endorsed or certified by TMDB.',
     url: 'https://www.themoviedb.org',

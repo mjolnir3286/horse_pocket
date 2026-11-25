@@ -8,7 +8,7 @@
  * Bump the version suffixes when the cached files change shape.
  */
 const PREFIX = 'shed';
-const SHELL_CACHE = `${PREFIX}-shell-v1`;
+const SHELL_CACHE = `${PREFIX}-shell-v2`;
 const ASSET_CACHE = `${PREFIX}-assets-v1`;
 const OCR_CACHE = `${PREFIX}-ocr-v1`;
 const ASSET_MAX = 60;

@@ -1367,6 +1367,10 @@ input {
   margin-bottom: 2px;
 }
 
+.about-dev-notice {
+  margin: 0 0 12px;
+}
+
 .about-fineprint a {
   color: inherit;
   text-decoration: underline;

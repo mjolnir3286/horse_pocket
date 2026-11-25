@@ -87,7 +87,6 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
           <h2 id="watch-next-heading">
             <Sparkles size={15} aria-hidden="true" /> Watch Next
           </h2>
-          <span className="section-meta">Based on {usable.length} watched</span>
           <ChevronDown size={16} className={`episodes-chevron ${open ? 'open' : ''}`} aria-hidden="true" />
         </button>
       ) : (

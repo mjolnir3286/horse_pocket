@@ -10,6 +10,7 @@ import {
   mergeLead,
   polishTitle,
 } from './titleUtils';
+import { fetchTvMazeScheduleLeads, lookupTvMazeShow, TVMAZE_USER_AGENT } from './tvmazeClient';
 
 interface FeedConfig {
   name: string;
@@ -188,62 +189,9 @@ function extractDateInfo(
   };
 }
 
-async function lookupTvMaze(
-  showTitle: string
-): Promise<UpcomingReleaseLead['tvmaze'] | undefined> {
-  if (!showTitle || showTitle.length < 3 || showTitle.split(' ').length > 6) {
-    return undefined;
-  }
-  try {
-    const url = `https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(
-      showTitle
-    )}&embed=nextepisode`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'HorsePocketCollector/0.1' },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) return undefined;
-
-    interface TvMazeShow {
-      id: number;
-      name: string;
-      webChannel?: { name: string } | null;
-      network?: { name: string } | null;
-      _embedded?: {
-        nextepisode?: {
-          name?: string;
-          season?: number;
-          number?: number;
-          airdate?: string;
-        };
-      };
-    }
-
-    const data = (await res.json()) as TvMazeShow;
-    const normQuery = showTitle.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const normMatch = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (!normMatch.includes(normQuery) && !normQuery.includes(normMatch)) {
-      return undefined;
-    }
-
-    const nextEp = data._embedded?.nextepisode;
-    return {
-      showId: data.id,
-      matchedName: data.name,
-      webChannel: data.webChannel?.name ?? data.network?.name ?? undefined,
-      nextEpisodeAirDate: nextEp?.airdate || undefined,
-      nextEpisodeName: nextEp?.name || undefined,
-      nextEpisodeSeason: nextEp?.season,
-      nextEpisodeNumber: nextEp?.number,
-    };
-  } catch {
-    return undefined;
-  }
-}
-
 async function fetchRssItems(feed: FeedConfig) {
   const res = await fetch(feed.url, {
-    headers: { 'User-Agent': 'HorsePocketCollector/0.1 (+https://github.com/mjolnir3286/horse_pocket)' },
+    headers: { 'User-Agent': TVMAZE_USER_AGENT },
     signal: AbortSignal.timeout(10000),
   });
   if (!res.ok) {
@@ -274,6 +222,18 @@ async function run() {
   const feedsPolled: CollectorOutput['feedsPolled'] = [];
   const candidates: UpcomingReleaseLead[] = [];
   let totalRawItems = 0;
+  let tvmazeScheduleLeadCount = 0;
+  let rssLeadCount = 0;
+
+  console.log('[collector] Fetching TVmaze web/streaming schedules (global + US, past 7 to next 14 days)…');
+  const tvmaze = await fetchTvMazeScheduleLeads(now, 7, 14);
+  feedsPolled.push(...tvmaze.feeds);
+  totalRawItems += tvmaze.rawItemCount;
+  tvmazeScheduleLeadCount = tvmaze.leads.length;
+  candidates.push(...tvmaze.leads);
+  console.log(
+    `[collector] TVmaze schedule: ${tvmaze.rawItemCount} raw episodes -> ${tvmazeScheduleLeadCount} mapped leads on tracked platforms`
+  );
 
   for (const feed of FEEDS) {
     try {
@@ -347,6 +307,8 @@ async function run() {
     }
   }
 
+  rssLeadCount = candidates.length - tvmazeScheduleLeadCount;
+
   const publicOut = path.resolve(process.cwd(), 'public/data/upcoming-releases.json');
   const nowIso = now.toISOString();
 
@@ -384,21 +346,23 @@ async function run() {
 
   const allLeads = Array.from(rekeyed.values()).sort((a, b) => b.confidenceScore - a.confidenceScore);
 
-  // Confirm a subset via TVmaze (no key). Prefer still-upcoming leads first; never discard the rest.
+  // Confirm remaining RSS leads via TVmaze singlesearch (no key). Schedule leads are already confirmed.
   const confirmQueue = [
-    ...allLeads.filter((l) => l.availabilityStatus === 'upcoming' && !l.tvmaze),
-    ...allLeads.filter((l) => l.availabilityStatus === 'available-now' && !l.tvmaze),
-  ].slice(0, 12);
+    ...allLeads.filter((l) => l.sourceName !== 'TVmaze web schedule' && l.availabilityStatus === 'upcoming' && !l.tvmaze),
+    ...allLeads.filter((l) => l.sourceName !== 'TVmaze web schedule' && l.availabilityStatus === 'available-now' && !l.tvmaze),
+  ].slice(0, 30);
 
+  let rssConfirmed = 0;
   for (const lead of confirmQueue) {
-    const tvmaze = await lookupTvMaze(lead.showTitle);
-    if (tvmaze) {
-      lead.tvmaze = tvmaze;
-      if (tvmaze.nextEpisodeAirDate) {
+    const lookup = await lookupTvMazeShow(lead.showTitle);
+    if (lookup) {
+      lead.tvmaze = lookup;
+      if (lookup.nextEpisodeAirDate) {
         lead.confirmationStatus = 'confirmed';
-        lead.parsedDateIso = tvmaze.nextEpisodeAirDate;
+        lead.parsedDateIso = lookup.nextEpisodeAirDate;
         lead.datePrecision = 'exact';
         lead.confidenceScore = Number(Math.min(0.99, lead.confidenceScore + 0.18).toFixed(2));
+        rssConfirmed += 1;
       } else if (lead.datePrecision === 'exact') {
         lead.confidenceScore = Number(Math.min(0.96, lead.confidenceScore + 0.1).toFixed(2));
       }
@@ -429,8 +393,11 @@ async function run() {
     fs.writeFileSync(path.join(wwwDir, 'upcoming-releases.json'), JSON.stringify(output, null, 2));
   }
 
+  const confirmedCount = allLeads.filter((l) => l.confirmationStatus === 'confirmed').length;
+  const tvmazeInMerged = allLeads.filter((l) => l.sourceName === 'TVmaze web schedule').length;
+
   console.log(
-    `[collector] Polled ${feedsPolled.length} feeds (${totalRawItems} raw items) -> ${allLeads.length} historical leads (${upcomingCount} upcoming, ${availableNowCount} available now) written to ${publicOut}`
+    `[collector] Done. TVmaze schedule leads=${tvmazeScheduleLeadCount} (raw episodes=${tvmaze.rawItemCount}); RSS leads this run=${rssLeadCount}; RSS confirmed via TVmaze=${rssConfirmed}; merged historical total=${allLeads.length} (${upcomingCount} upcoming, ${availableNowCount} available now, ${confirmedCount} confirmed, ${tvmazeInMerged} from TVmaze schedule) -> ${publicOut}`
   );
   for (const l of allLeads.slice(0, 12)) {
     console.log(

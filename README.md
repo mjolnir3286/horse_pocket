@@ -2,7 +2,7 @@
 
 **Horse Pocket** is a mobile-first, installable Progressive Web App (PWA) for discovering where shows and movies stream, comparing platform subscription costs, tracking Top 3 shows per platform, polling public release announcements, and getting new-episode push alerts.
 
-> **Status:** Skeleton MVP built locally for review (mock/example catalog & pricing by default, plus a working RSS + TVmaze release alert collector and a TMDB `/watch/providers` adapter stub).
+> **Status:** Skeleton MVP built locally for review (mock/example catalog & pricing by default, plus a working TVmaze-primary release collector with public RSS as a secondary source, and a TMDB `/watch/providers` adapter stub).
 
 ---
 
@@ -14,11 +14,11 @@
    - Detail modal showing all carrying platforms, quality (`HD` / `4K UHD`), subscription/rent/buy status, and starting plan price.
 
 2. **Upcoming Releases Collector (`Upcoming` + `collector/runCollector.ts`)**
-   - Node/TypeScript script (`npm run collect`) that polls public RSS feeds (Google News RSS search queries, Deadline, Variety TV, TVLine) for premiere/release keywords.
-   - Cleans extracted titles (strips quotes, trailing premiere phrases, and actor/creator prefixes like `Ayo Edebiri and Will Sharpe's Prodigies` → `Prodigies`).
-   - Parses dates via `chrono-node` (vague phrases like "this spring" stay unconfirmed), assigns a confidence score, and verifies a subset against **TVmaze's free no-key API**.
+   - Node/TypeScript script (`npm run collect`) whose **main source** is TVmaze's free, no-key `/schedule/web` API (global + US, past 7 days through the next 14). It maps streaming web channels onto Horse Pocket's tracked platforms. No account or API key is required; the daily job identifies itself as `HorsePocket/1.0 (+https://github.com/mjolnir3286/horse_pocket)` and throttles to stay under TVmaze's rate limit, with backoff on HTTP 429.
+   - Public RSS feeds (Google News searches, Deadline, Variety TV, TVLine) are a **secondary** source for premiere news. Extracted titles are cleaned (quotes, trailing premiere phrases, and actor/creator prefixes like `Ayo Edebiri and Will Sharpe's Prodigies` → `Prodigies`). Dates are parsed with `chrono-node` (vague phrases like "this spring" stay unconfirmed) and a subset of RSS leads is confirmed against TVmaze `singlesearch`.
    - **Never drops past-dated leads.** Dates on or after today appear in the **Upcoming** tab; earlier dates stay in history and are listed under that platform as **Available now / recently released**. Each run **merges** into `public/data/upcoming-releases.json` (keeping `firstSeenAt` / `lastSeenAt`) instead of overwriting history.
    - Followed Upcoming leads trigger the existing push notification flow.
+   - Plan costs and back-catalog "where to watch" remain example data we maintain (TVmaze does not cover those).
 
 3. **Watchlist & New Episode Push Alerts (`Watchlist`)**
    - Follow/unfollow shows (persisted in `localStorage`).
@@ -40,6 +40,9 @@
    - Supports Android Chrome **Add to Home screen** (`beforeinstallprompt` + fallback instructions) and is structured cleanly for wrapping with **Capacitor** (`capacitor.config.example.ts`).
    - **Light and dark themes** follow the device `prefers-color-scheme` setting (no in-app toggle). Dark keeps the current navy palette; light uses conservative neutral grays with a slightly toned-down indigo accent. Browser chrome `theme-color` meta tags cover both schemes (`#0b0e14` / `#f4f4f5`); the web manifest `theme_color` / `background_color` stay `#0b0e14` as the install-splash fallback (the format only allows one value).
 
+7. **Welcome and About cards**
+   - A first-visit welcome card explains where to watch, upcoming shows, and alerts. The help icon in the header reopens it. A separate info icon opens an About card with a short site description, a "Made by Kale G." link to the public repo, a small "Built with Grok Bot" note, compact TVmaze attribution, and a line that Horse Pocket isn't affiliated with any streaming service or data provider. Credits and maker links live in `src/config/site.ts`. The app UI uses relative paths (Vite `BASE_URL`) so it can be hosted anywhere; it does not hardcode a GitHub Pages URL.
+
 Nothing in this MVP requires a paid plan, paid API key, or stored phone numbers. Public GitHub Pages + Actions, TVmaze, and RSS feeds are free. Browser push in this preview uses the Notification API and a service worker on-device (no user phone-number database). Production Web Push would store a browser push subscription (a public key + endpoint), not a phone number.
 
 ---
@@ -60,7 +63,7 @@ Nothing in this MVP requires a paid plan, paid API key, or stored phone numbers.
 
 ```bash
 npm install
-npm run collect   # Merge live RSS + TVmaze leads into public/data/upcoming-releases.json
+npm run collect   # Merge TVmaze schedule + RSS leads into public/data/upcoming-releases.json
 npm run dev       # http://localhost:4173/horse_pocket/
 ```
 
@@ -91,7 +94,7 @@ Major streaming services (Netflix, Disney+, Hulu, Amazon Prime Video, HBO Max, e
 
 Horse Pocket combines two compliant data paths:
 1. **Catalog & Where-to-Watch (`TMDB`):** Designed around TMDB's free API (`/search/multi`, `/tv/{id}/watch/providers`, `/movie/{id}/watch/providers`, `/discover/tv`), which uses JustWatch-sourced provider availability. Set `VITE_TMDB_API_KEY` in `.env` (from `.env.example`) to activate `TmdbStreamingProvider`; otherwise it runs on `MockStreamingProvider`.
-2. **Release Alert Collector (`RSS + TVmaze`):** Watches public news/press RSS feeds for premiere announcements (`unconfirmed` leads) and cross-checks TVmaze's free schedule API (`https://api.tvmaze.com`) to promote matches with verified episode air dates to `confirmed`. Past-dated leads are retained in collector history and shown under the matching platform as available now; only future dates appear in Upcoming.
+2. **Release Alert Collector (`TVmaze` primary, RSS secondary):** The daily job pulls TVmaze's free no-key `/schedule/web` feed for global and US streaming dates and maps web channels to platforms. Public news/press RSS feeds still contribute premiere announcements (`unconfirmed` until confirmed via TVmaze `singlesearch`). Past-dated leads are retained in collector history and shown under the matching platform as available now; only future dates appear in Upcoming. TVmaze data is licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); attribution is a compact credit on the About card (`src/config/site.ts`). ShareAlike applies to redistributed TVmaze data, not to the app's code or design.
 
 ### How Real Push Notifications Work in Production
 The MVP simulates episode release checks locally via the Service Worker. For real background alerts:
@@ -100,6 +103,12 @@ The MVP simulates episode release checks locally via the Service Worker. For rea
 3. **Android native delivery (Capacitor):** Install `@capacitor/core`, `@capacitor/android`, and `@capacitor/push-notifications`, copy `capacitor.config.example.ts` to `capacitor.config.ts`, and route pushes through **Firebase Cloud Messaging (FCM)**.
 
 ---
+
+## Data sources & attribution
+
+- **Upcoming / new-episode dates:** TVmaze (`https://api.tvmaze.com`), no account or key. Licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The About card credits TVmaze with a link back to [tvmaze.com](https://www.tvmaze.com) and the license. Only the scheduled collector job calls TVmaze; the live site reads a static JSON file.
+- **Premiere news (secondary):** public RSS (Google News, Deadline, Variety, TVLine).
+- **Catalog, where-to-watch, and plan prices:** example/mock data in this MVP (optional TMDB adapter is stubbed and unused unless `VITE_TMDB_API_KEY` is set).
 
 ## Non-Ad, Premium-Feel Monetization Ideas
 

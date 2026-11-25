@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Bookmark,
   CircleHelp,
+  Info,
   Crown,
   Download,
   Film,
@@ -17,6 +18,7 @@ import { PlatformPage } from './components/PlatformPage';
 import { TitleCard } from './components/TitleCard';
 import { TitleDetailModal } from './components/TitleDetailModal';
 import { UpcomingView } from './components/UpcomingView';
+import { AboutModal } from './components/AboutModal';
 import { readWelcomeDismissed, WelcomeModal } from './components/WelcomeModal';
 import { WatchlistView } from './components/WatchlistView';
 import {
@@ -99,7 +101,9 @@ export const App: React.FC = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
+  const [aboutOpen, setAboutOpen] = useState(false);
   const helpButtonRef = React.useRef<HTMLButtonElement>(null);
+  const aboutButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -107,6 +111,10 @@ export const App: React.FC = () => {
 
   const closeWelcome = useCallback(() => {
     setWelcomeOpen(false);
+  }, []);
+
+  const closeAbout = useCallback(() => {
+    setAboutOpen(false);
   }, []);
 
   useEffect(() => {
@@ -397,11 +405,22 @@ export const App: React.FC = () => {
               ref={helpButtonRef}
               type="button"
               className="pill-btn icon-btn"
-              aria-label="About Horse Pocket"
-              title="About Horse Pocket"
+              aria-label="How to use Horse Pocket"
+              title="How to use Horse Pocket"
               onClick={() => setWelcomeOpen(true)}
             >
               <CircleHelp size={16} />
+            </button>
+
+            <button
+              ref={aboutButtonRef}
+              type="button"
+              className="pill-btn icon-btn"
+              aria-label="About Horse Pocket"
+              title="About Horse Pocket"
+              onClick={() => setAboutOpen(true)}
+            >
+              <Info size={16} />
             </button>
 
             <button
@@ -656,6 +675,12 @@ export const App: React.FC = () => {
         onClose={closeWelcome}
         onRequestNotifications={handleRequestNotifications}
         restoreFocusRef={helpButtonRef}
+      />
+
+      <AboutModal
+        open={aboutOpen}
+        onClose={closeAbout}
+        restoreFocusRef={aboutButtonRef}
       />
 
       <TitleDetailModal

@@ -1,11 +1,23 @@
 {
-  "generatedAt": "2026-11-25T02:57:26.273Z",
+  "generatedAt": "2026-11-25T03:45:34.272Z",
   "feedsPolled": [
+    {
+      "name": "TVmaze web schedule (global)",
+      "url": "https://api.tvmaze.com/schedule/web?country=&date=2026-11-17…2026-12-08",
+      "status": "ok",
+      "itemCount": 777
+    },
+    {
+      "name": "TVmaze web schedule (US)",
+      "url": "https://api.tvmaze.com/schedule/web?country=US&date=2026-11-17…2026-12-08",
+      "status": "ok",
+      "itemCount": 234
+    },
     {
       "name": "Google News: Season Premieres",
       "url": "https://news.google.com/rss/search?q=%22season%20premiere%22%20(Netflix%20OR%20Hulu%20OR%20Disney%2B%20OR%20%22Prime%20Video%22%20OR%20%22HBO%20Max%22)&hl=en-US&gl=US&ceid=US:en",
       "status": "ok",
-      "itemCount": 66
+      "itemCount": 100
     },
     {
       "name": "Google News: Streaming Release Dates",
@@ -17,7 +29,7 @@
       "name": "Google News: Apple TV+ / Peacock / Paramount+",
       "url": "https://news.google.com/rss/search?q=(%22premieres%22%20OR%20%22new%20season%22)%20(%22Apple%20TV%22%20OR%20Peacock%20OR%20%22Paramount%2B%22)&hl=en-US&gl=US&ceid=US:en",
       "status": "ok",
-      "itemCount": 44
+      "itemCount": 100
     },
     {
       "name": "Deadline",
@@ -38,10 +50,10 @@
       "itemCount": 20
     }
   ],
-  "totalRawItems": 252,
-  "totalLeads": 222,
-  "upcomingCount": 207,
-  "availableNowCount": 15,
+  "totalRawItems": 1353,
+  "totalLeads": 349,
+  "upcomingCount": 300,
+  "availableNowCount": 49,
   "leads": [
     {
       "id": "yellowjackets-paramount-plus",
@@ -59,7 +71,8 @@
       "confidenceScore": 0.99,
       "matchedKeywords": [
         "premieres",
-        "new season"
+        "new season",
+        "tvmaze-schedule"
       ],
       "tvmaze": {
         "showId": 36672,
@@ -71,7 +84,7 @@
         "nextEpisodeNumber": 2
       },
       "firstSeenAt": "2026-11-20T08:00:00.000Z",
-      "lastSeenAt": "2026-11-20T08:00:00.000Z",
+      "lastSeenAt": "2026-11-03T08:00:00.000Z",
       "availabilityStatus": "upcoming"
     },
     {
@@ -185,7 +198,8 @@
       "matchedKeywords": [
         "new season",
         "coming to platform",
-        "premieres"
+        "premieres",
+        "tvmaze-schedule"
       ],
       "firstSeenAt": "2026-10-29T07:00:00.000Z",
       "lastSeenAt": "2026-10-29T07:00:00.000Z",
@@ -274,25 +288,2886 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxOLWlWOWtUZnVkeFlrM0hIaEI4OUV2YkpMY3U2NWNZWklQaWVkLVNxTHFxRjcwdVpDT25PLUtNcTMtX2FtZlpJT3FMR09NdzVwTFM4aWhKS0FrODVOci1MdDBYdlQ2OS03V1BiOGZlVVRNQVVYUjR6TnJQTDhfZ1d1cDZDNkV0TS1EWXZqa1UydTVwbVpsemlBY2h0WG9Kbmh4bldKSkpBRWRBSUN5TjZ0NkxURU9oS1ZXbktTY2hGY3l3STFiMkxzWk02QmVqRzN3Wk5DeDBkMlBOV1U5RmRvUE9mUnI4Z2NNeURDWVRMaEc?oc=5",
       "publishedAt": "2026-09-10T07:00:00.000Z",
       "firstSeenAt": "2026-09-10T07:00:00.000Z",
-      "lastSeenAt": "2026-09-10T07:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": "2026-12-01",
+      "lastSeenAt": "2026-09-11T07:00:00.000Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "premieres",
+        "new season",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 71,
+        "matchedName": "Dancing with the Stars",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Finale",
+        "nextEpisodeSeason": 35,
+        "nextEpisodeNumber": 12
+      }
+    },
+    {
+      "id": "thelordoftheringstheringsofpower-prime-video",
+      "showTitle": "The Lord of the Rings: The Rings of Power",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "The Lord of the Rings: The Rings of Power S3E7: Orodruin",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3682723/the-lord-of-the-rings-the-rings-of-power-3x07-orodruin",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-10-22T07:00:00.000Z",
+      "lastSeenAt": "2026-10-22T07:00:00.000Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "premieres",
+        "new season",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 33352,
+        "matchedName": "The Lord of the Rings: The Rings of Power",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Orodruin",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 7
+      }
+    },
+    {
+      "id": "dexterresurrection-paramount-plus",
+      "showTitle": "Dexter: Resurrection",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "Dexter: Resurrection S2E5: Out of the Past",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3791166/dexter-resurrection-2x05-out-of-the-past",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-10-29T07:00:00.000Z",
+      "lastSeenAt": "2026-10-29T07:00:00.000Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "new season",
+        "release date",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 78665,
+        "matchedName": "Dexter: Resurrection",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Out of the Past",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 5
+      }
+    },
+    {
+      "id": "tulsaking-paramount-plus",
+      "showTitle": "Tulsa King",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "Tulsa King S4E7: Black Diamonds",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3743595/tulsa-king-4x07-black-diamonds",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-10-19T07:00:00.000Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
       "datePrecision": "exact",
       "confirmationStatus": "confirmed",
       "availabilityStatus": "upcoming",
       "confidenceScore": 0.99,
       "matchedKeywords": [
         "premieres",
-        "new season"
+        "new season",
+        "tvmaze-schedule"
       ],
       "tvmaze": {
-        "showId": 71,
-        "matchedName": "Dancing with the Stars",
+        "showId": 59344,
+        "matchedName": "Tulsa King",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Black Diamonds",
+        "nextEpisodeSeason": 4,
+        "nextEpisodeNumber": 7
+      }
+    },
+    {
+      "id": "peacocknbamonday-peacock",
+      "showTitle": "Peacock NBA Monday",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Peacock NBA Monday S2E6: Los Angeles Lakers at Houston Rockets",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3770034/peacock-nba-monday-2x06-los-angeles-lakers-at-houston-rockets",
+      "publishedAt": "2026-11-30T00:00:00.000Z",
+      "firstSeenAt": "2026-10-22T07:00:00.000Z",
+      "lastSeenAt": "2026-10-22T07:00:00.000Z",
+      "extractedDateText": "2026-11-30",
+      "parsedDateIso": "2026-11-30",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "premieres",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 93556,
+        "matchedName": "Peacock NBA Monday",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-30",
+        "nextEpisodeName": "Los Angeles Lakers at Houston Rockets",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "thehuntingwives-netflix",
+      "showTitle": "The Hunting Wives",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Hunting Wives S2E1: Scared Straight",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3706933/the-hunting-wives-2x01-scared-straight",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-23T21:28:34.000Z",
+      "lastSeenAt": "2026-11-23T21:28:34.000Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "new season",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 72427,
+        "matchedName": "The Hunting Wives",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Scared Straight",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "awkwafinatheunlikelycook-apple-tv-plus",
+      "showTitle": "Awkwafina: The Unlikely Cook",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Awkwafina: The Unlikely Cook S1E5: Nora Learns to Serve",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3803472/awkwafina-the-unlikely-cook-1x05-nora-learns-to-serve",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-05T08:00:00.000Z",
+      "lastSeenAt": "2026-11-05T08:00:00.000Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "premieres",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 88484,
+        "matchedName": "Awkwafina: The Unlikely Cook",
+        "webChannel": "Apple TV",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Nora Learns to Serve",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 5
+      }
+    },
+    {
+      "id": "daysofourlives-peacock",
+      "showTitle": "Days of Our Lives",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Days of Our Lives S2026E234: Ep. #15516",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3802755/days-of-our-lives-2026-11-24-ep-15516",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-02T08:00:00.000Z",
+      "lastSeenAt": "2026-11-02T08:00:00.000Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "new season",
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 812,
+        "matchedName": "Days of Our Lives",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Ep. #15516",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 234
+      }
+    },
+    {
+      "id": "allemotalle-max",
+      "showTitle": "Alle mot alle",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Alle mot alle S13E46: Semifinale 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3712525/alle-mot-alle-13x46-semifinale-1",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 49859,
+        "matchedName": "Alle mot alle",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Semifinale 1",
+        "nextEpisodeSeason": 13,
+        "nextEpisodeNumber": 46
+      }
+    },
+    {
+      "id": "plan-netflix",
+      "showTitle": "Plan",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Plan S3E11: Episode 11",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3809910/the-devils-plan-3x11-episode-11",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 70927,
+        "matchedName": "The Devil's Plan",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Episode 11",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 11
+      }
+    },
+    {
+      "id": "megastorm-disney-plus",
+      "showTitle": "Megastorm",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Megastorm S1E7: Valencia Floods",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3802968/megastorm-1x07-valencia-floods",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94997,
+        "matchedName": "Megastorm",
         "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Valencia Floods",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 7
+      }
+    },
+    {
+      "id": "thestepbackwithblakegriffin-prime-video",
+      "showTitle": "The Stepback with Blake Griffin",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "The Stepback with Blake Griffin S1E5: Who Really Pays for Sports Stadiums?",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3824488/the-stepback-with-blake-griffin-1x05-who-really-pays-for-sports-stadiums",
+      "publishedAt": "2026-11-17T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-17",
+      "parsedDateIso": "2026-11-17",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95317,
+        "matchedName": "The Stepback with Blake Griffin",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-17",
+        "nextEpisodeName": "Who Really Pays for Sports Stadiums?",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 5
+      }
+    },
+    {
+      "id": "hesaidshesaidtilldeathdouspart-paramount-plus",
+      "showTitle": "He Said, She Said: Till Death Do Us Part",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "He Said, She Said: Till Death Do Us Part S1E1: Exhibit A. The Marriage",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823752/he-said-she-said-till-death-do-us-part-1x01-exhibit-a-the-marriage",
+      "publishedAt": "2026-11-17T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-17",
+      "parsedDateIso": "2026-11-17",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95731,
+        "matchedName": "He Said, She Said: Till Death Do Us Part",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-17",
+        "nextEpisodeName": "Exhibit A. The Marriage",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "today3rdhour-peacock",
+      "showTitle": "Today 3rd Hour",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Today 3rd Hour S2026E233: Eduardo Franco, Gesine Bullock-Prado",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823338/today-3rd-hour-2026-11-24-eduardo-franco-gesine-bullock-prado",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 72466,
+        "matchedName": "Today 3rd Hour",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Eduardo Franco, Gesine Bullock-Prado",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 233
+      }
+    },
+    {
+      "id": "reasonabledoubt-hulu",
+      "showTitle": "Reasonable Doubt",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Reasonable Doubt S4E10: Moment of Clarity",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3770083/reasonable-doubt-4x10-moment-of-clarity",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 61704,
+        "matchedName": "Reasonable Doubt",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Moment of Clarity",
+        "nextEpisodeSeason": 4,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "phony-hulu",
+      "showTitle": "Phony",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Phony S1E7: What Comes Up?",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3793145/phony-1x07-what-comes-up",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 63873,
+        "matchedName": "Phony",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "What Comes Up?",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 7
+      }
+    },
+    {
+      "id": "gma3-hulu",
+      "showTitle": "GMA3",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "GMA3 S6E305: Dan Souza, Morgan Bolling",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823363/gma3-6x305-dan-souza-morgan-bolling",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 72930,
+        "matchedName": "GMA3",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Dan Souza, Morgan Bolling",
+        "nextEpisodeSeason": 6,
+        "nextEpisodeNumber": 305
+      }
+    },
+    {
+      "id": "coast2coasttuesday-peacock",
+      "showTitle": "Coast 2 Coast Tuesday",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Coast 2 Coast Tuesday S2E10: Boston Celtics at Washington Wizards",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3791737/coast-2-coast-tuesday-2x10-boston-celtics-at-washington-wizards",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 93557,
+        "matchedName": "Coast 2 Coast Tuesday",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Boston Celtics at Washington Wizards",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "thecircle-hulu",
+      "showTitle": "The Circle",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "The Circle S8E4: Double Trouble",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3794034/the-circle-8x04-double-trouble",
+      "publishedAt": "2026-11-24T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-24",
+      "parsedDateIso": "2026-11-24",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 45419,
+        "matchedName": "The Circle",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-24",
+        "nextEpisodeName": "Double Trouble",
+        "nextEpisodeSeason": 8,
+        "nextEpisodeNumber": 4
+      }
+    },
+    {
+      "id": "midnightdinertokyostories-netflix",
+      "showTitle": "Midnight Diner: Tokyo Stories",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Midnight Diner: Tokyo Stories S3E6: Episode 6",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3798323/midnight-diner-tokyo-stories-3x06-episode-6",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 17725,
+        "matchedName": "Midnight Diner: Tokyo Stories",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Episode 6",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "sacrifice-paramount-plus",
+      "showTitle": "Sacrifice",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "Sacrifice S2E10: Chasing Ghosts",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3791857/sacrifice-2x10-chasing-ghosts",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 50786,
+        "matchedName": "Sacrifice",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Chasing Ghosts",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "allthequeensmen-paramount-plus",
+      "showTitle": "All the Queens Men",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "All the Queens Men S5E15: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3806191/all-the-queens-men-5x15-tba",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 57465,
+        "matchedName": "All the Queen's Men",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 5,
+        "nextEpisodeNumber": 15
+      }
+    },
+    {
+      "id": "rivals-disney-plus",
+      "showTitle": "Rivals",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Rivals S2E11: Episode 11",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3795417/rivals-2x11-episode-11",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 64087,
+        "matchedName": "Rivals",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Episode 11",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 11
+      }
+    },
+    {
+      "id": "whereswanda-apple-tv-plus",
+      "showTitle": "Wheres Wanda?",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Wheres Wanda? S2E6: Friday Night",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3675889/wheres-wanda-2x06-friday-night",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 71074,
+        "matchedName": "Where's Wanda?",
+        "webChannel": "Apple TV",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Friday Night",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "viennagame-disney-plus",
+      "showTitle": "Vienna Game",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Vienna Game S1E1: Wien ruft",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3706848/vienna-game-1x01-wien-ruft",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 75517,
+        "matchedName": "Vienna Game",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "Wien ruft",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "theremarriedempress-disney-plus",
+      "showTitle": "The Remarried Empress",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "The Remarried Empress S1E9: Episode 9",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3790521/the-remarried-empress-1x09-episode-9",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 90035,
+        "matchedName": "The Remarried Empress",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Episode 9",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 9
+      }
+    },
+    {
+      "id": "winthemall-netflix",
+      "showTitle": "Win the Mall",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Win the Mall S1E1: We All Live Here Now",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3794684/win-the-mall-1x01-we-all-live-here-now",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 90831,
+        "matchedName": "Win the Mall",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "We All Live Here Now",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "rettskalvrerett-max",
+      "showTitle": "Rett skal være rett",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Rett skal være rett S1E11: Søvn og hvile",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3750504/rett-skal-vaere-rett-1x11-sovn-og-hvile",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 93434,
+        "matchedName": "Rett skal være rett",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Søvn og hvile",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 11
+      }
+    },
+    {
+      "id": "nflplayaction-paramount-plus",
+      "showTitle": "NFL Play Action",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "NFL Play Action S1E12: NFL Play Action Week 12",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3824519/nfl-play-action-1x12-nfl-play-action-week-12",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 93828,
+        "matchedName": "NFL Play Action",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "NFL Play Action Week 12",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 12
+      }
+    },
+    {
+      "id": "prawobestii-netflix",
+      "showTitle": "Prawo Bestii",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Prawo Bestii S1E1: Odcinek 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3788622/prawo-bestii-1x01-odcinek-1",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94993,
+        "matchedName": "Prawo Bestii",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "Odcinek 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "os12signosdevalentina-netflix",
+      "showTitle": "Os 12 Signos de Valentina",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Os 12 Signos de Valentina S1E1: Inferno Astral",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3800981/os-12-signos-de-valentina-1x01-inferno-astral",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95296,
+        "matchedName": "Os 12 Signos de Valentina",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "Inferno Astral",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "gordon-netflix",
+      "showTitle": "Gordon",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Gordon S1E1: Thief",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3806078/gordon-1x01-thief",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95447,
+        "matchedName": "Gordon",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "Thief",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "quarterbackclub-prime-video",
+      "showTitle": "Quarterback Club",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Quarterback Club S1E2: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823760/quarterback-club-1x02-tba",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95732,
+        "matchedName": "Quarterback Club",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 2
+      }
+    },
+    {
+      "id": "reincarnatedasasword-hulu",
+      "showTitle": "Reincarnated as a Sword",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Reincarnated as a Sword S2E9: A Rescue Mission Gone Awry",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3777366/reincarnated-as-a-sword-2x09-a-rescue-mission-gone-awry",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 63237,
+        "matchedName": "Reincarnated as a Sword",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "A Rescue Mission Gone Awry",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 9
+      }
+    },
+    {
+      "id": "allsfair-hulu",
+      "showTitle": "Alls Fair",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Alls Fair S2E6: Queens",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3801746/alls-fair-2x06-queens",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 78300,
+        "matchedName": "All's Fair",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Queens",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "somosas-hulu",
+      "showTitle": "Somos Así",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Somos Así S1E1: Episodio 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3822834/somos-asi-1x01-episodio-1",
+      "publishedAt": "2026-11-18T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-18",
+      "parsedDateIso": "2026-11-18",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95638,
+        "matchedName": "Somos Así",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-18",
+        "nextEpisodeName": "Episodio 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "kongenbefaler-max",
+      "showTitle": "Kongen Befaler",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Kongen Befaler S13E10: Neineineineinei!",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3700489/kongen-befaler-13x10-neineineineinei",
+      "publishedAt": "2026-11-19T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-19",
+      "parsedDateIso": "2026-11-19",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 44671,
+        "matchedName": "Kongen Befaler",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-19",
+        "nextEpisodeName": "Neineineineinei!",
+        "nextEpisodeSeason": 13,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "thursdaynightfootballonprimevideo-prime-video",
+      "showTitle": "Thursday Night Football on Prime Video",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Thursday Night Football on Prime Video S5E11: Denver Broncos at Pittsburgh Steelers",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3617953/thursday-night-football-on-prime-video-5x11-denver-broncos-at-pittsburgh-steelers",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 59591,
+        "matchedName": "Thursday Night Football on Prime Video",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Denver Broncos at Pittsburgh Steelers",
+        "nextEpisodeSeason": 5,
+        "nextEpisodeNumber": 11
+      }
+    },
+    {
+      "id": "aussieshore-paramount-plus",
+      "showTitle": "Aussie Shore",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "Aussie Shore S3E7: Episode 7",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3795798/aussie-shore-3x07-episode-7",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 79502,
+        "matchedName": "Aussie Shore",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Episode 7",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 7
+      }
+    },
+    {
+      "id": "thealtruists-netflix",
+      "showTitle": "The Altruists",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Altruists S1E1: Inappropriate Relationships",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3698254/the-altruists-1x01-inappropriate-relationships",
+      "publishedAt": "2026-11-19T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-19",
+      "parsedDateIso": "2026-11-19",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 85058,
+        "matchedName": "The Altruists",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-19",
+        "nextEpisodeName": "Inappropriate Relationships",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "thehowardsternshow-max",
+      "showTitle": "The Howard Stern Show",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "The Howard Stern Show S1E10: November 19, 2026: Zac Brown",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3824949/the-howard-stern-show-1x10-november-19-2026-zac-brown",
+      "publishedAt": "2026-11-19T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-19",
+      "parsedDateIso": "2026-11-19",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94778,
+        "matchedName": "The Howard Stern Show",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-19",
+        "nextEpisodeName": "November 19, 2026: Zac Brown",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "thekardashians-hulu",
+      "showTitle": "The Kardashians",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "The Kardashians S8E8: The Next Drama",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3768858/the-kardashians-8x08-the-next-drama",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 59888,
+        "matchedName": "The Kardashians",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "The Next Drama",
+        "nextEpisodeSeason": 8,
+        "nextEpisodeNumber": 8
+      }
+    },
+    {
+      "id": "nellyashantiwebelongtogether-peacock",
+      "showTitle": "Nelly & Ashanti: We Belong Together",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Nelly & Ashanti: We Belong Together S2E1: We Still Belong Together",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3789879/nelly-ashanti-we-belong-together-2x01-we-still-belong-together",
+      "publishedAt": "2026-11-19T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-19",
+      "parsedDateIso": "2026-11-19",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 84616,
+        "matchedName": "Nelly & Ashanti: We Belong Together",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-19",
+        "nextEpisodeName": "We Still Belong Together",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "percyjacksonandtheolympians-disney-plus",
+      "showTitle": "Percy Jackson and the Olympians",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Percy Jackson and the Olympians S3E3: I Learn How to Grow Zombies",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3681443/percy-jackson-and-the-olympians-3x03-i-learn-how-to-grow-zombies",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 48108,
+        "matchedName": "Percy Jackson and the Olympians",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "I Learn How to Grow Zombies",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 3
+      }
+    },
+    {
+      "id": "nocturne-apple-tv-plus",
+      "showTitle": "Nocturne",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Nocturne S1E6: Only Connect",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3665760/nocturne-1x06-only-connect",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 66811,
+        "matchedName": "Nocturne",
+        "webChannel": "Apple TV",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Only Connect",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "mobland-paramount-plus",
+      "showTitle": "MobLand",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "MobLand S2E10: The Queen Is Dead",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3708490/mobland-2x10-the-queen-is-dead",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 75026,
+        "matchedName": "MobLand",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "The Queen Is Dead",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "thetraitorsitalia-prime-video",
+      "showTitle": "The Traitors Italia",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "The Traitors Italia S2E6: Fino all'ultimo inganno",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3788171/the-traitors-italia-2x06-fino-allultimo-inganno",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 83223,
+        "matchedName": "The Traitors Italia",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "Fino all'ultimo inganno",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 6
+      }
+    },
+    {
+      "id": "121212-apple-tv-plus",
+      "showTitle": "12 12 12",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "12 12 12 S1E4: That's How You Make a Boy Baby",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3716170/12-12-12-1x04-thats-how-you-make-a-boy-baby",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 84261,
+        "matchedName": "12 12 12",
+        "webChannel": "Apple TV",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "That's How You Make a Boy Baby",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 4
+      }
+    },
+    {
+      "id": "furia-max",
+      "showTitle": "Furia",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Furia S2E8: Episode 8",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3792003/furia-2x08-episode-8",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 85376,
+        "matchedName": "Furia",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Episode 8",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 8
+      }
+    },
+    {
+      "id": "theblueroad-netflix",
+      "showTitle": "The Blue Road",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Blue Road S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3779357/the-blue-road-1x01-episode-1",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 89972,
+        "matchedName": "The Blue Road",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "steelballrunjojosbizarreadventure-netflix",
+      "showTitle": "Steel Ball Run: JoJos Bizarre Adventure",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Steel Ball Run: JoJos Bizarre Adventure S2E10: Episode 10",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3808045/steel-ball-run-jojos-bizarre-adventure-2x10-episode-10",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 90817,
+        "matchedName": "Steel Ball Run: JoJo's Bizarre Adventure",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Episode 10",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "theadamrayshow-netflix",
+      "showTitle": "The Adam Ray Show",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Adam Ray Show S1E26: Pete Davidson",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3828386/the-adam-ray-show-1x26-pete-davidson",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 93056,
+        "matchedName": "The Adam Ray Show",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "Pete Davidson",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 26
+      }
+    },
+    {
+      "id": "perfectosmentirosos-prime-video",
+      "showTitle": "Perfectos mentirosos",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Perfectos mentirosos S1E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3766852/perfectos-mentirosos-1x01-tba",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94538,
+        "matchedName": "Perfectos mentirosos",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "demonscrest-prime-video",
+      "showTitle": "Demons Crest",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Demons Crest S1E5: Devil",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3806328/demons-crest-1x05-devil",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95047,
+        "matchedName": "Demons' Crest",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Devil",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 5
+      }
+    },
+    {
+      "id": "melaniarea-max",
+      "showTitle": "Melania Rea",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Melania Rea S1E4: Episodio 4",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3816210/melania-rea-1x04-episodio-4",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95392,
+        "matchedName": "Melania Rea",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Episodio 4",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 4
+      }
+    },
+    {
+      "id": "melaniatheseries-prime-video",
+      "showTitle": "Melania, The Series",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Melania, The Series S1E1: I. Family & Trust",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3806697/melania-the-series-1x01-i-family-trust",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95452,
+        "matchedName": "Melania, The Series",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "I. Family & Trust",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "therestisfootball-netflix",
+      "showTitle": "The Rest Is Football",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Rest Is Football S2E38: Juan Mata Exclusive: I Changed My Mind In A CL Final Shootout",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3829177/the-rest-is-football-2x38-juan-mata-exclusive-i-changed-my-mind-in-a-cl-final-shootout",
+      "publishedAt": "2026-11-20T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-20",
+      "parsedDateIso": "2026-11-20",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95462,
+        "matchedName": "The Rest Is Football",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-20",
+        "nextEpisodeName": "Juan Mata Exclusive: I Changed My Mind In A CL Final Shootout",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 38
+      }
+    },
+    {
+      "id": "wrdnocnejciszy-max",
+      "showTitle": "Wśród nocnej ciszy",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Wśród nocnej ciszy S1E3: Odcinek 3",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3826222/wsrod-nocnej-ciszy-1x03-odcinek-3",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95506,
+        "matchedName": "Wśród nocnej ciszy",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Odcinek 3",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 3
+      }
+    },
+    {
+      "id": "infamia-max",
+      "showTitle": "Infamia",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Infamia S1E3: Episode 3",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3816374/infamia-1x03-episode-3",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95592,
+        "matchedName": "Infamia",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Episode 3",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 3
+      }
+    },
+    {
+      "id": "macysthanksgivingdayparade-peacock",
+      "showTitle": "Macys Thanksgiving Day Parade",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Macys Thanksgiving Day Parade S2026E1: Macy's Thanksgiving Day Parade 2026",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3440528/macys-thanksgiving-day-parade-2026-11-26-macys-thanksgiving-day-parade-2026",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 22447,
+        "matchedName": "Macy's Thanksgiving Day Parade",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Macy's Thanksgiving Day Parade 2026",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "thegreatindiankapilshow-netflix",
+      "showTitle": "The Great Indian Kapil Show",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Great Indian Kapil Show S5E10: Episode 10",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3793958/the-great-indian-kapil-show-5x10-episode-10",
+      "publishedAt": "2026-11-28T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-28",
+      "parsedDateIso": "2026-11-28",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 75082,
+        "matchedName": "The Great Indian Kapil Show",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-28",
+        "nextEpisodeName": "Episode 10",
+        "nextEpisodeSeason": 5,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "ataleofthesecretsaint-prime-video",
+      "showTitle": "A Tale of the Secret Saint",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "A Tale of the Secret Saint S1E10: The Lament of Sutherland",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3780895/a-tale-of-the-secret-saint-1x10-the-lament-of-sutherland",
+      "publishedAt": "2026-11-28T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-28",
+      "parsedDateIso": "2026-11-28",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94415,
+        "matchedName": "A Tale of the Secret Saint",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-28",
+        "nextEpisodeName": "The Lament of Sutherland",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 10
+      }
+    },
+    {
+      "id": "thechosen-prime-video",
+      "showTitle": "The Chosen",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "The Chosen S6E5: 6:00am - 7:00am",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3586232/the-chosen-6x05-600am-700am",
+      "publishedAt": "2026-11-29T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-29",
+      "parsedDateIso": "2026-11-29",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 47119,
+        "matchedName": "The Chosen",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-29",
+        "nextEpisodeName": "6:00am - 7:00am",
+        "nextEpisodeSeason": 6,
+        "nextEpisodeNumber": 5
+      }
+    },
+    {
+      "id": "jaget-max",
+      "showTitle": "Jaget",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Jaget S4E8: Feiltrinn",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3775835/jaget-4x08-feiltrinn",
+      "publishedAt": "2026-11-29T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-29",
+      "parsedDateIso": "2026-11-29",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 69353,
+        "matchedName": "Jaget",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-29",
+        "nextEpisodeName": "Feiltrinn",
+        "nextEpisodeSeason": 4,
+        "nextEpisodeNumber": 8
+      }
+    },
+    {
+      "id": "cityofgodthefightrageson-max",
+      "showTitle": "City of God: The Fight Rages On",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "City of God: The Fight Rages On S2E4: Episódio 4",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3808067/city-of-god-the-fight-rages-on-2x04-episodio-4",
+      "publishedAt": "2026-11-29T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-29",
+      "parsedDateIso": "2026-11-29",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 77414,
+        "matchedName": "City of God: The Fight Rages On",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-29",
+        "nextEpisodeName": "Episódio 4",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 4
+      }
+    },
+    {
+      "id": "julpbrrud-max",
+      "showTitle": "Jul på Brårud",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Jul på Brårud S1E2: Som julekvelden på kjerringa",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3804999/jul-pa-brarud-1x02-som-julekvelden-pa-kjerringa",
+      "publishedAt": "2026-11-29T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-29",
+      "parsedDateIso": "2026-11-29",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95407,
+        "matchedName": "Jul på Brårud",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-29",
+        "nextEpisodeName": "Som julekvelden på kjerringa",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 2
+      }
+    },
+    {
+      "id": "wwemondaynightraw-netflix",
+      "showTitle": "WWE Monday Night RAW",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "WWE Monday Night RAW S33E48: #1748 - Simmons Bank Arena in North Little Rock, AR",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3717633/wwe-monday-night-raw-33x48-1748-simmons-bank-arena-in-north-little-rock-ar",
+      "publishedAt": "2026-11-30T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-30",
+      "parsedDateIso": "2026-11-30",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 802,
+        "matchedName": "WWE Monday Night RAW",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-30",
+        "nextEpisodeName": "#1748 - Simmons Bank Arena in North Little Rock, AR",
+        "nextEpisodeSeason": 33,
+        "nextEpisodeNumber": 48
+      }
+    },
+    {
+      "id": "sesamestreet-netflix",
+      "showTitle": "Sesame Street",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Sesame Street S57E1: Elmo & Tango's Puppy Playdate",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3771199/sesame-street-57x01-elmo-tangos-puppy-playdate",
+      "publishedAt": "2026-11-23T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-23",
+      "parsedDateIso": "2026-11-23",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 6544,
+        "matchedName": "Sesame Street",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-23",
+        "nextEpisodeName": "Elmo & Tango's Puppy Playdate",
+        "nextEpisodeSeason": 57,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "thetrialsofkarenread-netflix",
+      "showTitle": "The Trials of Karen Read",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "The Trials of Karen Read S1E1: A Broken Taillight",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3833177/the-trials-of-karen-read-1x01-a-broken-taillight",
+      "publishedAt": "2026-11-23T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-23",
+      "parsedDateIso": "2026-11-23",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95923,
+        "matchedName": "The Trials of Karen Read",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-23",
+        "nextEpisodeName": "A Broken Taillight",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "dig-peacock",
+      "showTitle": "Dig",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Dig S1E1: Pilot",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3695782/dig-1x01-pilot",
+      "publishedAt": "2026-11-23T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-23",
+      "parsedDateIso": "2026-11-23",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "available-now",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 84536,
+        "matchedName": "Dig",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-11-23",
+        "nextEpisodeName": "Pilot",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "bladerunner2099-prime-video",
+      "showTitle": "Blade Runner 2099",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Blade Runner 2099 S1E1: Hades",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3682675/blade-runner-2099-1x01-hades",
+      "publishedAt": "2026-11-25T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-25",
+      "parsedDateIso": "2026-11-25",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 60458,
+        "matchedName": "Blade Runner 2099",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-25",
+        "nextEpisodeName": "Hades",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "mickeymousespecials-disney-plus",
+      "showTitle": "Mickey Mouse Specials",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Mickey Mouse Specials S2026E1: Mickey's Home Alone",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3647716/mickey-mouse-specials-2026-11-26-mickeys-home-alone",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 70700,
+        "matchedName": "Mickey Mouse Specials",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Mickey's Home Alone",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "foolnight-netflix",
+      "showTitle": "Fool Night",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Fool Night S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3708426/fool-night-1x01-episode-1",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 92747,
+        "matchedName": "Fool Night",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "legevakta-netflix",
+      "showTitle": "Legevakta",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Legevakta S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3830721/legevakta-1x01-episode-1",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95874,
+        "matchedName": "Legevakta",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "toosdevandervalkontvoering-netflix",
+      "showTitle": "Toos: De van der Valk ontvoering",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Toos: De van der Valk ontvoering S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3831712/toos-de-van-der-valk-ontvoering-1x01-episode-1",
+      "publishedAt": "2026-11-26T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-26",
+      "parsedDateIso": "2026-11-26",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95912,
+        "matchedName": "Toos: De van der Valk ontvoering",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-26",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "batwheels-max",
+      "showTitle": "Batwheels",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Batwheels S4E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3794912/batwheels-4x01-tba",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 51042,
+        "matchedName": "Batwheels",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 4,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "greatbigbucketlist-prime-video",
+      "showTitle": "Great Big Bucket List",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Great Big Bucket List S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3805665/alan-carrs-great-big-bucket-list-1x01-episode-1",
+      "publishedAt": "2026-11-27T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-27",
+      "parsedDateIso": "2026-11-27",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95442,
+        "matchedName": "Alan Carr's Great Big Bucket List",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-27",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "salishs12gamesofchristmas-netflix",
+      "showTitle": "Salishs 12 Games of Christmas",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Salishs 12 Games of Christmas S1E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3812508/salishs-12-games-of-christmas-1x01-tba",
+      "publishedAt": "2026-11-28T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-28",
+      "parsedDateIso": "2026-11-28",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95533,
+        "matchedName": "Salish's 12 Games of Christmas",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-11-28",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "allemotallejulespesial-max",
+      "showTitle": "Alle mot Alle Julespesial",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "Alle mot Alle Julespesial S5E1: Julekvelden for søppelkunnskap",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3830982/alle-mot-alle-julespesial-5x01-julekvelden-for-soppelkunnskap",
+      "publishedAt": "2026-11-30T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-30",
+      "parsedDateIso": "2026-11-30",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 59377,
+        "matchedName": "Alle mot Alle Julespesial",
+        "webChannel": "HBO Max",
+        "nextEpisodeAirDate": "2026-11-30",
+        "nextEpisodeName": "Julekvelden for søppelkunnskap",
+        "nextEpisodeSeason": 5,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "theboywhostolebillions-prime-video",
+      "showTitle": "The Boy Who Stole Billions?",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "The Boy Who Stole Billions? S1E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3794048/the-boy-who-stole-billions-1x01-tba",
+      "publishedAt": "2026-11-30T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-30",
+      "parsedDateIso": "2026-11-30",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 94942,
+        "matchedName": "The Boy Who Stole Billions?",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-11-30",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "familyguyhuluexclusives-hulu",
+      "showTitle": "Family Guy Hulu Exclusives",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Family Guy Hulu Exclusives S2026E2: Holiday Special 2026: The Peter Clause",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823003/family-guy-hulu-exclusives-2026-11-30-holiday-special-2026-the-peter-clause",
+      "publishedAt": "2026-11-30T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-11-30",
+      "parsedDateIso": "2026-11-30",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 80348,
+        "matchedName": "Family Guy Hulu Exclusives",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-11-30",
+        "nextEpisodeName": "Holiday Special 2026: The Peter Clause",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 2
+      }
+    },
+    {
+      "id": "fbitrue-paramount-plus",
+      "showTitle": "FBI True",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "FBI True S9E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3824429/fbi-true-9x01-tba",
+      "publishedAt": "2026-12-01T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-01",
+      "parsedDateIso": "2026-12-01",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 67172,
+        "matchedName": "FBI True",
+        "webChannel": "Paramount+",
         "nextEpisodeAirDate": "2026-12-01",
-        "nextEpisodeName": "Dancing with the Holidays",
-        "nextEpisodeSeason": 35,
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 9,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "trinity-netflix",
+      "showTitle": "Trinity",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Trinity S1E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3804410/trinity-1x01-tba",
+      "publishedAt": "2026-12-01T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-01",
+      "parsedDateIso": "2026-12-01",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 85583,
+        "matchedName": "Trinity",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-01",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "collectpraise-netflix",
+      "showTitle": "Collect & Praise",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Collect & Praise S1E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3803674/collect-praise-1x01-tba",
+      "publishedAt": "2026-12-01T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-01",
+      "parsedDateIso": "2026-12-01",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95345,
+        "matchedName": "Collect & Praise",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-01",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "badmonkey-apple-tv-plus",
+      "showTitle": "Bad Monkey",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Bad Monkey S2E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3705781/bad-monkey-2x01-tba",
+      "publishedAt": "2026-12-02T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-02",
+      "parsedDateIso": "2026-12-02",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 56778,
+        "matchedName": "Bad Monkey",
+        "webChannel": "Apple TV",
+        "nextEpisodeAirDate": "2026-12-02",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 2,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "ilcapoperfetto-netflix",
+      "showTitle": "Il Capo Perfetto",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Il Capo Perfetto S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3804438/il-capo-perfetto-1x01-episode-1",
+      "publishedAt": "2026-12-02T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-02",
+      "parsedDateIso": "2026-12-02",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 81100,
+        "matchedName": "Il Capo Perfetto",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-02",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "hotonesextraheat-netflix",
+      "showTitle": "Hot Ones: Extra Heat",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Hot Ones: Extra Heat S1E3: Rob Lowe",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3823030/hot-ones-extra-heat-1x03-rob-lowe",
+      "publishedAt": "2026-12-02T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-02",
+      "parsedDateIso": "2026-12-02",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 92750,
+        "matchedName": "Hot Ones: Extra Heat",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-02",
+        "nextEpisodeName": "Rob Lowe",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 3
+      }
+    },
+    {
+      "id": "christmasinrockefellercenter-peacock",
+      "showTitle": "Christmas in Rockefeller Center",
+      "platformId": "peacock",
+      "platformName": "Peacock",
+      "rawHeadline": "Christmas in Rockefeller Center S2026E1: 94th Annual Christmas in Rockefeller Center",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3460611/christmas-in-rockefeller-center-2026-12-02-94th-annual-christmas-in-rockefeller-center",
+      "publishedAt": "2026-12-02T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-02",
+      "parsedDateIso": "2026-12-02",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 9363,
+        "matchedName": "Christmas in Rockefeller Center",
+        "webChannel": "Peacock",
+        "nextEpisodeAirDate": "2026-12-02",
+        "nextEpisodeName": "94th Annual Christmas in Rockefeller Center",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "prideandprejudice-netflix",
+      "showTitle": "Pride and Prejudice",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Pride and Prejudice S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3765170/pride-and-prejudice-1x01-episode-1",
+      "publishedAt": "2026-12-03T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-03",
+      "parsedDateIso": "2026-12-03",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 84008,
+        "matchedName": "Pride and Prejudice",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-03",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "dancemomsanewera-hulu",
+      "showTitle": "Dance Moms: A New Era",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Dance Moms: A New Era S3E1: TBA",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3814144/dance-moms-a-new-era-3x01-tba",
+      "publishedAt": "2026-12-03T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-03",
+      "parsedDateIso": "2026-12-03",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 78689,
+        "matchedName": "Dance Moms: A New Era",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-12-03",
+        "nextEpisodeName": "TBA",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "thatthriftingshowwithlaraspencer-hulu",
+      "showTitle": "That Thrifting Show With Lara Spencer",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "That Thrifting Show With Lara Spencer: Holiday Edition - Sleigh the Family Room!",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3803516/that-thrifting-show-with-lara-spencer-s01-special-holiday-edition-sleigh-the-family-room",
+      "publishedAt": "2026-12-03T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-03",
+      "parsedDateIso": "2026-12-03",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 87074,
+        "matchedName": "That Thrifting Show With Lara Spencer",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-12-03",
+        "nextEpisodeName": "Holiday Edition - Sleigh the Family Room!",
+        "nextEpisodeSeason": 1,
         "nextEpisodeNumber": null
+      }
+    },
+    {
+      "id": "sellingsunset-netflix",
+      "showTitle": "Selling Sunset",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Selling Sunset S10E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3824325/selling-sunset-10x01-episode-1",
+      "publishedAt": "2026-12-04T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-04",
+      "parsedDateIso": "2026-12-04",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 41476,
+        "matchedName": "Selling Sunset",
+        "webChannel": "Netflix",
+        "nextEpisodeAirDate": "2026-12-04",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 10,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "hour-prime-video",
+      "showTitle": "Hour",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "Hour S3E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3804446/the-devils-hour-3x01-episode-1",
+      "publishedAt": "2026-12-04T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-04",
+      "parsedDateIso": "2026-12-04",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 53882,
+        "matchedName": "The Devil's Hour",
+        "webChannel": "Prime Video",
+        "nextEpisodeAirDate": "2026-12-04",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 3,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "diaryofawimpykid-disney-plus",
+      "showTitle": "Diary of a Wimpy Kid",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "Diary of a Wimpy Kid S2026E1: Diary of a Wimpy Kid: The Getaway",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3701329/diary-of-a-wimpy-kid-2026-12-04-diary-of-a-wimpy-kid-the-getaway",
+      "publishedAt": "2026-12-04T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-04",
+      "parsedDateIso": "2026-12-04",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 71089,
+        "matchedName": "Diary of a Wimpy Kid",
+        "webChannel": "Disney+",
+        "nextEpisodeAirDate": "2026-12-04",
+        "nextEpisodeName": "Diary of a Wimpy Kid: The Getaway",
+        "nextEpisodeSeason": 2026,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "theelitearmyrangers-paramount-plus",
+      "showTitle": "The Elite: Army Rangers",
+      "platformId": "paramount-plus",
+      "platformName": "Paramount+",
+      "rawHeadline": "The Elite: Army Rangers S1E1: Episode 1",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3813648/the-elite-army-rangers-1x01-episode-1",
+      "publishedAt": "2026-12-08T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-08",
+      "parsedDateIso": "2026-12-08",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 95544,
+        "matchedName": "The Elite: Army Rangers",
+        "webChannel": "Paramount+",
+        "nextEpisodeAirDate": "2026-12-08",
+        "nextEpisodeName": "Episode 1",
+        "nextEpisodeSeason": 1,
+        "nextEpisodeNumber": 1
+      }
+    },
+    {
+      "id": "onlymurdersinthebuilding-hulu",
+      "showTitle": "Only Murders in the Building",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Only Murders in the Building S6E1: Changing of the Guard",
+      "sourceName": "TVmaze web schedule",
+      "sourceUrl": "https://www.tvmaze.com/episodes/3714462/only-murders-in-the-building-6x01-changing-of-the-guard",
+      "publishedAt": "2026-12-08T00:00:00.000Z",
+      "firstSeenAt": "2026-11-25T03:45:34.272Z",
+      "lastSeenAt": "2026-11-25T03:45:34.272Z",
+      "extractedDateText": "2026-12-08",
+      "parsedDateIso": "2026-12-08",
+      "datePrecision": "exact",
+      "confirmationStatus": "confirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.99,
+      "matchedKeywords": [
+        "tvmaze-schedule"
+      ],
+      "tvmaze": {
+        "showId": 48830,
+        "matchedName": "Only Murders in the Building",
+        "webChannel": "Hulu",
+        "nextEpisodeAirDate": "2026-12-08",
+        "nextEpisodeName": "Changing of the Guard",
+        "nextEpisodeSeason": 6,
+        "nextEpisodeNumber": 1
       }
     },
     {
@@ -318,7 +3193,7 @@
         "webChannel": "Peacock"
       },
       "firstSeenAt": "2026-10-05T07:00:00.000Z",
-      "lastSeenAt": "2026-11-25T02:54:16.063Z",
+      "lastSeenAt": "2026-10-05T07:00:00.000Z",
       "availabilityStatus": "available-now"
     },
     {
@@ -420,29 +3295,7 @@
         "new season"
       ],
       "firstSeenAt": "2026-10-27T07:00:00.000Z",
-      "lastSeenAt": "2026-11-25T02:54:16.063Z",
-      "availabilityStatus": "available-now"
-    },
-    {
-      "id": "thelordoftheringstheringsofpower-prime-video",
-      "showTitle": "The Lord of the Rings: The Rings of Power",
-      "platformId": "prime-video",
-      "platformName": "Amazon Prime Video",
-      "rawHeadline": "ARE YOU READY? The trailer for \"The Lord of the Rings: The Rings of Power” season 3 is out now. The series will premiere on November 11. (📸: Prime Video/YouTube) - Facebook",
-      "sourceName": "Google News: Season Premieres",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxNZjBIbGJHOGFmcTUwMzk5Rnl1d2VibnBRbk5QNFdhUmdTQTc5akt5blMxWnhHaFh0TE90a2FCYXhhZEZPaXFYYmFJdDZrR1A4bUVSUE1FRmk0TDg5VlpCNzQ4QXZoN1pJcjNVQlZXTkRjTzhHTllVTjUyMTQ4bmduVkVTaHlxTDUzaUhLQmZnT1pkSnJoN1IyZlU5ckNxY0MwOWVpV0JDVkFxb05JclhSVjZkWEFTLUFBNXcxX1M0UDYtVGZfVXBDZTIyeXo2cmJHRHU0b0ZR?oc=5",
-      "publishedAt": "2026-10-22T07:00:00.000Z",
-      "extractedDateText": "November 11",
-      "parsedDateIso": "2026-11-11",
-      "datePrecision": "exact",
-      "confirmationStatus": "unconfirmed",
-      "confidenceScore": 0.95,
-      "matchedKeywords": [
-        "premieres",
-        "new season"
-      ],
-      "firstSeenAt": "2026-10-22T07:00:00.000Z",
-      "lastSeenAt": "2026-11-25T02:54:16.063Z",
+      "lastSeenAt": "2026-10-27T07:00:00.000Z",
       "availabilityStatus": "available-now"
     },
     {
@@ -711,7 +3564,8 @@
       "matchedKeywords": [
         "season premiere",
         "premieres",
-        "new season"
+        "new season",
+        "release date"
       ],
       "firstSeenAt": "2026-06-08T07:00:00.000Z",
       "lastSeenAt": "2026-06-08T07:00:00.000Z",
@@ -742,7 +3596,7 @@
         "new season"
       ],
       "firstSeenAt": "2026-04-02T07:00:00.000Z",
-      "lastSeenAt": "2022-01-11T08:00:00.000Z",
+      "lastSeenAt": "2026-04-02T07:00:00.000Z",
       "availabilityStatus": "upcoming",
       "tvmaze": {
         "showId": 28826,
@@ -993,6 +3847,118 @@
       ]
     },
     {
+      "id": "kingofthehill-hulu",
+      "showTitle": "King of the Hill",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Hulu Sets 'King of the Hill' Season 15 Premiere - Animation World Network",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBmQy1RWWNLZHRFOURFcXZTZHlDWmdsRThZQlcyYnk0VUNoRmVvRC1wbG82X1VKMl8yOE9YQmw2RlZ5WHBJUUkwT2dPRjZ0TjRBb0pNckNRWXVtd1FrQkFORFRkUHM1NG5JSUM2d2hBT3Q?oc=5",
+      "publishedAt": "2026-05-05T07:00:00.000Z",
+      "firstSeenAt": "2026-05-05T07:00:00.000Z",
+      "lastSeenAt": "2026-05-05T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.82,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ],
+      "tvmaze": {
+        "showId": 115,
+        "matchedName": "King of the Hill",
+        "webChannel": "Hulu"
+      }
+    },
+    {
+      "id": "houseofthedragon-max",
+      "showTitle": "House Of The Dragon",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "‘House Of The Dragon’ Season 3, Episode 1 Release Time: Here’s When The Season Premiere Lands On HBO Max - Forbes",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPZHdHWVU2QXd6dXZtMDdGMW9WZWhTYnZDQTVBbUFfSW1pX2dsYndoMDJSODh6WVRNbnVYQkVSVnBrZkxmTFBCbzA1dFg0SVJRQUJXaFRSZUJmVV9VZnB1WFZpMDV0U19xTlBzbWlwcDBnQ0RKdUUzajZfVU5aejZwNnRQVVlMV3dleHhfSnBLOHRkdmR5UVlTeGVqRWM0VHBrN1ZHRjRMRW1MS3BmRlE?oc=5",
+      "publishedAt": "2026-06-20T07:00:00.000Z",
+      "firstSeenAt": "2026-06-20T07:00:00.000Z",
+      "lastSeenAt": "2026-06-20T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.82,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ],
+      "tvmaze": {
+        "showId": 44778,
+        "matchedName": "House of the Dragon",
+        "webChannel": "HBO"
+      }
+    },
+    {
+      "id": "thepitt-max",
+      "showTitle": "The Pitt",
+      "platformId": "max",
+      "platformName": "HBO Max (Max)",
+      "rawHeadline": "The Pitt Season 2 Premiere Doubles HBO Max Ratings - IMDb",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE9LZVdOZWtkWnJYaU9TWW1GczFPZmdvNW5hNzNTMFZtdHBNeE9XT0FIWUItQ1hKSjFENTM2Wkp1Qm5nUW9ZRV9Kajh0RUFRZw?oc=5",
+      "publishedAt": "2026-02-26T13:39:23.000Z",
+      "firstSeenAt": "2026-02-26T13:39:23.000Z",
+      "lastSeenAt": "2026-02-26T13:39:23.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.82,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ],
+      "tvmaze": {
+        "showId": 75632,
+        "matchedName": "The Pitt",
+        "webChannel": "HBO Max"
+      }
+    },
+    {
+      "id": "shoresy-hulu",
+      "showTitle": "Shoresy",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "When Will ‘Shoresy’ Season 5 Premiere on Hulu? - Decider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOM2ZqaEFPdjV6cjVYUWo2WWpva1FLMjh2enlqRHZNQWVoSzRIVGlHZ09BQ1pTRDcwM1NxVEJJNmFxUlBYZjdncUY3YnRwbkxrSkNxVHJWdkVWMVNqdm1jNFUtZ2pYTDVOSnNVX2dJQndJZWh0d0dnNFlkNVBVTklsWEpLa201T0hQTEpSNWpB?oc=5",
+      "publishedAt": "2026-02-18T08:00:00.000Z",
+      "firstSeenAt": "2026-02-18T08:00:00.000Z",
+      "lastSeenAt": "2026-02-18T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.82,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ],
+      "tvmaze": {
+        "showId": 59872,
+        "matchedName": "Shoresy",
+        "webChannel": "Crave"
+      }
+    },
+    {
       "id": "ginnygeorgia-netflix",
       "showTitle": "Ginny & Georgia",
       "platformId": "netflix",
@@ -1061,7 +4027,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 2993,
+        "matchedName": "Stranger Things",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "netflixshowspotlightsfortworthin-netflix",
@@ -1105,7 +4076,12 @@
       "matchedKeywords": [
         "premieres",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 55138,
+        "matchedName": "Arcane: League of Legends",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "solaropposites-netflix",
@@ -1127,7 +4103,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 38432,
+        "matchedName": "Solar Opposites",
+        "webChannel": "Hulu"
+      }
     },
     {
       "id": "thecrown-netflix",
@@ -1149,7 +4130,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 3594,
+        "matchedName": "The Crown",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "crossisthethirdbiggest-prime-video",
@@ -1215,7 +4201,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 34577,
+        "matchedName": "Station 19",
+        "webChannel": "ABC"
+      }
     },
     {
       "id": "onedayatatime-netflix",
@@ -1237,7 +4228,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 11549,
+        "matchedName": "One Day at a Time",
+        "webChannel": "Pop"
+      }
     },
     {
       "id": "narcosmexico-netflix",
@@ -1259,7 +4255,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 37787,
+        "matchedName": "Narcos: Mexico",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "reallysad-netflix",
@@ -1325,7 +4326,12 @@
       "matchedKeywords": [
         "premieres",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 175,
+        "matchedName": "House of Cards",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "sense8-netflix",
@@ -1347,7 +4353,12 @@
       "matchedKeywords": [
         "premieres",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 1367,
+        "matchedName": "Sense8",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "hemlockgrove-netflix",
@@ -1369,7 +4380,12 @@
       "matchedKeywords": [
         "season premiere",
         "premieres"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 33,
+        "matchedName": "Hemlock Grove",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "from-netflix",
@@ -1391,7 +4407,12 @@
       "matchedKeywords": [
         "release date",
         "coming to platform"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 54723,
+        "matchedName": "FROM",
+        "webChannel": "MGM+"
+      }
     },
     {
       "id": "thelincolnlawyer-netflix",
@@ -1413,7 +4434,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 52910,
+        "matchedName": "The Lincoln Lawyer",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "virginriver-netflix",
@@ -1435,7 +4461,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 38893,
+        "matchedName": "Virgin River",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "amanontheinside-netflix",
@@ -1457,7 +4488,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 74443,
+        "matchedName": "A Man on the Inside",
+        "webChannel": "Netflix"
+      }
     },
     {
       "id": "callthemidwife-netflix",
@@ -1479,7 +4515,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 394,
+        "matchedName": "Call the Midwife",
+        "webChannel": "BBC One"
+      }
     },
     {
       "id": "thewalkingdeaddaryldixon-netflix",
@@ -1501,7 +4542,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 64501,
+        "matchedName": "The Walking Dead: Daryl Dixon",
+        "webChannel": "AMC+"
+      }
     },
     {
       "id": "outlander-netflix",
@@ -1523,7 +4569,12 @@
       "matchedKeywords": [
         "new season",
         "release date"
-      ]
+      ],
+      "tvmaze": {
+        "showId": 43,
+        "matchedName": "Outlander",
+        "webChannel": "STARZ"
+      }
     },
     {
       "id": "msrachel-netflix",
@@ -1636,28 +4687,6 @@
       ]
     },
     {
-      "id": "dexterresurrection-paramount-plus",
-      "showTitle": "Dexter: Resurrection",
-      "platformId": "paramount-plus",
-      "platformName": "Paramount+",
-      "rawHeadline": "‘Dexter: Resurrection’ Season 2 release date: Paramount+ free trial, how to watch the new season of ‘Dexter: Resurrection’ - Decider",
-      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQNVgyNWhsN3RzNXMtVjdkeUNFckRHNUtCMmZtM3pHZklsbnV6VkZ6d3dzcGRxVEp2SHp5OVh2cE5KQWRzVVptMm43OW8waVBucU5aczduc0hIVDhlNEc3SnZzWFYxMURfNklUWEgyMTF4VjMzZnFBdFRkTWl5bzBranpLcjYzT3ZkZEd1aFlDV3QxODFtV0Y5bi1EVnJDYUJ6T3o4M1NFcHl6RGxZb0cxWEJ3T2xiMVZhT2lGWm14QUE?oc=5",
-      "publishedAt": "2026-10-29T07:00:00.000Z",
-      "firstSeenAt": "2026-10-29T07:00:00.000Z",
-      "lastSeenAt": "2026-10-29T07:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.81,
-      "matchedKeywords": [
-        "new season",
-        "release date"
-      ]
-    },
-    {
       "id": "slowhorses-apple-tv-plus",
       "showTitle": "Slow Horses",
       "platformId": "apple-tv-plus",
@@ -1667,7 +4696,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNb28yREpubmI5eTVyTGVaUjlZY0otZHpJaGh2eEg3MjRGdUVudlN6N3lhekxzcTNlek1yd1V1RHZKVWM2R0MtdUFETHAwczF4YnB3X2RJclFfaWhjZGNKeXhXLVlFU1JxVU1XVFdHTWU4ZlRFSmN0QWFfTGVraTI1djJTWEhBa29LSEs4ajJkU0czSmxnaWg2Z1JIRGg?oc=5",
       "publishedAt": "2026-09-15T07:00:00.000Z",
       "firstSeenAt": "2026-08-30T07:00:00.000Z",
-      "lastSeenAt": "2026-09-15T07:00:00.000Z",
+      "lastSeenAt": "2026-08-30T07:00:00.000Z",
       "extractedDateText": "September",
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -1690,28 +4719,6 @@
       "publishedAt": "2026-08-27T07:00:00.000Z",
       "firstSeenAt": "2026-08-27T07:00:00.000Z",
       "lastSeenAt": "2026-08-27T07:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.81,
-      "matchedKeywords": [
-        "premieres",
-        "new season"
-      ]
-    },
-    {
-      "id": "tulsaking-paramount-plus",
-      "showTitle": "Tulsa King",
-      "platformId": "paramount-plus",
-      "platformName": "Paramount+",
-      "rawHeadline": "Tulsa King Season 4 premieres on Paramount+ as Stallone’s mob boss tries to go legit - Martin Cid Magazine",
-      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFB4akFrXzZRcjVsRmQ5b0dpVVo0ZjNpUmw2dm5rVmVpUmptb0VtTU9jaEpPaG44Y2xlek9RTGxWTXpRblVqLVFoMENXLVdNN0MtZ2NTZFVIdjhsZw?oc=5",
-      "publishedAt": "2026-10-19T07:00:00.000Z",
-      "firstSeenAt": "2026-10-19T07:00:00.000Z",
-      "lastSeenAt": "2026-10-19T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -2010,6 +5017,50 @@
       ]
     },
     {
+      "id": "thediplomat-netflix",
+      "showTitle": "The Diplomat",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "‘The Diplomat’ Season 4: Netflix Release Date Estimate & Everything We Know So Far - What's on Netflix",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQcVRfa2Nlc1psLTh5eUc0YVdLUUswSmc1djA3T2xsUVVObFBlLUpSU0hJWGN4aVItamdWLTdTVUlvVFVRZ2pFR0hsWFZMSjZMMkVlYnBjWjV4LW1aYjZnRGNWVFdVaXB6UENJaEFnc08teU56WmQzSWo3cjJsM296bWREdWFEZnJXWEdBNnM2LVo?oc=5",
+      "publishedAt": "2026-07-27T07:00:00.000Z",
+      "firstSeenAt": "2024-10-10T18:12:20.000Z",
+      "lastSeenAt": "2026-07-27T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.81,
+      "matchedKeywords": [
+        "new season",
+        "release date"
+      ]
+    },
+    {
+      "id": "lupin-netflix",
+      "showTitle": "Lupin",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Lupin Season 4: 9 Big Reveals From Omar Sy Ahead of the Netflix Premiere - What's on Netflix",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijgFBVV95cUxPWFFacTBKdHkxUlRHT05sY2dTQng4NmlSZGYxV2UwaTV3bzZBN29RQWhVY0p0ZkhEUjJyUFdCdWFGamV1a1ExcFhUd1RQcXR6ektQMVcyS0pzcWtBZUdPVnlCQ3hrcWw2X1JRcHI4SUdrbkdfYTV2dTBqTW13TGtPcllvdDdqRE5yMHd2Uktn?oc=5",
+      "publishedAt": "2026-10-21T07:00:00.000Z",
+      "firstSeenAt": "2026-10-21T07:00:00.000Z",
+      "lastSeenAt": "2026-10-21T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.81,
+      "matchedKeywords": [
+        "premieres",
+        "new season"
+      ]
+    },
+    {
       "id": "newottreleasesthisweeknovember23292026h-netflix",
       "showTitle": "New OTT releases this week (November 23-29, 2026): H",
       "platformId": "netflix",
@@ -2285,27 +5336,6 @@
       ]
     },
     {
-      "id": "peacocknbamonday-peacock",
-      "showTitle": "PEACOCK NBA MONDAY",
-      "platformId": "peacock",
-      "platformName": "Peacock",
-      "rawHeadline": "JALEN BRUNSON, STEPHEN CURRY, NIKOLA JOKIC, AND LUKA DONCIC HEADLINE SEASON PREMIERES OF NBC SPORTS’ “PEACOCK NBA MONDAY” AND “COAST 2 COAST TUESDAY” NEXT WEEK - NBC Sports",
-      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqAJBVV95cUxPVDBhcVFrdUxwWWZwWHFYcXU3bmhJN211czd5NjVQZk9TQWhyR3YxbzlNMUgtYWdBS3p5NXZoTi0tV3BYSzV3U1FnSVAzUzhjOHZrNkpGaEtlczQwMGxzMG1GYlBpdDljQTc2dGV1ZFl1Y01rRjFxQkhjeXhLNzhreU1xSlF1WUJiX3ZwQ1NpdlpsOV9WNkZIeHVVZHVadWtEWklsXzVaZlk2UXJUUThLQUppQXpqNDhzUlM2ZmtlbzJKNTdyb3dRUWtxTEpkeS03R1FRd1VIS2gxd19hMEdxZFV5RVFDQ09GcGZpTDZ5a1ZSMlFxdl95R09QNXVha1NZaGZiamR5UlVFNHFLeVJBeXRKTG95UVAwUkllMWRqYWQ2Y3F4aU9uVg?oc=5",
-      "publishedAt": "2026-10-22T07:00:00.000Z",
-      "firstSeenAt": "2026-10-22T07:00:00.000Z",
-      "lastSeenAt": "2026-10-22T07:00:00.000Z",
-      "extractedDateText": "NEXT WEEK",
-      "parsedDateIso": null,
-      "datePrecision": "vague",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.75,
-      "matchedKeywords": [
-        "premieres"
-      ]
-    },
-    {
       "id": "whatelsehappensinoctober-apple-tv-plus",
       "showTitle": "What Else Happens in October",
       "platformId": "apple-tv-plus",
@@ -2399,7 +5429,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNcG5jaTdHb0tPRDVWd04xcEVTaWpIRlFXVUR0bnlldy0xMXl2dXNZOGdoVU5jVkRQc1pSSmc2a2tydFVfZExhazFTYnNxQzhsYnAyc1RBa2lJTzVKRHpKaXJOeWQ1Ql9sY29mT2F5SGRFUXpQWHp1MjYwUXVQbXdwWjA1N0tGOWZTbEZsWjFjbE96bTJNYWNyTkRMcU5HOUpZeF9TUkp3?oc=5",
       "publishedAt": "2021-05-24T07:00:00.000Z",
       "firstSeenAt": "2026-06-09T02:10:43.000Z",
-      "lastSeenAt": "2014-04-14T07:00:00.000Z",
+      "lastSeenAt": "2026-07-30T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -2409,7 +5439,8 @@
       "matchedKeywords": [
         "season premiere",
         "premieres",
-        "release date"
+        "release date",
+        "new season"
       ]
     },
     {
@@ -2436,23 +5467,25 @@
       ]
     },
     {
-      "id": "thehuntingwives-netflix",
-      "showTitle": "The Hunting Wives",
+      "id": "netflixsliveactionfantasyremakeseriesscorese-netflix",
+      "showTitle": "Netflixs Live-Action Fantasy Remake Series Scores E",
       "platformId": "netflix",
       "platformName": "Netflix",
-      "rawHeadline": "'The Hunting Wives' Season 2 brings Texas actors to the Netflix series - Houston Chronicle",
+      "rawHeadline": "Netflix's Live-Action Fantasy Remake Series Scores Early Season 2 Premiere - Collider",
       "sourceName": "Google News: Season Premieres",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQLV9hWThmeGFPT3g5SFhma3VocEI5U0JuUEhOUi1lUFJmMzJwSnZoNlN2clRJUWpXa0VKVjlBanlBU1BjQV9EREp0cExzbmp5MkhJVVlfV3dyNUx5N0RydUxXVzVzUHB4ZExLVzgxSlBTVVM4RjlUUjA1Q3VYYmZUSGFoQTlja2pnTi04SUEwNXJqOGc4UzdnM3dGbzVJOHUwWm5uQ0w0NWJQeEdveE5tMHRkRTNoRWctN3hZ?oc=5",
-      "publishedAt": "2026-11-23T21:28:34.000Z",
-      "firstSeenAt": "2026-11-23T21:28:34.000Z",
-      "lastSeenAt": "2026-11-23T21:28:34.000Z",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPNlRFVVBWdHN5czIxNnV3LTV6dkF0eUFJZHVEYVBTVDRlQTBDYk1kRlRTbXIzd0xTOFpwa2JtSnVpQUd3cGxvRWRQbVBKUWVGOE03N2g4eHJZRUVLOE5iY3pJSEpzN3ZwbFpBSVR4RFVPemdJS0ZQM1ZHSVRGbW1ORjdYZkxMckJmS3FqNHJ4REJRODVPSG0yOVR1amE?oc=5",
+      "publishedAt": "2026-06-17T07:00:00.000Z",
+      "firstSeenAt": "2026-06-17T07:00:00.000Z",
+      "lastSeenAt": "2026-06-17T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
       "confirmationStatus": "unconfirmed",
       "availabilityStatus": "upcoming",
-      "confidenceScore": 0.69,
+      "confidenceScore": 0.7,
       "matchedKeywords": [
+        "season premiere",
+        "premieres",
         "new season"
       ]
     },
@@ -2709,27 +5742,6 @@
       ]
     },
     {
-      "id": "thediplomat-netflix",
-      "showTitle": "The Diplomat",
-      "platformId": "netflix",
-      "platformName": "Netflix",
-      "rawHeadline": "The Diplomat Season 3: Watch What Happens When Grace Penn Becomes President - Netflix",
-      "sourceName": "Google News: Streaming Release Dates",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMibEFVX3lxTE04VU84aDVDa1d2MHFpZ2hlc1h3NTgwWlNjQkpuMFFHRUg4QTZMUWNmXzFJOU1fbFZrTTByZ21qaFdiSnlYeUd0dlpoYmZ0SUV0LTJYSGVsLWxfTTZzM21jVkczM0wwRmFtTzdxUg?oc=5",
-      "publishedAt": "2024-10-10T18:12:20.000Z",
-      "firstSeenAt": "2024-10-10T18:12:20.000Z",
-      "lastSeenAt": "2024-10-10T18:12:20.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.69,
-      "matchedKeywords": [
-        "new season"
-      ]
-    },
-    {
       "id": "gameon-netflix",
       "showTitle": "Game On",
       "platformId": "netflix",
@@ -2898,27 +5910,6 @@
       ]
     },
     {
-      "id": "awkwafinatheunlikelycook-apple-tv-plus",
-      "showTitle": "Awkwafina: The Unlikely Cook",
-      "platformId": "apple-tv-plus",
-      "platformName": "Apple TV+",
-      "rawHeadline": "‘Awkwafina: The Unlikely Cook’ premieres on Apple TV - 9to5Mac",
-      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQVHBNYXQ4UmFFcDJmZzR4VFRSOFJVU284MEFNMkp5ekU3dFB4VWtDWkJPVDI3eE5SMlRTeU1lcG52RV9VZnpWUmllRDMyeEdKbVZFb3hESlh6blh4Tk1Id2RJQ1lVdWxOWGhvVEFxemtiVkJBMGJjeUJNRGZiVnBtcVpVd1VXSlhq?oc=5",
-      "publishedAt": "2026-11-05T08:00:00.000Z",
-      "firstSeenAt": "2026-11-05T08:00:00.000Z",
-      "lastSeenAt": "2026-11-05T08:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.69,
-      "matchedKeywords": [
-        "premieres"
-      ]
-    },
-    {
       "id": "thejloshow-paramount-plus",
       "showTitle": "THE JLO SHOW",
       "platformId": "paramount-plus",
@@ -2950,27 +5941,6 @@
       "publishedAt": "2026-11-09T08:00:00.000Z",
       "firstSeenAt": "2026-11-09T08:00:00.000Z",
       "lastSeenAt": "2026-11-09T08:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.69,
-      "matchedKeywords": [
-        "new season"
-      ]
-    },
-    {
-      "id": "daysofourlives-peacock",
-      "showTitle": "Days of Our Lives",
-      "platformId": "peacock",
-      "platformName": "Peacock",
-      "rawHeadline": "Peacock Drops New Season Trailer For 61-Year-Old ‘Days of Our Lives’ Daytime Soap - Media Play News",
-      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPVGl2TGJFd29OYzlxQlcyNjFhN2VFbkFfN09semxQWU9JenZBT0pPaDc4aFo0bjhvY1B6VW5UM2YtR3pyMWxwTVpKcFl3ZzB2MXNkclRLdWFES2NlbHN6X0dQTGttN2xwWmx3VkJTcVlva09VMUFvWDVVMVlLaF9vNGVVZ0YzcjJQVXFnUUpwN0NFS0FpSUprTXBDeXN4ZUhvWmZkU2U3elU5RURjdXo0?oc=5",
-      "publishedAt": "2026-11-02T08:00:00.000Z",
-      "firstSeenAt": "2026-11-02T08:00:00.000Z",
-      "lastSeenAt": "2026-11-02T08:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -3222,7 +6192,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMiTkFVX3lxTFBGVWlHSndqc0xiRGpUN3g5bVNEOFhfTlBwRUJXbDktX0ZNTC1VZzVBa0lsVEYzRkt5S1lsMGh3V01uWE1zQUJrakFFaFRYdw?oc=5",
       "publishedAt": "2026-10-21T11:59:57.000Z",
       "firstSeenAt": "2026-10-21T11:59:57.000Z",
-      "lastSeenAt": "2026-09-08T07:00:00.000Z",
+      "lastSeenAt": "2026-10-21T11:59:57.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -3348,7 +6318,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxQWXh5TWtRZU50cjNhWnJYcU1RNTU1TmhhWTFXZHhxXzdXaWlQbVNIWUJuM3pMdlh5QUtMZUxJak1mRW5tRzFEUUFjdmg4VnNpWGQzb3FENVpteFVDZF9YTnFfR0NPREZCSUo0MFVzYU85TElyV2FrNnBheVFCZlVaWDZvUmNkdUNiY2FMMGhROWJKTGJ0aWM0dmVlWERnSkZQLTNjdGZoS2N5SnpMUFVkcDFIeTBadnI1eDFpT2JkMS11b09qSzQ5c3JTRFpSWmJMZ1lKTmRLdkd6MHdud1dSbzFDZm0xRnVqVXB3Qg?oc=5",
       "publishedAt": "2026-07-28T07:00:00.000Z",
       "firstSeenAt": "2026-07-28T07:00:00.000Z",
-      "lastSeenAt": "2026-08-05T07:00:00.000Z",
+      "lastSeenAt": "2026-09-27T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -3656,6 +6626,283 @@
       ]
     },
     {
+      "id": "emilyinparis-netflix",
+      "showTitle": "Emily in Paris",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Emily in Paris season 6: Netflix reveals final teaser - KarloBag.eu",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNQ3ZLLU1LN0xHYl9UTnJyNHNlckk3OEpndW4zemdCWEhpVUVWSmVNd0VnYU1fZmZWSFV4Zll0ZlRGN3hvQXluZjlQcms0a3V0eVRScXFlVEFzelZDbUM3WV9OeHZEY0poVDJ0cE1SNXo4SDkxeThMWkFqUGt6dE1iSUloSXR6bGRLTXpySVRXYng3T3M0NE54aThXSGl5Y0NOWVVXVmVZMU1oLURuaTNxa2VXOHNfUmhwejA0Vl8wZDdlUQ?oc=5",
+      "publishedAt": "2026-11-21T03:01:14.000Z",
+      "firstSeenAt": "2026-11-21T03:01:14.000Z",
+      "lastSeenAt": "2026-11-21T03:01:14.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "s-hulu",
+      "showTitle": "s",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Hulu's 'Paradise' Grows Its Audience in Season 2, with the Finale Increasing +35% Over the Premiere - The Walt Disney Company",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBnNU1JSEhFWHdTSDQwWmxGYWR3RjAwcU82UGpzSnBzcUlHNGlkTS1tSWZuN0dCUFloWjY1WUxVNkpKNmUtS3kzZmlfeUEyV0dCUXRBb3plM3F5WDRYMjdySTItU2dzbkI1QzNEZE93?oc=5",
+      "publishedAt": "2026-04-02T07:00:00.000Z",
+      "firstSeenAt": "2026-04-02T07:00:00.000Z",
+      "lastSeenAt": "2026-04-02T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "malcolminthemiddle-disney-plus",
+      "showTitle": "Malcolm in the Middle",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "‘Malcolm in the Middle’ Revival Hits 8.1 Million Views in Three Days, Disney+ and Hulu’s Biggest Premiere of the Year - Variety",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQcWpwb3NraU1XRW52Q0I4NDdiSnd5VmpVSVFFX1Z3TXJLTmZUWWJJLVM2c0pUYURRSkJnQTVKaFZZM095ajdrRnE0cG5VZDNPeWd0OHl3TFQ1LWZramUxd3hrQ0dpa0l2NU5Xb3NBNUd0ckhTYUJzYXA2ZERkYmNpSHM2Z2pERVNGWHpGczBjbGdKcXd0c3lOcGZR?oc=5",
+      "publishedAt": "2026-04-13T07:00:00.000Z",
+      "firstSeenAt": "2026-04-13T07:00:00.000Z",
+      "lastSeenAt": "2026-04-13T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "premieres"
+      ]
+    },
+    {
+      "id": "deptq-netflix",
+      "showTitle": "Dept. Q",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Dept. Q season 2 finishes filming, bringing its Netflix return a step closer - Netflix Life",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPU0xlcm5TcDI1YUsxRUFlWVFUYm1iOE9lTTBNdFhCeFdVclZRMVl3bU5EcC1EMDB3dHZWVUhuT2NramZTS1h5QU1sNi1HS1R3d1hwdEY5ZGxtdU9BdE1ZUEVFSUpHdWY4TW1VUGNKc2pjemdYSGlfYkhUcFhGcjdKLXVHNlZGQk5qeHFjY0ZnRDNLbUUtV1B3?oc=5",
+      "publishedAt": "2026-11-03T08:00:00.000Z",
+      "firstSeenAt": "2026-11-03T08:00:00.000Z",
+      "lastSeenAt": "2026-11-03T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "rickandmorty-hulu",
+      "showTitle": "Rick and Morty",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Will ‘Rick and Morty’ Season 9 Be on HBO Max or Hulu? - Decider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPOWF1cnhyb2ZLdFZvb2pGTnpqRTFMV1JFbFZrdkRkeDFPWDkyZWMweEcwcTBRNXV6RUg3dkFmenp1ckZiZURvcmh3WGxlQ0tQSUZDTmhYTEptXzd6Wk1uTDZvR0c4YjU4QlduMTViNVRseXhJR0pUakV0TVFlQkFVaVFweXBiRnRuc3c?oc=5",
+      "publishedAt": "2026-05-24T07:00:00.000Z",
+      "firstSeenAt": "2026-05-24T07:00:00.000Z",
+      "lastSeenAt": "2026-05-24T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "thesecretlivesofmormonwives-hulu",
+      "showTitle": "The Secret Lives of Mormon Wives",
+      "platformId": "hulu",
+      "platformName": "Hulu",
+      "rawHeadline": "Hulu’s ‘The Secret Lives of Mormon Wives’ Stirs up Drama in Season 4 Trailer (TV News Roundup) - Variety",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPam9mTnBXX0E5aFh5dGxtVGFwZGJWOW83ZV83ZkxNWm42d2xxREwzME5CTDJxY29BWnBQQVByaVR1aDhwNHhfOTNVR2JCcFNDUWRSNzZZcnphYk5GdnhoWHJjOXZCRTgxY25HRzBVOHdhTFV6NHY5SThOX2tETjFsQTN2M29GVTlTRDF5S2hUUFExa2dEdGhOUjFmMTF2RndjTjAxc05B?oc=5",
+      "publishedAt": "2026-02-18T08:00:00.000Z",
+      "firstSeenAt": "2026-02-18T08:00:00.000Z",
+      "lastSeenAt": "2026-02-18T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "sullivan-netflix",
+      "showTitle": "Sullivan",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "When Will ‘Sullivan’s Crossing’ Season 4 Be on Netflix? - Decider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPNGQ0RlI3UkhlaDNkQnp3VGtyQUhxV0FWaHk3Zy01bnlBczVTbHRTQ25wdDlzWDJXUDVvTGNqUFhELUs1SjBLMkxaQVkwNEpjaUVReW81ODI0aVlrRXdkeHRnUjluc2Zjel96SXhRaWpIcUNjMDhWU2pKV1RkQzdEOGVPVE14TEIyN0VF?oc=5",
+      "publishedAt": "2026-04-22T07:00:00.000Z",
+      "firstSeenAt": "2026-04-22T07:00:00.000Z",
+      "lastSeenAt": "2026-04-22T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "hitnetflix-netflix",
+      "showTitle": "Hit Netflix",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "Big Bang Theory Co-Creator Chuck Lorre's Hit Netflix Sitcom Unveils Season 2 Trailer - Comic Book Resources",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMibkFVX3lxTE1IYVJuZEN1RHVBbDJwSEtSUXdDQTllY3dBZnFmakxPV2RyYTFDdlVtT0tZbWZoVnVxR3E3Q2hhb1JYQnp2bkpaWHRRQjF0WmNXMDlGZ2x1MGlsRUpVdC1iSzdvbHpsU0xwc25SbDhB?oc=5",
+      "publishedAt": "2026-07-30T07:00:00.000Z",
+      "firstSeenAt": "2026-07-30T07:00:00.000Z",
+      "lastSeenAt": "2026-07-30T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "reacher-prime-video",
+      "showTitle": "Reacher",
+      "platformId": "prime-video",
+      "platformName": "Amazon Prime Video",
+      "rawHeadline": "‘Reacher’ Renewed for Season 5 at Amazon Prime Video - Variety",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQVWFwYUM0Uk9NN2pWU2x5Y2JKaEQtSXoxUjE0OGRseUxUSG93cU81REZNaFQ2LW9QXzV4Q1NzbC1wZkNwVmFBTnpmQUFZZ2NpaEtPUjlYa1JhTUhna2NKaVpfZDdKT1lIT1VLX3YwRmFqWEZ6ZXBLSml0RjhuYmRLOGxIdWlwSDFYZFNIamFGX0cxQQ?oc=5",
+      "publishedAt": "2026-05-11T07:00:00.000Z",
+      "firstSeenAt": "2026-05-11T07:00:00.000Z",
+      "lastSeenAt": "2026-05-11T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season",
+        "premieres"
+      ]
+    },
+    {
+      "id": "leanne-netflix",
+      "showTitle": "Leanne",
+      "platformId": "netflix",
+      "platformName": "Netflix",
+      "rawHeadline": "'Leanne' Season 2: Everything You Need To Know About The Return of The Hit Netflix Sitcom - What's on Netflix",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNWTh2SWpmXzEwYmpsakZDTlowcE5ZZDZhZTdnVEZrWkNBNGNYWmNCTkREUUVYWUFTczdHeXlqYjNFUUdJUm9iSTR5MXJoUXZhZmh0Wm1HNHl2QTVXSS11NHlqd3FST1VCT0RGTmhaN2g5UXk5U241MjVVanlRaFYtTUtKWHBzSnN6ZG55eVA5MA?oc=5",
+      "publishedAt": "2026-08-24T07:00:00.000Z",
+      "firstSeenAt": "2026-08-24T07:00:00.000Z",
+      "lastSeenAt": "2026-08-24T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "911-disney-plus",
+      "showTitle": "9-1-1",
+      "platformId": "disney-plus",
+      "platformName": "Disney+",
+      "rawHeadline": "9-1-1 Season 10: new episodes stream weekly | Explore Disney+ - Disney Plus",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9IVHc3N21wamZDOWF0ZU9UOHVfREpWYjRCcVJYbXliOFNSblg4c3Fod0stRklhalFjSDVaNFN1bWVJdklxME9yM0VkNF9PQlVKSVR3a1NrcWszVF9Ncnd6X1EyUHJodEVrSVZOT1Y0NFM?oc=5",
+      "publishedAt": "2026-11-11T08:00:00.000Z",
+      "firstSeenAt": "2026-11-11T08:00:00.000Z",
+      "lastSeenAt": "2026-11-11T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "greatestsitcomlaysdownsomeharshless-apple-tv-plus",
+      "showTitle": "Greatest Sitcom Lays Down Some Harsh Less",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Apple TV's Greatest Sitcom Lays Down Some Harsh Lessons in New Season 5 Preview [Exclusive] - Collider",
+      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMieEFVX3lxTE5JSHVDakVPdm4wRGVfZW1fWFVjZWNLQ0ctT1Nja0doS09zNmVHVzlkMzZjN2FMQTVHbkY3Qmk0My14M01TZTJJX0J2bXFBdmtBdkp1TkxSSVVjV2c1bDJOWlZ1bjY4UjI3eVR1S1lpN2tSeEtJRFk4LQ?oc=5",
+      "publishedAt": "2026-07-21T07:00:00.000Z",
+      "firstSeenAt": "2026-07-21T07:00:00.000Z",
+      "lastSeenAt": "2026-07-21T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.69,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "thegildedagehasreturnedtohbowithitslargestp-unknown",
+      "showTitle": "#TheGildedAge has returned to HBO with its largest p",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "#TheGildedAge has returned to HBO with its largest premiere audience ever. The Season 4 premiere, which aired November 1, drew nearly 4 million cross-platform U.S. viewers in its first three days of availability, HBO said Thursday. That makes it the series’ - Facebook",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxPSjc2TTBzYkI4WGNXb0YyNEFBcW9pWVlaUlpIWV8xckw3aFowVkJHaVlaX25PWVJ2TmtfWkduZndxT3NvQnFSeWEwZkVhdTVWcWlRYnQ0WnpXbUljUWxMSl9xM0dkLUZCRkdFZGhycHF3NEt3cFBOb3FYZExEM0NlRFI5bW8xRFhPR1BnbV9SeDFqQVJGMWVLRWZzWkFYdjFtM0hMbzFEb2NmNmVON0kxRkRGMk9yazZxYnhVdS05a280azRGLVFsaUhPRFRPZUMwTkx6Sw?oc=5",
+      "publishedAt": "2026-11-05T21:38:13.000Z",
+      "firstSeenAt": "2026-11-05T21:38:13.000Z",
+      "lastSeenAt": "2026-11-05T21:38:13.000Z",
+      "extractedDateText": "November 1",
+      "parsedDateIso": "2027-11-01",
+      "datePrecision": "exact",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.65,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
       "id": "3-peacock",
       "showTitle": "3",
       "platformId": "peacock",
@@ -3778,6 +7025,29 @@
       "availabilityStatus": "upcoming",
       "confidenceScore": 0.63,
       "matchedKeywords": [
+        "release date"
+      ]
+    },
+    {
+      "id": "thebear-unknown",
+      "showTitle": "The Bear",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘The Bear’ Is Officially Closing Its Doors This Summer With Final Season Premiere Date - Rolling Stone",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQSm1reV9kdnFnbVhKSUZTMk9PMUpGM3E1U0ZsSmlWRXlkbTA0SDBjYUxESkY1QnVWcEU2X0hRaXdtWnRRVWgyZUZuY1BVVjV2YUsweXdVWFNWajl5RjNxUjloUlV4LUtkbTNwdEtGZlRORmluZFp6eFVnZDVvRGRsQTA0UmI5U2ViTXlWUzBrMllTSTlXQUcxRGlrQjhYc0J6dTQtYTNIY2NfUQ?oc=5",
+      "publishedAt": "2026-05-06T07:00:00.000Z",
+      "firstSeenAt": "2026-05-07T07:00:00.000Z",
+      "lastSeenAt": "2026-05-06T07:00:00.000Z",
+      "extractedDateText": "This Summer",
+      "parsedDateIso": null,
+      "datePrecision": "vague",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.63,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
         "release date"
       ]
     },
@@ -3913,29 +7183,6 @@
       "matchedKeywords": [
         "premieres",
         "new season",
-        "release date"
-      ]
-    },
-    {
-      "id": "thebear-unknown",
-      "showTitle": "The Bear",
-      "platformId": "unknown",
-      "platformName": "Multi / Unspecified",
-      "rawHeadline": "‘The Bear’ Is Officially Closing Its Doors With Final Season Premiere Date - Rolling Stone Australia",
-      "sourceName": "Google News: Season Premieres",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPV0M3ajM0TFpRenJGMmFYekxubEpyd2ZsOUpScEl4Mm5hNmMxSmsyckJrOVBuOERyQ0w1cFJNS25sT2JkVXU3UjhEeFJqc3VDeEs0UVF2Q1RMY1kydXhmYTNxazZwblRFdTZtWVRkYUhmaFd5WTgwQXZOOHZIckFtU0VzVXVwallNLVEyRG9SYTc?oc=5",
-      "publishedAt": "2026-05-07T07:00:00.000Z",
-      "firstSeenAt": "2026-05-07T07:00:00.000Z",
-      "lastSeenAt": "2026-05-07T07:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.57,
-      "matchedKeywords": [
-        "season premiere",
-        "premieres",
         "release date"
       ]
     },
@@ -4502,6 +7749,257 @@
       ]
     },
     {
+      "id": "tulsaking-unknown",
+      "showTitle": "Tulsa King",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "When does ‘Tulsa King’ season 4 premiere? All about Dwight’s next big score - Entertainment Weekly",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMieEFVX3lxTE1OeF9ZLUMtYWszZFM0UmExclYtUE5YOG1qaGk2dG0wNDJUZVhZd2szVDhRZVBOVkF2RWtraExZLWJwanJueC1jUXVZd3hINTRNaDgtN1VrT2l4QmoxQURNUGlRUFpSeFVReXpORnEzdEpnT0dXMWtmTw?oc=5",
+      "publishedAt": "2026-10-10T07:00:00.000Z",
+      "firstSeenAt": "2026-09-20T07:00:00.000Z",
+      "lastSeenAt": "2026-08-16T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "new season",
+        "release date",
+        "season premiere",
+        "premieres"
+      ]
+    },
+    {
+      "id": "stryingtokillkimkardashian-unknown",
+      "showTitle": "s Trying To Kill Kim Kardashian",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "All's Fair Season 2 Premiere: Who Got Hit? Who Came Out? And Who's Trying To Kill Kim Kardashian's Allura? - TVLine",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNS1RDZ2ROeGhMV21iZDJray0tYzh6Q1h6aWZXa2l2Y0pBYjhUZ3o2RTA4WUR6Z1luWDl6OWFkMEFMUjVnWnhweFlUX0NxMmZCLTlqcVlLQjdPYWlPSHJiOUV6ZDgxQTM0OU1TNTVMUnNmRkFOZWZfaEdGUmhrNnY0MmhHa01xQ080UlczRXBLYw?oc=5",
+      "publishedAt": "2026-11-04T08:00:00.000Z",
+      "firstSeenAt": "2026-11-04T08:00:00.000Z",
+      "lastSeenAt": "2026-11-04T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "sisterwives-unknown",
+      "showTitle": "Sister Wives",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘Sister Wives’ season 21 premiere: Where to watch free on demand today - Cleveland.com",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNbEowd2FpX1ZvUkIzRHZnbXNkcElySkVnVlFaYXBRV1RKR1hGdm8yci1QZFQxbzFHeTQ1QzhQbjlNdmtDS2FBNmR0c01jVmdHMmpEX19DRkJXN0plSkdZSDh2cmN3T3hxazduMjF3NGVVLUFxYUgwNzl5bV9ILUQzZ2RPVExFZXoxa3d0RmU5S0lObGkxZGJwUUEwT1FxeGdobUNxVE9ZTGxmUzNVdEE?oc=5",
+      "publishedAt": "2026-10-05T07:00:00.000Z",
+      "firstSeenAt": "2026-10-05T07:00:00.000Z",
+      "lastSeenAt": "2026-10-05T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "americanhorrorstory-unknown",
+      "showTitle": "American Horror Story",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘American Horror Story’ season 13 premiere: How to watch 3 episodes free today - Cleveland.com",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPbGl0WjRiaFVYQ2VEVzRsUHV1RlRTeFU4dk9UV1J3bFg4aGNsWkRPRk9qWkRzUU5pclJybzNORmRzRDZMR1pUSTMzSFZNUXJiX0RuXzBYSU5CdGsyaTQ3emgwdjJOS25OcG1YVXlWVUJTby1wbTJRTXdQSWxubzdoT0JqdTF1aVNtOXp3SW1RVm1mdFBqcG9QcHpGeXoxRmVBNU03TGdqSmVJbEdKUjYzQQ?oc=5",
+      "publishedAt": "2026-09-24T07:00:00.000Z",
+      "firstSeenAt": "2026-09-24T07:00:00.000Z",
+      "lastSeenAt": "2026-09-24T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "thediplomat-unknown",
+      "showTitle": "The Diplomat",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "How ‘The Diplomat’ Pulled Off Its Shocking Season 4 Premiere: ‘We Talked a Lot About How Quiet the [SPOILER] Is’ - IndieWire",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPRTRzT3JfM0E2MXlmOXFndXpET3BjSG9mNDhPUTd0dnhDZVZFQTZGNm1tVEZWRS1ZR0laa0I4WnNIUjNON1ZqNXZKclpfWlBJRlBodFZIRlp3QlM4UVFYckEteXVvZmdnTUtYcVR2TTNBZDRBcFVwc0NxbHluZWRaSG1TbndrNkhYVUxNU1U5ZkYyRVZWMjExcEliWkRFTzhtaGhYeExnREFhcXFSOW9DUnlYcVpQQQ?oc=5",
+      "publishedAt": "2026-10-15T07:00:00.000Z",
+      "firstSeenAt": "2026-10-15T07:00:00.000Z",
+      "lastSeenAt": "2026-10-15T18:12:14.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "tellmelies-unknown",
+      "showTitle": "Tell Me Lies",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "'Tell Me Lies' Season 3 Premiere Pulls 5M Views Globally In 7 Days - Deadline",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNcS11OUNxM1R6NHJKNlJoTGtsN0g2VEplUnk5elpzbWw0a29kQjNkR0pabUp2TExLWDRsX18tTDlYSl84WXdETTVYLWFWYUNzcHpHMXFRYU93QWFnWVVXY0cwdmtXSS1FSFF2X0ExOGp6eFZkSDI0bFFaSTZvYmtja3lRMjUyb00tcDNOUFdadFg?oc=5",
+      "publishedAt": "2026-01-20T08:00:00.000Z",
+      "firstSeenAt": "2026-01-20T08:00:00.000Z",
+      "lastSeenAt": "2026-01-20T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "ghostadventures-unknown",
+      "showTitle": "Ghost Adventures",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "'Ghost Adventures' Season 30 Premiere Date Revealed as Zak Bagans Teases 'Sinister' Investigations - TV Insider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNX3JHRW1ra290QXVnOUdCcHpWUFFHTmw5Y1BDOVNfeUhURW5CRjRXb01hd1ZwQjFLenZyaHBtTHJhUzBjR0NpZGRiYWp6TzBZRUx6WkRYbW9YMnhFWnNldS1aOFVfYzhoelJNYWNfdVpDTE80QXJvSVlReWt2RENWRkRLMktaY0xBTHBXaGs2Q0xEYWdNU3l1cWdzSXJxLWZBenIxazhB?oc=5",
+      "publishedAt": "2026-09-09T07:00:00.000Z",
+      "firstSeenAt": "2026-09-09T07:00:00.000Z",
+      "lastSeenAt": "2026-09-09T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season",
+        "release date"
+      ]
+    },
+    {
+      "id": "adults-unknown",
+      "showTitle": "Adults",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘Adults’ Season 2 Premiere Recap - Vulture",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiggFBVV95cUxNM2xnLVh1T0ZKWDgtZXI2VUlCNmRNeXo1LXhURS1zZXhTbnFsRkxES1VEOFNicGdSMDZlVjh1TkdaTjFUcFVRZGpmOUdxMzhna2YyMy1XMFl0WUFWUWUtX1lkTG44ZUc2VTNPU1UzUFk4Q2dJeWt4VmlnOGVLbkxWWDhR?oc=5",
+      "publishedAt": "2026-08-27T07:00:00.000Z",
+      "firstSeenAt": "2026-08-27T07:00:00.000Z",
+      "lastSeenAt": "2026-08-27T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "hacksfinal-unknown",
+      "showTitle": "Hacks Final",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "Hacks Final Season Premiere Date - World Screen",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBqRk9HX3JkZ1hmOEx3NFJ6QkFlSkUxTzVKUFpvb1k4dXBTQ2ZtMlc5NlJqeS1NY0U4YjNsOGlxN2Y2dVAyTXdqNkdrSV9acFFXLWkxbkN6aXpIWUppTzY2aU9xcmlEaWpXdFBTOFJCUXJVM21PbUE?oc=5",
+      "publishedAt": "2026-03-24T07:00:00.000Z",
+      "firstSeenAt": "2026-03-24T07:00:00.000Z",
+      "lastSeenAt": "2026-03-24T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "release date"
+      ]
+    },
+    {
+      "id": "appletvjustunveiledthenewseasonoflastyears-apple-tv-plus",
+      "showTitle": "Apple TV just unveiled the new season of last year’s",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Apple TV just unveiled the new season of last year’s hit comedy - 9to5Mac",
+      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOcWdfUHhfMEdrZ1VBbzN3cldWdzFKdTVfb0I3N1pPNDJjaVlhQk1mOUhqd0hFYV8wTmkybDQxQzFLcXBPT2pBcmU2dHlYcW5BMkRLS01KRGVuNHBqU3hWWXllcTdZZWFkWGRaZlJaX1VveDliODNCZFdKLUNoUTFZdHdtMzdfSUoxa0trVHZ3RHBOZUxXenFCeU9R?oc=5",
+      "publishedAt": "2026-10-08T07:00:00.000Z",
+      "firstSeenAt": "2026-10-08T07:00:00.000Z",
+      "lastSeenAt": "2026-10-08T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
+      "id": "appletvjustconfirmedanewseasonforoneofmyf-apple-tv-plus",
+      "showTitle": "Apple TV just confirmed a new season for one of my f",
+      "platformId": "apple-tv-plus",
+      "platformName": "Apple TV+",
+      "rawHeadline": "Apple TV just confirmed a new season for one of my favorite shows this year - 9to5Mac",
+      "sourceName": "Google News: Apple TV+ / Peacock / Paramount+",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOT2hzc0tobVBpOHFTMHNiaXNsQXNSQWJWSXYxbVBPUVVJNFM4QWlWQThrVUs2QV94Wml2MHNseWY3Y1VNQjlKeWdnLTNENXBGRDgyWXpFdXlZdl9WSWUxZm5tQ2JVZjM5VVJFTGo2MEtoaHJ5ckx6RUdTRGMzVXpCeEI2cFFvNGJxam9wYW1uSkloVS1SOG9QYVVITmg0b1RYVUJZeUI0OE84T1k?oc=5",
+      "publishedAt": "2026-10-14T07:00:00.000Z",
+      "firstSeenAt": "2026-10-14T07:00:00.000Z",
+      "lastSeenAt": "2026-10-14T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.57,
+      "matchedKeywords": [
+        "new season"
+      ]
+    },
+    {
       "id": "allofusaredeadfansareexpecting-unknown",
       "showTitle": "All of Us Are Dead fans are expecting",
       "platformId": "unknown",
@@ -4645,7 +8143,7 @@
       "sourceUrl": "https://news.google.com/rss/articles/CBMihwJBVV95cUxORVg4MjJsUG0yMXg5eDZWby10TTIyZ1d5b0VBeGxTZElORmdVRm5icTgtaDZkODZpVDdPbnl2dW1RNmdRLS11ZmVGWlhkZFRSeWh2ZU4tczRibGNOaDN0YUhsZS1Tck44ZHdrOHlMbndPU3cyTmh5RWdsWjVSY3pqZ21oUXlIaUwxUVNkVEo3andmcnItMlYzcXZRU1ZkOHFOdzVJVzFhOGI1TV9Ic1A3UldWdFpGWXJYbno2WHRZeWJZODIwZWplQV9HS0pGZDJWRVJ6Tnd6NFRDUUt3aHF5c3JVU3lla2h3TkxGWnQxeWZlZGNBVUswTnB2VTJrbnNycHQydTBKb9IBjAJBVV95cUxNNUFwSVFnZnB1ai1SM296WTc5MVhfY3A0bkk0ZGRZSGIzTDgyTHUxZlh5NG1DV1hiOTlpQWVLN3BaV0R5MEJ5MmFPb2ZLVHFvcEdRZnlRQjFCdm81YXZIS2Izb0pXemhyQVo1d0pSSEZoTnhySEZ1amRHc0xHamk4Wm1yUWFvNFlkWjVmS091YzN3dVlCTm5IMGVFSTh5ZEpwcmJKemNVZGhKZ3IwUERWZzIyNW5rUVh0MHBDWVFIYnFYakFuc2N1TXhHVFYtVjV4ek5fNlh3RGNwV3I3dTJndmV6SlFpM0tuUzJRd09lRVpZNUJHWGhkcGVhNWx5UTlnNmVSb1BxR2dWMHg0?oc=5",
       "publishedAt": "2026-11-20T20:28:40.000Z",
       "firstSeenAt": "2026-11-20T20:28:40.000Z",
-      "lastSeenAt": "2026-11-20T20:28:40.000Z",
+      "lastSeenAt": "2026-11-01T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -4654,7 +8152,8 @@
       "confidenceScore": 0.56,
       "matchedKeywords": [
         "new season",
-        "release date"
+        "release date",
+        "premieres"
       ]
     },
     {
@@ -4734,28 +8233,6 @@
       "publishedAt": "2026-11-06T08:00:00.000Z",
       "firstSeenAt": "2026-11-06T08:00:00.000Z",
       "lastSeenAt": "2026-11-05T08:00:00.000Z",
-      "extractedDateText": null,
-      "parsedDateIso": null,
-      "datePrecision": "none",
-      "confirmationStatus": "unconfirmed",
-      "availabilityStatus": "upcoming",
-      "confidenceScore": 0.56,
-      "matchedKeywords": [
-        "new season",
-        "release date"
-      ]
-    },
-    {
-      "id": "tulsaking-unknown",
-      "showTitle": "Tulsa King",
-      "platformId": "unknown",
-      "platformName": "Multi / Unspecified",
-      "rawHeadline": "‘Tulsa King’ Season 4 release date: Here’s when the new season of Sly Stallone’s ‘Tulsa King’ starts - Decider",
-      "sourceName": "Google News: Streaming Release Dates",
-      "sourceUrl": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPYlF4UFpuZzR5Y0hJTEFmZmpiUXBHczEwb3JxMmFwN3VhRExFeUtYaFEzalNPbXJrQWFiWlZUcTd5bmNmU25SZU0tNE5INTdyMEdwQS1CS055dl82M0pGV3hpX2xHV2lnOVFzTTFuMWVNLVBoczcxTFhpUW1MSGRfVzE4a2RuQkxtWnJPR1ZqZFBtcXFENy1oS3p0NF9YRVdZSUVDMlhQNHo2dw?oc=5",
-      "publishedAt": "2026-09-20T07:00:00.000Z",
-      "firstSeenAt": "2026-09-20T07:00:00.000Z",
-      "lastSeenAt": "2026-08-16T07:00:00.000Z",
       "extractedDateText": null,
       "parsedDateIso": null,
       "datePrecision": "none",
@@ -4874,7 +8351,8 @@
       "confidenceScore": 0.56,
       "matchedKeywords": [
         "new season",
-        "release date"
+        "release date",
+        "premieres"
       ]
     },
     {
@@ -4963,6 +8441,227 @@
       "matchedKeywords": [
         "new season",
         "release date"
+      ]
+    },
+    {
+      "id": "emilyinparis-unknown",
+      "showTitle": "Emily In Paris",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "The first trailer for the final season of ‘Emily In Paris’ takes a trip all the way back to Season 1 when Lily Collins’ heroine first arrived in the French capital city. It all leads to Greece, the “best for last,” which was hinted at the end of Season 5. The series returns to - Facebook",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPQ3R2Y1g5Y2pCdWp1RVU0VHRTcFZnazU2YlU4T1c1Zk5HUEN1OVViUDVRN29tZ2R0NGJpOVZmS0phaXZnTHRsczhnZTVtUFlOUy13b0FDUEhDUE5KX1BZaEppc1duWVBtTlBqUk90cENyUTYzd0xGWUpscmJFOERPTExvOWtYMGV0X0JVMVhncVRBU05XWktERERFN0E3TGt5eVFfak1WbElYN2EtYWV0eGNFMEpwTFVlclNWQlppU3d2Y1BDcjlXLU80dXBEb2JuSlBWbnNB?oc=5",
+      "publishedAt": "2026-11-11T08:00:00.000Z",
+      "firstSeenAt": "2026-11-11T08:00:00.000Z",
+      "lastSeenAt": "2026-11-11T08:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "new season",
+        "returns"
+      ]
+    },
+    {
+      "id": "theproudfamilylouderandprouder-unknown",
+      "showTitle": "The Proud Family: Louder and Prouder",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘The Proud Family: Louder and Prouder’ Skates to Final Season Premiere with New Trailer - Animation Magazine",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQbjBNWUFpak05RTVwbEZlc0VTb1F2UklHVEthbk1oQmppR2RPckloMGVQZ0dVZU1IUFNBck95TnIwSWVqQ0RnYkFfYzVXakpoVm0wMDNkNEhiUnNaek1rOU41RGJidzNqdHJ1dWJRcy1ZSEozdTkzTGFKMTdqVjRLMm9fV1JRaDlMSWlhM1N5SWhQSXE5RzBneUJlcUZKQ090QjRCdVZKY2F6ejA4R1FsTXFFU0dMWkRJWFEwS1J5Y05ERXZjS3c?oc=5",
+      "publishedAt": "2026-07-14T07:00:00.000Z",
+      "firstSeenAt": "2026-07-14T07:00:00.000Z",
+      "lastSeenAt": "2026-07-14T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres"
+      ]
+    },
+    {
+      "id": "bigbrother-unknown",
+      "showTitle": "Big Brother",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "When Does ‘Big Brother’ 28 Start? ‘Big Brother’ 2026 Premiere Date, Schedule, Streaming Info - Decider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNeWYxM01NZWRZdXQ4NmFWYUxlUndwZW1FbDdxVXJTNEhVTUN5dVNNNWFRdlg3MnNFcmpJSW5ScFlBdnhDZF9TVTFZSUhrMDF5NlItRHhsbG1qQkxKdFdNbWhzOUZkTGx5ZkFFQjMzcjdrNzFTdlRqLVFocWsxb1ZqMGs0MkFmbmpkLWtIUlZmbTVOdGE4T1ZieDlzYkJuV3AxbzIteF9GbHFHMTlwVHRoY3RNaFZRSTVyTmdaRlVOOXEzLVU?oc=5",
+      "publishedAt": "2026-07-08T07:00:00.000Z",
+      "firstSeenAt": "2026-07-08T07:00:00.000Z",
+      "lastSeenAt": "2026-07-08T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "premieres",
+        "release date"
+      ]
+    },
+    {
+      "id": "outerbanks-unknown",
+      "showTitle": "Outer Banks",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘Outer Banks’ Fifth and Final Season Gets a Premiere Date, Reveals First Look - Variety Australia",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPWkFxUURmOG5pVEtySTF4Q2Jkek9vQ3JpY0xrVVhlanc3bnplM1pIWFoxd1JSakJNNHo3THBpcERUcmRacFI4aHA1a05rTkZNLVZzR0JoNXoyMXoxUVo3REkxdWdtSElzV3I4VDBHSkJVZHBvcDhyTmJyb0pIQ3lYcUgzOGF6T0NjZDFBb19hQ2VZQQ?oc=5",
+      "publishedAt": "2026-06-19T07:00:00.000Z",
+      "firstSeenAt": "2026-06-19T07:00:00.000Z",
+      "lastSeenAt": "2026-06-19T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "premieres",
+        "release date"
+      ]
+    },
+    {
+      "id": "dwts-unknown",
+      "showTitle": "DWTS",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘DWTS’ Season 35 Kicks Off With Nearly 7 Million Viewers, Biggest Premiere in 6 Years - Yahoo",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQdEo2UzREOXlfVUpBU1ZINjRCQVk5QzlRS01VYkpXMVFmQlU5OWlWLW53UnRuVmpic2tWc3lEek5Ed3ozVkE5ZXRab0hnZ0U1ZnVsZ2l1Y2U4ZTdhVjZfOFhVRFlDTTJkaEtQUXJXQ01nV3Y5d0JIOVJINGJuSHhnOHd4d3JrRWNVVnRDVUc1bEk?oc=5",
+      "publishedAt": "2026-09-16T07:00:00.000Z",
+      "firstSeenAt": "2026-09-16T07:00:00.000Z",
+      "lastSeenAt": "2026-09-16T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "houseofthedragon-unknown",
+      "showTitle": "House of the Dragon",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "How to watch ‘House of the Dragon’ Season 3 live: ‘HOTD’ Season 3 release date, HBO free trial info - Decider",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOZm8xT0w3aDFRSHZKVjFaZlFObW1TMXV4VXJXSkFZdDNSS2hTdGRjbHBfbjBLWHlEV1R1ZjlUekZNNTJrdURhMy1kYWQ1SC1jSTJYRmI3WE4tZm9TWHl0VlVtZEdoTldMOTdTVGtGOGswYUNMeURPYVZQUHdPTDA0RmdSWkxicHFsaHRCai14ay1HMkRJTUk4TGFYWXBueVFpcDZ6LUFRalZwSFN1Vjh0NXZn?oc=5",
+      "publishedAt": "2026-06-21T07:00:00.000Z",
+      "firstSeenAt": "2026-06-21T07:00:00.000Z",
+      "lastSeenAt": "2026-06-19T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "new season",
+        "release date"
+      ]
+    },
+    {
+      "id": "doc-unknown",
+      "showTitle": "Doc",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘Doc’ Season 3 premieres tonight: How to watch free without cable - Syracuse.com",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNZmppZEZhdmZQWndCMFhBMnB0cXdiTzI4eXdhUTZTejM1V3NtNEVhU1ktcHY3eXJWbUllNU5xb0c3TFEtRUNPZmxETlVIb0NURE1mb3N3WW9aUGJ0aUZiRzVfcjdoODZxWDZsb3QxTnNjUmV3ZFg5QU44RFVWZWI5ZHhyUE1HVTIwZzJ6T1JubFpmUERVVEpPOHBlSTZzZ21KZG9Vb1V30gG6AUFVX3lxTFBaenJjUzY4R2QtUklHSkV3ZkhnUXNaUWJNb0Z5OHlEczZkOHRkRThsZW5XaXZDaE1SWG1GSHZpelFCYlI4VFBGOHd4a1JNelN2WmlpVEw3OVk2SFllV3l6VkJON0JiNERJRWhPeEhlUnN0MVgyMXlUMDQ4Q3E1UGlvWlRBRmNsTU9Nc0FLRkJYUkJEVW9SLXkyZHQ5cXdaSThHTkdyUU5qQWIzUWlHZkN2NkFhM0VPTGFEZw?oc=5",
+      "publishedAt": "2026-09-22T07:00:00.000Z",
+      "firstSeenAt": "2026-09-22T07:00:00.000Z",
+      "lastSeenAt": "2026-09-22T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "dancingwiththestars-unknown",
+      "showTitle": "Dancing with the Stars",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "‘Dancing with the Stars’ Leaps Back Into the Ballroom as Tuesday’s No. 1 Show, Delivering Nearly 7 Million Total Viewers — Scores Show’s Biggest Season Premiere in 6 Years - detpress.com",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMiowJBVV95cUxPUDViOFhSLW5VN0VDVnR2VEdVUm9hU1I4WXZxSHRjSm9MQTUzeEVvSkpUYks2WkF0Y2pFUFd5MzRCWnV5LU1iYlF4NWwxM09DbWo4d2ZkaUpGUVdCanZtODBmVDJOWjRuNWhVTWt0ZVBYNTVTM1VMbzFUempoSEhVNkdIbzE5NjFSenA0Y21Wbk13SWFlNE44TDZrbS03TlR6SHYtemxBbGZGQXh5ODBtQUlOczQ4b1dsOVJTSjJrZGZMckhKLXctZ3NDa3Rpc1pVVVZpT0V2TDROME1xOWduVTk0STNkMHVaT1ZZQk5rOTBVUExkY3ROdU1WdnBJU2hmQU5LaDJ4cUVwbWRRVTNWcDJuSzFMRlV1eHdLY0ZZRWFtZk0?oc=5",
+      "publishedAt": "2026-09-16T07:00:00.000Z",
+      "firstSeenAt": "2026-09-16T07:00:00.000Z",
+      "lastSeenAt": "2026-09-16T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres"
+      ]
+    },
+    {
+      "id": "theboys-unknown",
+      "showTitle": "The Boys",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "The Boys season 5 double-episode premiere review: An unwarranted decision to drop two at once - Winter is Coming",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOWlVnSGsxOUYtS3FYWjYtWjJlbUxyZ1ZpWUMwbThHa2tiaFdmSFhFT3REVVpEQWJaMUFqaHFRRzFwQ3Qza19tcWRrN1pybGFsMlhHWGtEanpfZGQ1NE5wR1VYVGJENFVWMjFrSkxmRm5ueldXTWNqcTcwTmx2VFVBSQ?oc=5",
+      "publishedAt": "2026-04-09T07:00:00.000Z",
+      "firstSeenAt": "2026-04-09T07:00:00.000Z",
+      "lastSeenAt": "2026-04-09T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.56,
+      "matchedKeywords": [
+        "premieres",
+        "new season"
+      ]
+    },
+    {
+      "id": "wilmingtonshotabctvseriesenlistsstarpowerfor-unknown",
+      "showTitle": "Wilmington-shot ABC TV series enlists star power for",
+      "platformId": "unknown",
+      "platformName": "Multi / Unspecified",
+      "rawHeadline": "Wilmington-shot ABC TV series enlists star power for season 2 premiere - Wilmington Star-News",
+      "sourceName": "Google News: Season Premieres",
+      "sourceUrl": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxPdFF2YzRSdmtCOWJwUTNnaC1GZkNWN2JHMHR1Y0p2eGdtZXJiMVU0SnQtc0lVX01KZ3g4TlYzX3pqSG5NMU1FMVh0eGl6MjJpUDZDV0M0dVFPbHNmVWQ1SVhMSWFhSkdRYl9zTzJxSzVUUDl2R2J5RVNCblRjM0RmRjJqblBNS1dUWjVjdlpzeEt1cG5qWjZwUEFJYTNOY2g1N1Q2b2RoZl9qMVRsQWdKWEwxYzNndnc0U1lSbG9GU3ZwSFVLMWdidzNxeFUyd1g4OENKbmVrNkdkWUVrQk1SblhTdXBJUHNZX0ZkXzhiU290TnBNZV96Nzg0WWVBUzg?oc=5",
+      "publishedAt": "2026-09-08T07:00:00.000Z",
+      "firstSeenAt": "2026-09-08T07:00:00.000Z",
+      "lastSeenAt": "2026-09-08T07:00:00.000Z",
+      "extractedDateText": null,
+      "parsedDateIso": null,
+      "datePrecision": "none",
+      "confirmationStatus": "unconfirmed",
+      "availabilityStatus": "upcoming",
+      "confidenceScore": 0.45,
+      "matchedKeywords": [
+        "season premiere",
+        "premieres",
+        "new season"
       ]
     },
     {

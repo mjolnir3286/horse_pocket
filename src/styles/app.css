@@ -1017,3 +1017,48 @@ input {
   padding: 0;
   justify-content: center;
 }
+
+/* About card — compact credits in fine print */
+.about-sheet .welcome-intro {
+  margin-bottom: 12px;
+}
+
+.about-made-by {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+}
+
+.about-made-by a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.about-built-with {
+  margin: 0 0 14px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.about-fineprint,
+.about-disclaimer {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.about-fineprint {
+  margin-bottom: 2px;
+}
+
+.about-fineprint a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.about-disclaimer {
+  margin-bottom: 16px;
+}
+

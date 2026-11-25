@@ -1,6 +1,6 @@
 /* Horse Pocket Service Worker (PWA Shell + Episode Alert Notifications) */
-const CACHE_NAME = 'horse-pocket-v2';
-const BASE = self.registration.scope; // e.g. https://user.github.io/horse_pocket/
+const CACHE_NAME = 'horse-pocket-v3';
+const BASE = self.registration.scope; // the app's scope URL, including any subpath
 
 const SHELL_ASSETS = [
   BASE,

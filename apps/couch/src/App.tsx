@@ -1,12 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bookmark, CircleHelp, Download, Film, Info, Layers, Rss, Search, X } from 'lucide-react';
+import { Bookmark, Download, Film, Layers, Menu, Rss, Search, X } from 'lucide-react';
 import { PlatformPage } from './components/PlatformPage';
 import { ResultCard } from './components/ResultCard';
+import { SideMenu, type PendingCouchImport } from './components/SideMenu';
 import { TitleDetailModal } from './components/TitleDetailModal';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
 import { readWelcomeDismissed, WelcomeModal } from './components/WelcomeModal';
 import { WatchlistView } from './components/WatchlistView';
+import {
+  applyCouchBackupToStorage,
+  buildCouchBackup,
+  couchBackupFilename,
+  downloadJsonFile,
+  FOLLOWED_LEADS_STORAGE_KEY,
+  parseCouchBackup,
+  type DiscoverTypeFilter,
+} from './services/backup';
 import {
   dispatchLocalEpisodeNotification,
   getNotificationPermission,
@@ -40,8 +50,6 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-/** Name-only follows from the Upcoming feed (leads with no TVmaze id). */
-const FOLLOWED_LEADS_STORAGE_KEY = 'horse_pocket_followed_leads_v1';
 
 function normalizeTitle(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -71,7 +79,7 @@ export const App: React.FC = () => {
 
   const [queryText, setQueryText] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'movie' | 'tv'>('all');
+  const [typeFilter, setTypeFilter] = useState<DiscoverTypeFilter>('all');
   const [results, setResults] = useState<TmdbTitle[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -94,16 +102,18 @@ export const App: React.FC = () => {
   const [permissionState, setPermissionState] = useState<NotificationSupportState>(() => getNotificationPermission());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
   const [aboutOpen, setAboutOpen] = useState(false);
-  const helpButtonRef = useRef<HTMLButtonElement>(null);
-  const aboutButtonRef = useRef<HTMLButtonElement>(null);
+  const [backupGeneration, setBackupGeneration] = useState(0);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const followsRef = useRef(follows);
   followsRef.current = follows;
   const checkingRef = useRef(false);
   const [checkRequest, setCheckRequest] = useState(0);
 
   const showToast = (msg: string) => setToast(msg);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const closeWelcome = useCallback(() => setWelcomeOpen(false), []);
   const closeAbout = useCallback(() => setAboutOpen(false), []);
   const closeDetail = useCallback(() => setSelected(null), []);
@@ -337,6 +347,45 @@ export const App: React.FC = () => {
     [platforms]
   );
 
+  const handleExportBackup = () => {
+    const backup = buildCouchBackup({
+      follows,
+      followedLeadNames,
+      alerts,
+      lastCheckedAt,
+      welcomeDismissed: readWelcomeDismissed(),
+      discoverTypeFilter: typeFilter,
+    });
+    downloadJsonFile(backup, couchBackupFilename());
+    showToast('Backup exported.');
+  };
+
+  const handleValidateImport = (
+    rawText: string
+  ): { ok: true; pending: PendingCouchImport } | { ok: false; error: string } => {
+    const parsed = parseCouchBackup(rawText);
+    if (!parsed.ok) return parsed;
+    const { backup } = parsed;
+    const count = backup.watchlist.follows.length + backup.watchlist.followedLeadNames.length;
+    const summary = count === 1 ? '1 saved title' : `${count} saved titles`;
+    return {
+      ok: true,
+      pending: {
+        summary,
+        apply: () => {
+          applyCouchBackupToStorage(backup);
+          setFollows(backup.watchlist.follows);
+          setFollowedLeadNames(backup.watchlist.followedLeadNames);
+          setAlerts(backup.watchlist.alerts);
+          setLastCheckedAt(backup.watchlist.lastCheckedAt);
+          setTypeFilter(backup.settings.discoverTypeFilter);
+          setBackupGeneration((n) => n + 1);
+          showToast('Lists replaced from backup.');
+        },
+      },
+    };
+  };
+
   const handleInstallClick = async () => {
     if (installPrompt) {
       await installPrompt.prompt();
@@ -367,39 +416,60 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      <header className="app-header">
-        <div className="header-row">
-          <div className="brand-identity">
-            <span className="couch-mark">
-              <CouchMarkIcon />
-            </span>
-            <h1 className="brand-title">{SITE.name}</h1>
+      <div className="top-chrome">
+        <header className="app-header">
+          <div className="header-row">
+            <div className="header-left">
+              <button
+                ref={menuButtonRef}
+                type="button"
+                className="menu-btn"
+                aria-label="Open menu"
+                aria-expanded={menuOpen}
+                aria-controls="couch-side-menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu size={20} aria-hidden="true" />
+              </button>
+              <div className="brand-identity">
+                <span className="couch-mark">
+                  <CouchMarkIcon />
+                </span>
+                <h1 className="brand-title">{SITE.name}</h1>
+              </div>
+            </div>
+            <div className="header-actions">
+              <button type="button" className="pill-btn install-btn" onClick={handleInstallClick} title={`Install ${SITE.name}`}>
+                <Download size={13} />
+                Install
+              </button>
+            </div>
           </div>
-          <div className="header-actions">
-            <button type="button" className="pill-btn install-btn" onClick={handleInstallClick} title={`Install ${SITE.name}`}>
-              <Download size={13} />
-              Install
+        </header>
+
+        <nav className="primary-nav" aria-label="Primary navigation">
+          <div className="primary-nav-inner">
+            <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>
+              <Rss size={19} />
+              {matchedUpcomingLeads.length > 0 && <span className="nav-badge">{matchedUpcomingLeads.length}</span>}
+              <span>Upcoming</span>
+            </button>
+            <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
+              <Film size={19} />
+              <span>Discover</span>
+            </button>
+            <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
+              <Bookmark size={19} />
+              {(alerts.length > 0 || tvFollowCount > 0) && <span className="nav-badge">{alerts.length > 0 ? alerts.length : follows.length}</span>}
+              <span>Watchlist</span>
+            </button>
+            <button type="button" className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`} onClick={() => setActiveTab('platforms')}>
+              <Layers size={19} />
+              <span>Platforms</span>
             </button>
           </div>
-        </div>
-        <div className="header-subrow">
-          <a
-            href="https://mjolnir3286.github.io/horse_pocket/"
-            className="portal-back"
-            aria-label="Back to Horse Pocket"
-          >
-            ‹ Horse Pocket
-          </a>
-          <div className="header-sub-actions">
-            <button ref={helpButtonRef} type="button" className="sub-icon-btn" aria-label={`How to use ${SITE.name}`} title={`How to use ${SITE.name}`} onClick={() => setWelcomeOpen(true)}>
-              <CircleHelp size={15} />
-            </button>
-            <button ref={aboutButtonRef} type="button" className="sub-icon-btn" aria-label={`About ${SITE.name}`} title={`About ${SITE.name}`} onClick={() => setAboutOpen(true)}>
-              <Info size={15} />
-            </button>
-          </div>
-        </div>
-      </header>
+        </nav>
+      </div>
 
       <main className="app-main">
         {activeTab === 'discover' && (
@@ -480,6 +550,7 @@ export const App: React.FC = () => {
 
         {activeTab === 'upcoming' && (
           <UpcomingView
+            key={backupGeneration}
             collectorData={collectorData}
             platforms={platforms}
             platformsById={platformsById}
@@ -508,31 +579,20 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        <div className="bottom-nav-inner">
-          <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>
-            <Rss size={19} />
-            {matchedUpcomingLeads.length > 0 && <span className="nav-badge">{matchedUpcomingLeads.length}</span>}
-            <span>Upcoming</span>
-          </button>
-          <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
-            <Film size={19} />
-            <span>Discover</span>
-          </button>
-          <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
-            <Bookmark size={19} />
-            {(alerts.length > 0 || tvFollowCount > 0) && <span className="nav-badge">{alerts.length > 0 ? alerts.length : follows.length}</span>}
-            <span>Watchlist</span>
-          </button>
-          <button type="button" className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`} onClick={() => setActiveTab('platforms')}>
-            <Layers size={19} />
-            <span>Platforms</span>
-          </button>
-        </div>
-      </nav>
-
-      <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={helpButtonRef} />
-      <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={aboutButtonRef} />
+      <SideMenu
+        id="couch-side-menu"
+        open={menuOpen}
+        onClose={closeMenu}
+        restoreFocusRef={menuButtonRef}
+        onOpenHelp={() => setWelcomeOpen(true)}
+        onOpenAbout={() => setAboutOpen(true)}
+        onExport={handleExportBackup}
+        onValidateImport={handleValidateImport}
+        onInstall={handleInstallClick}
+        brandIcon={<CouchMarkIcon />}
+      />
+      <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={menuButtonRef} />
+      <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={menuButtonRef} />
       <TitleDetailModal item={selected} follow={selected ? followsByKey.get(followKey(selected.mediaType, selected.id)) : undefined} onToggleFollow={toggleFollowTitle} onClose={closeDetail} onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
     </div>
   );

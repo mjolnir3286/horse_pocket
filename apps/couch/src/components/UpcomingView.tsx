@@ -11,6 +11,20 @@ import {
 import type { CollectorOutput, UpcomingReleaseLead } from '../types/collector';
 import type { PlatformId, StreamingPlatform } from '../types/streaming';
 import { PlatformFilterMenu } from './PlatformFilterMenu';
+import {
+  isPlatformFilterList,
+  isSortKey,
+  isStatusFilter,
+  PLATFORM_STORAGE_KEY,
+  readStorage,
+  SORT_OPTIONS,
+  SORT_STORAGE_KEY,
+  STATUS_STORAGE_KEY,
+  writeStorage,
+  type PlatformFilterId,
+  type SortKey,
+  type StatusFilter,
+} from '../services/backup';
 
 interface UpcomingViewProps {
   collectorData: CollectorOutput | null;
@@ -19,63 +33,6 @@ interface UpcomingViewProps {
   isLeadFollowed: (lead: UpcomingReleaseLead) => boolean;
   onToggleFollowLead: (lead: UpcomingReleaseLead) => void;
 }
-
-type StatusFilter = 'all' | 'confirmed' | 'unconfirmed' | 'followed';
-type SortKey = 'date-soonest' | 'date-latest' | 'provider-az' | 'title-az' | 'confidence';
-type PlatformFilterId = PlatformId | 'unknown' | 'none';
-
-const STATUS_STORAGE_KEY = 'horse_pocket_upcoming_status_v1';
-const PLATFORM_STORAGE_KEY = 'horse_pocket_upcoming_platforms_v1';
-const SORT_STORAGE_KEY = 'horse_pocket_upcoming_sort_v1';
-
-const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
-  { value: 'date-soonest', label: 'Date: soonest first' },
-  { value: 'date-latest', label: 'Date: latest first' },
-  { value: 'provider-az', label: 'Platform A–Z' },
-  { value: 'title-az', label: 'Title A–Z' },
-  { value: 'confidence', label: 'Confidence' },
-];
-
-function readStorage<T>(key: string, fallback: T, validate: (value: unknown) => value is T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw == null) return fallback;
-    const parsed = JSON.parse(raw) as unknown;
-    return validate(parsed) ? parsed : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeStorage(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // ignore quota / private-mode failures
-  }
-}
-
-const isStatusFilter = (value: unknown): value is StatusFilter =>
-  value === 'all' || value === 'confirmed' || value === 'unconfirmed' || value === 'followed';
-
-const isSortKey = (value: unknown): value is SortKey =>
-  SORT_OPTIONS.some((option) => option.value === value);
-
-const isPlatformFilterList = (value: unknown): value is PlatformFilterId[] =>
-  Array.isArray(value) &&
-  value.every(
-    (id) =>
-      id === 'none' ||
-      id === 'unknown' ||
-      id === 'netflix' ||
-      id === 'disney-plus' ||
-      id === 'hulu' ||
-      id === 'prime-video' ||
-      id === 'max' ||
-      id === 'apple-tv-plus' ||
-      id === 'peacock' ||
-      id === 'paramount-plus'
-  );
 
 function leadSortDate(lead: UpcomingReleaseLead): string | null {
   return lead.parsedDateIso || null;

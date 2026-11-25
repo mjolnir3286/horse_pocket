@@ -36,3 +36,29 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+@keyframes wadDrawerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes wadDrawerSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.wad-drawer-backdrop {
+  animation: wadDrawerFadeIn 0.18s ease-out;
+}
+
+.wad-drawer-panel {
+  animation: wadDrawerSlideIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wad-drawer-backdrop,
+  .wad-drawer-panel {
+    animation: none !important;
+    transition: none !important;
+  }
+}

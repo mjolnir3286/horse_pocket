@@ -1,12 +1,15 @@
-import { useState, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import AboutModal from './components/AboutModal'
 import Header from './components/Header'
+import HelpModal from './components/HelpModal'
 import IncomeSection from './components/IncomeSection'
 import TaxesSection from './components/TaxesSection'
 import ExpensesSection from './components/ExpensesSection'
 import PlanningTab from './components/PlanningTab'
+import SideMenu, { type PendingWadImport } from './components/SideMenu'
 import type { Timeframe, MobileTab, DesktopView, TaxRow, ExpenseRow, IncomeRow } from './types'
 import { convertValue } from './utils'
-import { exportToCSV, importFromCSV, generateFilename } from './csvUtils'
+import { buildWadBackup, downloadWadBackup, parseWadImport } from './backupUtils'
 
 const DEFAULT_TAXES: TaxRow[] = [
   { id: 'federal', name: 'Federal Income', mode: 'dollar', value: 0 },
@@ -24,8 +27,13 @@ export default function App() {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
   const [mobileTab, setMobileTab] = useState<MobileTab>('income')
   const [desktopView, setDesktopView] = useState<DesktopView>('budget')
-  const [importError, setImportError] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
+  const closeHelp = useCallback(() => setHelpOpen(false), [])
+  const closeAbout = useCallback(() => setAboutOpen(false), [])
 
   const totalIncome = incomeRows.reduce((sum, row) => {
     if (row.timeframe === 'hourly') {
@@ -50,63 +58,48 @@ export default function App() {
   }
 
   function handleExport() {
-    const csv = exportToCSV({ timeframe, incomeRows, taxes, expenses })
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = generateFilename()
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadWadBackup(buildWadBackup({ timeframe, incomeRows, taxes, expenses }))
   }
 
-  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      const data = importFromCSV(ev.target?.result as string)
-      if (data) {
-        setTimeframe(data.timeframe)
-        setIncomeRows(data.incomeRows)
-        setTaxes(data.taxes)
-        setExpenses(data.expenses)
-        setImportError(false)
-      } else {
-        setImportError(true)
-      }
-      e.target.value = ''
+  function handleValidateImport(
+    rawText: string
+  ): { ok: true; pending: PendingWadImport } | { ok: false; error: string } {
+    const parsed = parseWadImport(rawText)
+    if (!parsed.ok) return parsed
+    const { data } = parsed
+    const rows = data.incomeRows.length + data.expenses.length
+    const summary = rows === 1 ? '1 income/expense entry' : `${rows} income & expense entries`
+    return {
+      ok: true,
+      pending: {
+        summary,
+        apply: () => {
+          setTimeframe(data.timeframe)
+          setIncomeRows(data.incomeRows)
+          setTaxes(data.taxes)
+          setExpenses(data.expenses)
+        },
+      },
     }
-    reader.readAsText(file)
   }
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950 flex flex-col">
-      <Header
-        income={totalIncome}
-        totalTaxes={totalTaxes}
-        totalExpenses={totalExpenses}
-        netIncome={netIncome}
-        timeframe={timeframe}
-        onExport={handleExport}
-        onImportClick={() => fileInputRef.current?.click()}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        className="hidden"
-        onChange={handleImportFile}
-      />
-      {importError && (
-        <div className="bg-danger/10 border-b border-danger/30 text-danger text-sm text-center py-2 px-4">
-          Could not import file. Make sure it\'s a valid budget export.
-          <button onClick={() => setImportError(false)} className="ml-3 underline cursor-pointer">Dismiss</button>
-        </div>
-      )}
+      <div className="sticky top-0 z-40 shadow-sm">
+        <Header
+          income={totalIncome}
+          totalTaxes={totalTaxes}
+          totalExpenses={totalExpenses}
+          netIncome={netIncome}
+          timeframe={timeframe}
+          menuOpen={menuOpen}
+          menuId="wad-side-menu"
+          menuButtonRef={menuButtonRef}
+          onOpenMenu={() => setMenuOpen(true)}
+        />
 
-      {/* Desktop tab bar */}
-      <nav className="hidden md:flex border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900 sticky top-16 z-40">
+        {/* Desktop tab bar */}
+        <nav className="hidden md:flex border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
         <div className="max-w-4xl mx-auto w-full px-4 flex">
           <button
             onClick={() => setDesktopView('budget')}
@@ -131,8 +124,8 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Mobile tab bar */}
-      <nav className="md:hidden flex border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900 sticky top-16 z-40">
+        {/* Mobile tab bar */}
+        <nav className="md:hidden flex border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
         {([
           { id: 'income' as MobileTab, label: 'Income', icon: `${import.meta.env.BASE_URL}income.png`, activeClass: 'text-money border-b-2 border-money' },
           { id: 'taxes' as MobileTab, label: 'Taxes', icon: `${import.meta.env.BASE_URL}tax.png`, activeClass: 'text-danger border-b-2 border-danger' },
@@ -149,7 +142,8 @@ export default function App() {
             <span className="text-xs">{tab.label}</span>
           </button>
         ))}
-      </nav>
+        </nav>
+      </div>
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-8">
 
@@ -318,6 +312,19 @@ export default function App() {
           <PlanningTab />
         </section>
       </main>
+
+      <SideMenu
+        id="wad-side-menu"
+        open={menuOpen}
+        onClose={closeMenu}
+        restoreFocusRef={menuButtonRef}
+        onOpenHelp={() => setHelpOpen(true)}
+        onOpenAbout={() => setAboutOpen(true)}
+        onExport={handleExport}
+        onValidateImport={handleValidateImport}
+      />
+      <HelpModal open={helpOpen} onClose={closeHelp} restoreFocusRef={menuButtonRef} />
+      <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={menuButtonRef} />
     </div>
   )
 }

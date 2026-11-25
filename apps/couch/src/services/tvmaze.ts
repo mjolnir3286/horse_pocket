@@ -114,3 +114,30 @@ export async function getShowStatus(tvmazeId: number, force = false): Promise<Tv
     return status;
   });
 }
+
+const episodeMemory = new Map<number, { at: number; episodes: TvmazeEpisode[] }>();
+const EPISODES_TTL_MS = 6 * 60 * 60 * 1000;
+
+/**
+ * Every episode of a show from TVmaze (free, no key). Kept in memory for 6 hours,
+ * and in sessionStorage for shows small enough not to crowd storage.
+ */
+export async function getShowEpisodes(tvmazeId: number): Promise<TvmazeEpisode[]> {
+  const mem = episodeMemory.get(tvmazeId);
+  if (mem && Date.now() - mem.at < EPISODES_TTL_MS) return mem.episodes;
+  const sessionKey = String(tvmazeId);
+  const cached = cacheGet<TvmazeEpisode[]>('session', 'couch_tvmaze_episodes_v1', sessionKey);
+  if (cached) {
+    episodeMemory.set(tvmazeId, { at: Date.now(), episodes: cached });
+    return cached;
+  }
+  return dedupe(`episodes:${tvmazeId}`, async () => {
+    const res = await fetch(`${TVMAZE}/shows/${tvmazeId}/episodes`);
+    if (!res.ok) throw new Error(`TVmaze HTTP ${res.status}`);
+    const raw = (await res.json()) as RawEpisode[];
+    const episodes = raw.map((e) => toEpisode(e)).filter((e): e is TvmazeEpisode => e !== null);
+    episodeMemory.set(tvmazeId, { at: Date.now(), episodes });
+    if (episodes.length <= 400) cacheSet('session', 'couch_tvmaze_episodes_v1', sessionKey, episodes, EPISODES_TTL_MS);
+    return episodes;
+  });
+}

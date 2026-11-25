@@ -4,6 +4,7 @@ import type { NewEpisodeAlert } from '../types/streaming';
 import type { NotificationSupportState } from '../services/notifications';
 import type { FollowedTitle } from '../services/follows';
 import { posterUrl } from '../services/tmdb';
+import { WatchedButton } from './WatchedButton';
 
 interface WatchlistViewProps {
   follows: FollowedTitle[];
@@ -16,6 +17,9 @@ interface WatchlistViewProps {
   onUnfollow: (key: string) => void;
   onOpen: (follow: FollowedTitle) => void;
   onClearAlerts: () => void;
+  watchedState: (follow: FollowedTitle) => { watched: boolean; partial: string | null };
+  onToggleWatched: (follow: FollowedTitle) => void;
+  watchNext: React.ReactNode;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -45,6 +49,9 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
   onUnfollow,
   onOpen,
   onClearAlerts,
+  watchedState,
+  onToggleWatched,
+  watchNext,
 }) => {
   const permissionLabel =
     permissionState === 'granted'
@@ -126,8 +133,9 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
         <div className="watch-list">
           {sorted.map((f) => {
             const poster = posterUrl(f.posterPath, 'w92');
+            const ws = watchedState(f);
             return (
-              <div key={f.key} className="watch-row">
+              <div key={f.key} className={`watch-row ${ws.watched ? 'is-watched' : ''}`}>
                 <button type="button" className="watch-row-main" onClick={() => onOpen(f)}>
                   <span className="watch-thumb">
                     {poster ? <img src={poster} alt="" loading="lazy" /> : <span>{f.title.slice(0, 2).toUpperCase()}</span>}
@@ -141,8 +149,12 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
                       {episodeLine(f)}
                       {f.lastStatus?.network ? ` • ${f.lastStatus.network}` : ''}
                     </span>
+                    {(ws.watched || ws.partial) && (
+                      <span className="watched-tag tiny">{ws.watched ? 'Watched' : ws.partial}</span>
+                    )}
                   </span>
                 </button>
+                <WatchedButton watched={ws.watched} partial={ws.partial} title={f.title} onToggle={() => onToggleWatched(f)} />
                 <button type="button" className="follow-icon-btn" aria-label={`Remove ${f.title} from Watchlist`} title="Remove" onClick={() => onUnfollow(f.key)}>
                   <X size={15} />
                 </button>
@@ -151,6 +163,8 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           })}
         </div>
       )}
+
+      {watchNext}
     </div>
   );
 };

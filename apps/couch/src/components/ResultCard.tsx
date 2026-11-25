@@ -2,21 +2,24 @@ import React from 'react';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { posterUrl, type TmdbTitle, type WatchOptions } from '../services/tmdb';
 import { WatchOptionsSummary } from './WatchOptions';
+import { WatchedButton } from './WatchedButton';
 
 interface ResultCardProps {
   item: TmdbTitle;
   options: WatchOptions | null | undefined;
   isFollowed: boolean;
+  isWatched: boolean;
   onToggleFollow: (item: TmdbTitle) => void;
+  onToggleWatched: (item: TmdbTitle) => void;
   onSelect: (item: TmdbTitle) => void;
 }
 
-export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowed, onToggleFollow, onSelect }) => {
+export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowed, isWatched, onToggleFollow, onToggleWatched, onSelect }) => {
   const poster = posterUrl(item.posterPath);
   const typeLabel = item.mediaType === 'tv' ? 'Show' : 'Movie';
   return (
     <div
-      className="title-card"
+      className={`title-card ${isWatched ? 'is-watched' : ''}`}
       role="button"
       tabIndex={0}
       onClick={() => onSelect(item)}
@@ -38,6 +41,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowe
       <div className="title-body">
         <div className="title-top">
           <h3 className="title-name">{item.title}</h3>
+          <div className="card-actions">
+          <WatchedButton watched={isWatched} title={item.title} onToggle={() => onToggleWatched(item)} />
           <button
             type="button"
             className={`follow-icon-btn ${isFollowed ? 'following' : ''}`}
@@ -50,9 +55,16 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowe
           >
             {isFollowed ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
           </button>
+          </div>
         </div>
         <div className="title-meta">
           <span>{typeLabel}</span>
+          {isWatched && (
+            <>
+              <span>•</span>
+              <span className="watched-tag">Watched</span>
+            </>
+          )}
           {item.year && (
             <>
               <span>•</span>

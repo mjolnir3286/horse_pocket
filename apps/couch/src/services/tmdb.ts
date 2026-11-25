@@ -53,6 +53,9 @@ const SEARCH_STORE = 'couch_tmdb_search_v1';
 const PROVIDER_STORE = 'couch_tmdb_providers_v1';
 const POPULAR_STORE = 'couch_tmdb_popular_v1';
 const EXIDS_STORE = 'couch_tmdb_external_ids_v1';
+const SEASONS_STORE = 'couch_tmdb_seasons_v1';
+const SEASON_PROVIDER_STORE = 'couch_tmdb_season_providers_v1';
+const RECS_STORE = 'couch_tmdb_recommendations_v1';
 
 async function relayGet<T>(path: string, params: Record<string, string> = {}, signal?: AbortSignal): Promise<T> {
   const qs = new URLSearchParams(params).toString();
@@ -143,6 +146,21 @@ function mapProviders(list?: RawProvider[]): ProviderOption[] {
   return (list ?? []).map((p) => ({ id: p.provider_id, name: p.provider_name, logoPath: p.logo_path }));
 }
 
+type RawRegionProviders = { link?: string; flatrate?: RawProvider[]; free?: RawProvider[]; ads?: RawProvider[]; rent?: RawProvider[]; buy?: RawProvider[] };
+
+function toWatchOptions(us: RawRegionProviders | undefined): WatchOptions {
+  return !us
+    ? EMPTY_WATCH_OPTIONS
+    : {
+        link: us.link ?? null,
+        stream: mapProviders(us.flatrate),
+        free: mapProviders(us.free),
+        ads: mapProviders(us.ads),
+        rent: mapProviders(us.rent),
+        buy: mapProviders(us.buy),
+      };
+}
+
 export async function getWatchOptions(type: TmdbMediaType, id: number, signal?: AbortSignal): Promise<WatchOptions> {
   const key = `${type}-${id}`;
   const cached = cacheGet<WatchOptions>('local', PROVIDER_STORE, key);
@@ -156,17 +174,7 @@ export async function getWatchOptions(type: TmdbMediaType, id: number, signal?: 
         { link?: string; flatrate?: RawProvider[]; free?: RawProvider[]; ads?: RawProvider[]; rent?: RawProvider[]; buy?: RawProvider[] }
       >;
     }>(`/${type}/${id}/watch/providers`, {}, signal);
-    const us = data.results?.[WATCH_REGION];
-    const options: WatchOptions = !us
-      ? EMPTY_WATCH_OPTIONS
-      : {
-          link: us.link ?? null,
-          stream: mapProviders(us.flatrate),
-          free: mapProviders(us.free),
-          ads: mapProviders(us.ads),
-          rent: mapProviders(us.rent),
-          buy: mapProviders(us.buy),
-        };
+    const options = toWatchOptions(data.results?.[WATCH_REGION]);
     cacheSet('local', PROVIDER_STORE, key, options, DETAILS_TTL_MS);
     return options;
   });
@@ -212,6 +220,94 @@ export async function getPopularOnProvider(
       .filter((t): t is TmdbTitle => t !== null)
       .slice(0, count);
     cacheSet('local', POPULAR_STORE, key, titles, DETAILS_TTL_MS);
+    return titles;
+  });
+}
+
+export interface TmdbSeason {
+  seasonNumber: number;
+  name: string;
+  episodeCount: number;
+  airDate: string | null;
+}
+
+/** A show's seasons from TMDB /tv/{id} (already allowlisted). Cached 24 hours. */
+export async function getTvSeasons(id: number): Promise<TmdbSeason[]> {
+  const key = String(id);
+  const cached = cacheGet<TmdbSeason[]>('local', SEASONS_STORE, key);
+  if (cached) return cached;
+  return dedupe(`seasons:${key}`, async () => {
+    const again = cacheGet<TmdbSeason[]>('local', SEASONS_STORE, key);
+    if (again) return again;
+    const data = await relayGet<{
+      seasons?: Array<{ season_number: number; name?: string; episode_count?: number; air_date?: string | null }>;
+    }>(`/tv/${id}`, { language: 'en-US' });
+    const seasons = (data.seasons ?? []).map((s) => ({
+      seasonNumber: s.season_number,
+      name: s.name || `Season ${s.season_number}`,
+      episodeCount: s.episode_count ?? 0,
+      airDate: s.air_date || null,
+    }));
+    cacheSet('local', SEASONS_STORE, key, seasons, DETAILS_TTL_MS);
+    return seasons;
+  });
+}
+
+export function hasAnyWatchOption(o: WatchOptions): boolean {
+  return o.stream.length + o.free.length + o.ads.length + o.rent.length + o.buy.length > 0;
+}
+
+/**
+ * US where-to-watch for one season (TMDB /tv/{id}/season/{n}/watch/providers). Cached 24 hours.
+ * Returns EMPTY_WATCH_OPTIONS when TMDB has nothing for the season, so callers can fall back
+ * to the show-level list.
+ */
+export async function getSeasonWatchOptions(id: number, season: number, signal?: AbortSignal): Promise<WatchOptions> {
+  const key = `${id}-${season}`;
+  const cached = cacheGet<WatchOptions>('local', SEASON_PROVIDER_STORE, key);
+  if (cached) return cached;
+  return dedupe(`season-providers:${key}`, async () => {
+    const again = cacheGet<WatchOptions>('local', SEASON_PROVIDER_STORE, key);
+    if (again) return again;
+    let options: WatchOptions;
+    try {
+      const data = await relayGet<{ results?: Record<string, RawRegionProviders> }>(
+        `/tv/${id}/season/${season}/watch/providers`,
+        {},
+        signal
+      );
+      options = toWatchOptions(data.results?.[WATCH_REGION]);
+    } catch (err) {
+      // Unknown season (or an older relay without this route): fall back without caching.
+      if (err instanceof RelayError && err.status === 404) return EMPTY_WATCH_OPTIONS;
+      throw err;
+    }
+    cacheSet('local', SEASON_PROVIDER_STORE, key, options, DETAILS_TTL_MS);
+    return options;
+  });
+}
+
+export function peekRecommendations(type: TmdbMediaType, id: number): TmdbTitle[] | undefined {
+  return cacheGet<TmdbTitle[]>('local', RECS_STORE, `${type}-${id}`);
+}
+
+/** TMDB recommendations for one title (/movie|tv/{id}/recommendations). Cached 24 hours. */
+export async function getRecommendations(type: TmdbMediaType, id: number): Promise<TmdbTitle[]> {
+  const key = `${type}-${id}`;
+  const cached = cacheGet<TmdbTitle[]>('local', RECS_STORE, key);
+  if (cached) return cached;
+  return dedupe(`recs:${key}`, async () => {
+    const again = cacheGet<TmdbTitle[]>('local', RECS_STORE, key);
+    if (again) return again;
+    const data = await relayGet<{ results?: RawResult[] }>(`/${type}/${id}/recommendations`, {
+      language: 'en-US',
+      page: '1',
+    });
+    const titles = (data.results ?? [])
+      .map((r) => toTitle(r, type))
+      .filter((t): t is TmdbTitle => t !== null)
+      .slice(0, 12);
+    cacheSet('local', RECS_STORE, key, titles, DETAILS_TTL_MS);
     return titles;
   });
 }

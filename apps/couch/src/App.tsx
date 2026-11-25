@@ -3,7 +3,24 @@ import { Bookmark, Download, Film, Layers, Menu, Rss, Search, X } from 'lucide-r
 import { PlatformPage } from './components/PlatformPage';
 import { ResultCard } from './components/ResultCard';
 import { SideMenu, type PendingCouchImport } from './components/SideMenu';
-import { TitleDetailModal } from './components/TitleDetailModal';
+import { TitleDetailModal, type DetailItem } from './components/TitleDetailModal';
+import { HideWatchedToggle } from './components/HideWatchedToggle';
+import { WatchNext } from './components/WatchNext';
+import {
+  findWatched,
+  isTitleWatched,
+  loadHideWatched,
+  loadWatched,
+  sanitizeWatched,
+  saveHideWatched,
+  saveWatched,
+  setEpisodesWatched,
+  setTitleWatched,
+  watchedSources,
+  type WatchedRef,
+  type WatchedStore,
+} from './services/watched';
+import type { TvmazeEpisode } from './services/tvmaze';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
 import { readWelcomeDismissed, WelcomeModal } from './components/WelcomeModal';
@@ -85,7 +102,9 @@ export const App: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [optionsByKey, setOptionsByKey] = useState<Record<string, WatchOptions | null>>({});
   const searchAbort = useRef<AbortController | null>(null);
-  const [selected, setSelected] = useState<TmdbTitle | null>(null);
+  const [selected, setSelected] = useState<DetailItem | null>(null);
+  const [watched, setWatched] = useState<WatchedStore>(loadWatched);
+  const [hideWatched, setHideWatched] = useState<boolean>(loadHideWatched);
 
   const [follows, setFollows] = useState<FollowedTitle[]>(loadFollows);
   const [followedLeadNames, setFollowedLeadNames] = useState<string[]>(() => {
@@ -126,6 +145,8 @@ export const App: React.FC = () => {
 
   useEffect(() => saveFollows(follows), [follows]);
   useEffect(() => saveAlerts(alerts), [alerts]);
+  useEffect(() => saveWatched(watched), [watched]);
+  useEffect(() => saveHideWatched(hideWatched), [hideWatched]);
   useEffect(() => {
     try {
       localStorage.setItem(FOLLOWED_LEADS_STORAGE_KEY, JSON.stringify(followedLeadNames));
@@ -236,8 +257,13 @@ export const App: React.FC = () => {
   };
 
   const visibleResults = useMemo(
-    () => (typeFilter === 'all' ? results : results.filter((r) => r.mediaType === typeFilter)),
-    [results, typeFilter]
+    () =>
+      results.filter(
+        (r) =>
+          (typeFilter === 'all' || r.mediaType === typeFilter) &&
+          !(hideWatched && isTitleWatched(findWatched(watched, { key: followKey(r.mediaType, r.id), mediaType: r.mediaType, tmdbId: r.id })))
+      ),
+    [results, typeFilter, hideWatched, watched]
   );
 
   const followsByKey = useMemo(() => new Map(follows.map((f) => [f.key, f])), [follows]);
@@ -280,7 +306,9 @@ export const App: React.FC = () => {
 
   const openFollow = (f: FollowedTitle) => {
     if (f.tmdbId != null) {
-      setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0 });
+      setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId });
+    } else if (f.tvmazeId != null) {
+      setSelected({ id: 0, mediaType: 'tv', title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId, tmdbless: true });
     } else if (f.lastStatus?.tvmazeUrl) {
       window.open(f.lastStatus.tvmazeUrl, '_blank', 'noopener');
     }
@@ -300,6 +328,24 @@ export const App: React.FC = () => {
     [followedNames, followedTvmazeIds]
   );
 
+  const addTvmazeFollow = (tvmazeId: number, title: string) => {
+    const entry: FollowedTitle = {
+      key: `tvmaze-${tvmazeId}`,
+      mediaType: 'tv',
+      tmdbId: null,
+      tvmazeId,
+      title,
+      year: null,
+      posterPath: null,
+      followedAt: new Date().toISOString(),
+      lastNotifiedEpisodeId: null,
+      lastNotifiedAirstamp: null,
+    };
+    setFollows((prev) => (prev.some((f) => f.tvmazeId === tvmazeId) ? prev : [entry, ...prev]));
+    showToast(`Added “${title}” to your Watchlist`);
+    setCheckRequest((n) => n + 1);
+  };
+
   const toggleFollowLead = (lead: UpcomingReleaseLead) => {
     const norm = normalizeTitle(lead.showTitle);
     if (isLeadFollowed(lead)) {
@@ -311,21 +357,7 @@ export const App: React.FC = () => {
       return;
     }
     if (lead.tvmaze?.showId != null) {
-      const entry: FollowedTitle = {
-        key: `tvmaze-${lead.tvmaze.showId}`,
-        mediaType: 'tv',
-        tmdbId: null,
-        tvmazeId: lead.tvmaze.showId,
-        title: lead.showTitle,
-        year: null,
-        posterPath: null,
-        followedAt: new Date().toISOString(),
-        lastNotifiedEpisodeId: null,
-        lastNotifiedAirstamp: null,
-      };
-      setFollows((prev) => [entry, ...prev]);
-      showToast(`Added “${lead.showTitle}” to your Watchlist`);
-      setCheckRequest((n) => n + 1);
+      addTvmazeFollow(lead.tvmaze.showId, lead.showTitle);
     } else {
       setFollowedLeadNames((prev) => [...prev, lead.showTitle]);
       showToast(`Added “${lead.showTitle}” to your Watchlist`);
@@ -336,6 +368,140 @@ export const App: React.FC = () => {
     () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'upcoming' && isLeadFollowed(l)),
     [collectorData, isLeadFollowed]
   );
+  // ---- Watched marks (issue #1) ----
+  const refForTitle = (item: DetailItem): WatchedRef =>
+    item.tmdbless
+      ? { key: `tvmaze-${item.tvmazeId}`, mediaType: 'tv', tmdbId: null, tvmazeId: item.tvmazeId ?? null, title: item.title, year: item.year, posterPath: item.posterPath }
+      : {
+          key: followKey(item.mediaType, item.id),
+          mediaType: item.mediaType,
+          tmdbId: item.id,
+          tvmazeId: item.tvmazeId ?? followsByKey.get(followKey(item.mediaType, item.id))?.tvmazeId ?? null,
+          title: item.title,
+          year: item.year,
+          posterPath: item.posterPath,
+        };
+  const refForLead = (lead: UpcomingReleaseLead): WatchedRef => ({
+    key: lead.tvmaze?.showId != null ? `tvmaze-${lead.tvmaze.showId}` : `lead-${normalizeTitle(lead.showTitle)}`,
+    mediaType: 'tv',
+    tmdbId: null,
+    tvmazeId: lead.tvmaze?.showId ?? null,
+    title: lead.showTitle,
+  });
+  const refForFollow = (f: FollowedTitle): WatchedRef => ({
+    key: f.key,
+    mediaType: f.mediaType,
+    tmdbId: f.tmdbId,
+    tvmazeId: f.tvmazeId,
+    title: f.title,
+    year: f.year,
+    posterPath: f.posterPath,
+  });
+
+  /** Shows found only through TVmaze get a TMDB id in the background so Watch Next can use them. */
+  const enrichTmdbId = async (ref: WatchedRef) => {
+    if (ref.mediaType !== 'tv' || ref.tmdbId != null) return;
+    try {
+      const found = await searchTitles(ref.title);
+      const match = found.find((t) => t.mediaType === 'tv' && normalizeTitle(t.title) === normalizeTitle(ref.title));
+      if (!match) return;
+      setWatched((prev) => {
+        const entry = findWatched(prev, ref);
+        if (!entry || entry.tmdbId != null) return prev;
+        return { ...prev, [entry.key]: { ...entry, tmdbId: match.id, year: entry.year ?? match.year, posterPath: entry.posterPath ?? match.posterPath } };
+      });
+    } catch {
+      // Watch Next just skips this title.
+    }
+  };
+
+  const toggleWatchedRef = (ref: WatchedRef, ensureFollowed: () => void) => {
+    const wasWatched = isTitleWatched(findWatched(watched, ref));
+    setWatched((prev) => setTitleWatched(prev, ref, !wasWatched));
+    if (wasWatched) {
+      showToast(`Unmarked “${ref.title}”`);
+      return;
+    }
+    if (ref.mediaType === 'tv') {
+      ensureFollowed();
+      showToast(`Marked “${ref.title}” watched (all aired episodes). It’s on your Watchlist for new episodes.`);
+    } else {
+      showToast(`Marked “${ref.title}” watched`);
+    }
+    void enrichTmdbId(ref);
+  };
+
+  const toggleTitleWatched = (item: DetailItem) =>
+    toggleWatchedRef(refForTitle(item), () => {
+      if (item.tmdbless) {
+        if (item.tvmazeId != null && !follows.some((f) => f.tvmazeId === item.tvmazeId)) addTvmazeFollow(item.tvmazeId, item.title);
+      } else if (!followsByKey.has(followKey(item.mediaType, item.id))) {
+        void toggleFollowTitle(item);
+      }
+    });
+
+  const toggleLeadWatched = (lead: UpcomingReleaseLead) =>
+    toggleWatchedRef(refForLead(lead), () => {
+      if (!isLeadFollowed(lead)) toggleFollowLead(lead);
+    });
+
+  const toggleFollowWatched = (f: FollowedTitle) => toggleWatchedRef(refForFollow(f), () => undefined);
+
+  const setDetailEpisodes = (item: DetailItem, episodes: TvmazeEpisode[], value: boolean) => {
+    setWatched((prev) => setEpisodesWatched(prev, refForTitle(item), episodes, value));
+  };
+
+  const onDetailTvmazeResolved = (item: DetailItem, tvmazeId: number | null) => {
+    if (tvmazeId == null) return;
+    setWatched((prev) => {
+      const entry = findWatched(prev, refForTitle(item));
+      if (!entry || entry.tvmazeId != null) return prev;
+      return { ...prev, [entry.key]: { ...entry, tvmazeId } };
+    });
+  };
+
+  const isLeadWatched = useCallback((lead: UpcomingReleaseLead) => isTitleWatched(findWatched(watched, refForLead(lead))), [watched]);
+
+  const openLead = (lead: UpcomingReleaseLead) => {
+    const showId = lead.tvmaze?.showId;
+    if (showId == null) return;
+    const known = follows.find((f) => f.tvmazeId === showId && f.tmdbId != null);
+    const w = findWatched(watched, { tvmazeId: showId });
+    const tmdbId = known?.tmdbId ?? w?.tmdbId ?? null;
+    setSelected(
+      tmdbId != null
+        ? { id: tmdbId, mediaType: 'tv', title: lead.showTitle, year: known?.year ?? w?.year ?? null, overview: '', posterPath: known?.posterPath ?? w?.posterPath ?? null, popularity: 0, tvmazeId: showId }
+        : { id: 0, mediaType: 'tv', title: lead.showTitle, year: null, overview: '', posterPath: null, popularity: 0, tvmazeId: showId, tmdbless: true, platformName: lead.platformName }
+    );
+  };
+
+  const watchedFollowState = (f: FollowedTitle) => {
+    const entry = findWatched(watched, refForFollow(f));
+    const isW = isTitleWatched(entry);
+    const n = entry ? Object.values(entry.episodes).filter(Boolean).length : 0;
+    const partial = isW
+      ? null
+      : entry?.allAiredAt
+        ? 'Partly watched'
+        : n > 0
+          ? `${n} episode${n === 1 ? '' : 's'} watched`
+          : null;
+    return { watched: isW, partial };
+  };
+
+  const sources = useMemo(() => watchedSources(watched), [watched]);
+  const isTmdbWatched = useCallback(
+    (t: TmdbTitle) => Boolean(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id, title: t.title })),
+    [watched]
+  );
+  const isTmdbFollowed = useCallback((t: TmdbTitle) => followsByKey.has(followKey(t.mediaType, t.id)), [followsByKey]);
+
+  const detailFollow = selected
+    ? selected.tmdbless
+      ? follows.find((f) => f.tvmazeId === selected.tvmazeId)
+      : followsByKey.get(followKey(selected.mediaType, selected.id))
+    : undefined;
+
   const availableNowLeads = useMemo(
     () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'available-now'),
     [collectorData]
@@ -355,6 +521,7 @@ export const App: React.FC = () => {
       lastCheckedAt,
       welcomeDismissed: readWelcomeDismissed(),
       discoverTypeFilter: typeFilter,
+      hideWatched,
     });
     downloadJsonFile(backup, couchBackupFilename());
     showToast('Backup exported.');
@@ -379,6 +546,8 @@ export const App: React.FC = () => {
           setAlerts(backup.watchlist.alerts);
           setLastCheckedAt(backup.watchlist.lastCheckedAt);
           setTypeFilter(backup.settings.discoverTypeFilter);
+          setWatched(sanitizeWatched(backup.watched));
+          setHideWatched(backup.settings.hideWatched);
           setBackupGeneration((n) => n + 1);
           showToast('Lists replaced from backup.');
         },
@@ -497,6 +666,7 @@ export const App: React.FC = () => {
               </button>
             </form>
 
+            <div className="discover-controls">
             <div className="chip-scroll" aria-label="Filter by type">
               {(
                 [
@@ -509,6 +679,8 @@ export const App: React.FC = () => {
                   {label}
                 </button>
               ))}
+            </div>
+            <HideWatchedToggle hidden={hideWatched} onChange={setHideWatched} />
             </div>
 
             {!submittedQuery && !searching ? (
@@ -535,7 +707,9 @@ export const App: React.FC = () => {
                           item={item}
                           options={optionsByKey[key]}
                           isFollowed={followsByKey.has(key)}
+                          isWatched={isTitleWatched(findWatched(watched, { key, mediaType: item.mediaType, tmdbId: item.id }))}
                           onToggleFollow={toggleFollowTitle}
+                          onToggleWatched={toggleTitleWatched}
                           onSelect={setSelected}
                         />
                       );
@@ -556,6 +730,11 @@ export const App: React.FC = () => {
             platformsById={platformsById}
             isLeadFollowed={isLeadFollowed}
             onToggleFollowLead={toggleFollowLead}
+            isLeadWatched={isLeadWatched}
+            onToggleLeadWatched={toggleLeadWatched}
+            onOpenLead={openLead}
+            hideWatched={hideWatched}
+            onHideWatchedChange={setHideWatched}
           />
         )}
 
@@ -571,6 +750,17 @@ export const App: React.FC = () => {
             onUnfollow={unfollow}
             onOpen={openFollow}
             onClearAlerts={() => setAlerts([])}
+            watchedState={watchedFollowState}
+            onToggleWatched={toggleFollowWatched}
+            watchNext={
+              <WatchNext
+                sources={sources}
+                isWatched={isTmdbWatched}
+                isFollowed={isTmdbFollowed}
+                onToggleFollow={(t) => void toggleFollowTitle(t)}
+                onSelect={setSelected}
+              />
+            }
           />
         )}
 
@@ -593,7 +783,20 @@ export const App: React.FC = () => {
       />
       <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={menuButtonRef} />
       <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={menuButtonRef} />
-      <TitleDetailModal item={selected} follow={selected ? followsByKey.get(followKey(selected.mediaType, selected.id)) : undefined} onToggleFollow={toggleFollowTitle} onClose={closeDetail} onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
+      <TitleDetailModal
+        item={selected}
+        follow={detailFollow}
+        watchedEntry={selected ? findWatched(watched, refForTitle(selected)) : undefined}
+        onToggleFollow={(item) => {
+          if (!item.tmdbless) return void toggleFollowTitle(item);
+          const existing = follows.find((f) => f.tvmazeId === item.tvmazeId);
+          if (existing) unfollow(existing.key);
+          else if (item.tvmazeId != null) addTvmazeFollow(item.tvmazeId, item.title);
+        }}
+        onToggleWatched={toggleTitleWatched}
+        onSetEpisodes={setDetailEpisodes}
+        onTvmazeResolved={onDetailTvmazeResolved}
+        onClose={closeDetail} onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
     </div>
   );
 };

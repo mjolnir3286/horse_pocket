@@ -11,6 +11,9 @@ import {
 import type { CollectorOutput, UpcomingReleaseLead } from '../types/collector';
 import type { PlatformId, StreamingPlatform } from '../types/streaming';
 import { PlatformFilterMenu } from './PlatformFilterMenu';
+import { HideWatchedToggle } from './HideWatchedToggle';
+import { WatchedButton } from './WatchedButton';
+import { useMediaQuery } from '../lib/useMediaQuery';
 import {
   isPlatformFilterList,
   isSortKey,
@@ -32,6 +35,11 @@ interface UpcomingViewProps {
   platformsById: Record<PlatformId, StreamingPlatform>;
   isLeadFollowed: (lead: UpcomingReleaseLead) => boolean;
   onToggleFollowLead: (lead: UpcomingReleaseLead) => void;
+  isLeadWatched: (lead: UpcomingReleaseLead) => boolean;
+  onToggleLeadWatched: (lead: UpcomingReleaseLead) => void;
+  onOpenLead: (lead: UpcomingReleaseLead) => void;
+  hideWatched: boolean;
+  onHideWatchedChange: (hide: boolean) => void;
 }
 
 function leadSortDate(lead: UpcomingReleaseLead): string | null {
@@ -44,7 +52,13 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   platformsById,
   isLeadFollowed,
   onToggleFollowLead,
+  isLeadWatched,
+  onToggleLeadWatched,
+  onOpenLead,
+  hideWatched,
+  onHideWatchedChange,
 }) => {
+  const compactSort = useMediaQuery('(max-width: 520px)');
   const [filter, setFilter] = useState<StatusFilter>(() =>
     readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter)
   );
@@ -79,12 +93,13 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
 
   const statusFilteredLeads = useMemo(() => {
     return leads.filter((lead) => {
+      if (hideWatched && isLeadWatched(lead)) return false;
       if (filter === 'confirmed') return lead.confirmationStatus === 'confirmed';
       if (filter === 'unconfirmed') return lead.confirmationStatus === 'unconfirmed';
       if (filter === 'followed') return isLeadFollowed(lead);
       return true;
     });
-  }, [leads, filter, isLeadFollowed]);
+  }, [leads, filter, isLeadFollowed, hideWatched, isLeadWatched]);
 
   const platformCounts = useMemo(() => {
     const counts = new Map<PlatformFilterId, number>();
@@ -237,7 +252,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
         />
 
         <label className="sort-control">
-          <span className="section-meta">Sort</span>
+          <span className="section-meta sort-label">Sort</span>
           <select
             className="sort-select"
             value={sortKey}
@@ -246,11 +261,13 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {compactSort ? option.shortLabel : option.label}
               </option>
             ))}
           </select>
         </label>
+
+        <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} />
       </div>
 
       <div className="section-meta" style={{ marginBottom: 10 }}>
@@ -267,6 +284,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
           {filteredLeads.map((lead) => {
             const isConfirmed = lead.confirmationStatus === 'confirmed';
             const followed = isLeadFollowed(lead);
+            const watched = isLeadWatched(lead);
             const platform = lead.platformId !== 'unknown' ? platformsById[lead.platformId] : null;
             const dateLabel = lead.parsedDateIso
               ? `${lead.parsedDateIso} (${lead.datePrecision})`
@@ -275,7 +293,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                 : 'Date unclear';
 
             return (
-              <article key={lead.id} className="panel" style={{ marginBottom: 0 }}>
+              <article key={lead.id} className={`panel lead-card ${watched ? 'is-watched' : ''}`} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
@@ -319,10 +337,23 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                           ★ Watchlisted
                         </span>
                       )}
+
+                      {watched && <span className="watched-tag tiny">✓ Watched</span>}
                     </div>
 
-                    <h3 style={{ margin: '7px 0 4px', fontSize: '0.98rem' }}>{lead.showTitle}</h3>
+                    <h3 style={{ margin: '7px 0 4px', fontSize: '0.98rem' }}>
+                      {lead.tvmaze?.showId != null ? (
+                        <button type="button" className="lead-title-btn" onClick={() => onOpenLead(lead)}>
+                          {lead.showTitle}
+                        </button>
+                      ) : (
+                        lead.showTitle
+                      )}
+                    </h3>
                   </div>
+
+                  <div className="card-actions">
+                  <WatchedButton watched={watched} title={lead.showTitle} onToggle={() => onToggleLeadWatched(lead)} />
 
                   <button
                     type="button"
@@ -333,6 +364,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                   >
                     {followed ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
                   </button>
+                  </div>
                 </div>
 
                 <div

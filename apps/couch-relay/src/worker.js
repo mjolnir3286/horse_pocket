@@ -9,7 +9,7 @@
  * - CORS only for https://mjolnir3286.github.io and http://localhost:* / 127.0.0.1:*
  *   Requests without an allowed Origin are refused with 403.
  * - Adds `Authorization: Bearer <TMDB_TOKEN>` (Worker secret) server-side.
- * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, and discover).
+ * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, season providers, recommendations, and discover).
  * - Returns only TMDB's JSON body.
  */
 
@@ -23,6 +23,8 @@ const ROUTES = [
   [/^\/(movie|tv)\/\d{1,9}$/, 86400],
   [/^\/(movie|tv)\/\d{1,9}\/watch\/providers$/, 86400],
   [/^\/tv\/\d{1,9}\/external_ids$/, 86400],
+  [/^\/tv\/\d{1,9}\/season\/\d{1,3}\/watch\/providers$/, 86400],
+  [/^\/(movie|tv)\/\d{1,9}\/recommendations$/, 86400],
   [/^\/discover\/(movie|tv)$/, 86400],
   [/^\/configuration$/, 86400],
 ];

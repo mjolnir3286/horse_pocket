@@ -4,6 +4,7 @@ import {
   type FollowedTitle,
 } from './follows';
 import type { NewEpisodeAlert, PlatformId } from '../types/streaming';
+import { HIDE_WATCHED_KEY, sanitizeWatched } from './watched';
 
 export type StatusFilter = 'all' | 'confirmed' | 'unconfirmed' | 'followed';
 export type SortKey = 'date-soonest' | 'date-latest' | 'provider-az' | 'title-az' | 'confidence';
@@ -24,12 +25,12 @@ const LAST_CHECK_KEY = 'couch_last_episode_check_v1';
  */
 export const WATCHED_STORAGE_KEY = 'couch_watched_v1';
 
-export const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
-  { value: 'date-soonest', label: 'Date: soonest first' },
-  { value: 'date-latest', label: 'Date: latest first' },
-  { value: 'provider-az', label: 'Platform A–Z' },
-  { value: 'title-az', label: 'Title A–Z' },
-  { value: 'confidence', label: 'Confidence' },
+export const SORT_OPTIONS: Array<{ value: SortKey; label: string; shortLabel: string }> = [
+  { value: 'date-soonest', label: 'Date: soonest first', shortLabel: 'Soonest' },
+  { value: 'date-latest', label: 'Date: latest first', shortLabel: 'Latest' },
+  { value: 'provider-az', label: 'Platform A–Z', shortLabel: 'Platform' },
+  { value: 'title-az', label: 'Title A–Z', shortLabel: 'Title' },
+  { value: 'confidence', label: 'Confidence', shortLabel: 'Confidence' },
 ];
 
 export const isStatusFilter = (value: unknown): value is StatusFilter =>
@@ -117,6 +118,7 @@ export interface CouchBackup {
   settings: {
     welcomeDismissed: boolean;
     discoverTypeFilter: DiscoverTypeFilter;
+    hideWatched: boolean;
   };
   filters: {
     upcomingStatus: StatusFilter;
@@ -132,6 +134,7 @@ export interface CouchExportInput {
   lastCheckedAt: string | null;
   welcomeDismissed: boolean;
   discoverTypeFilter: DiscoverTypeFilter;
+  hideWatched: boolean;
 }
 
 export function buildCouchBackup(input: CouchExportInput): CouchBackup {
@@ -149,6 +152,7 @@ export function buildCouchBackup(input: CouchExportInput): CouchBackup {
     settings: {
       welcomeDismissed: input.welcomeDismissed,
       discoverTypeFilter: input.discoverTypeFilter,
+      hideWatched: input.hideWatched,
     },
     filters: {
       upcomingStatus: readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter),
@@ -249,10 +253,11 @@ export function parseCouchBackup(
         alerts: wl.alerts.slice(0, 30),
         lastCheckedAt: wl.lastCheckedAt ?? null,
       },
-      watched,
+      watched: sanitizeWatched(watched),
       settings: {
         welcomeDismissed: settings.welcomeDismissed,
         discoverTypeFilter,
+        hideWatched: settings.hideWatched === true,
       },
       filters: {
         upcomingStatus: filters.upcomingStatus,
@@ -273,6 +278,8 @@ export function applyCouchBackupToStorage(backup: CouchBackup) {
     } else {
       localStorage.removeItem(LAST_CHECK_KEY);
     }
+    if (backup.settings.hideWatched) localStorage.setItem(HIDE_WATCHED_KEY, 'true');
+    else localStorage.removeItem(HIDE_WATCHED_KEY);
     if (backup.settings.welcomeDismissed) {
       localStorage.setItem(WELCOME_DISMISSED_KEY, 'true');
     } else {

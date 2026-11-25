@@ -1598,3 +1598,421 @@ input {
     transition: none !important;
   }
 }
+
+/* ---- Issue #1: watched marks, eye toggle, episodes, Watch Next ---- */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.watched-btn.is-watched {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success-text);
+}
+
+.watched-btn.is-partial {
+  border-style: dashed;
+  color: var(--success-text);
+}
+
+.watched-btn:focus-visible,
+.follow-icon-btn:focus-visible,
+.control-btn:focus-visible,
+.lead-title-btn:focus-visible,
+.episodes-head:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.watched-tag {
+  color: var(--success-text);
+  font-weight: 650;
+}
+
+.title-card.is-watched .poster-tile,
+.watch-row.is-watched .watch-thumb {
+  opacity: 0.72;
+}
+
+/* Filter row controls share one height so Platforms, Sort and the eye toggle line up. */
+.platform-filter-button,
+.sort-select,
+.control-btn {
+  height: 34px;
+  box-sizing: border-box;
+}
+
+.sort-select {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 0.8rem;
+}
+
+.control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 550;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.control-btn:hover {
+  background: var(--bg-card-hover);
+}
+
+.control-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--chip-active-text);
+}
+
+.upcoming-controls .sort-control {
+  margin-left: auto;
+}
+
+@media (max-width: 520px) {
+  .upcoming-controls {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .upcoming-controls .platform-filter {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .upcoming-controls .platform-filter-button {
+    padding: 0 8px 0 10px;
+    gap: 4px;
+  }
+  .upcoming-controls .sort-label {
+    display: none;
+  }
+  .upcoming-controls .sort-select {
+    padding-left: 8px;
+    padding-right: 22px;
+    background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%;
+  }
+  .upcoming-controls .control-btn {
+    padding: 0 7px;
+    gap: 4px;
+  }
+}
+
+.discover-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.discover-controls .chip-scroll {
+  min-width: 0;
+}
+
+.discover-controls .control-btn {
+  margin-top: 6px;
+}
+
+.lead-title-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+  border-radius: 4px;
+}
+
+.lead-title-btn:hover {
+  text-decoration-color: currentColor;
+}
+
+.lead-card.is-watched h3 {
+  color: var(--text-muted);
+}
+
+/* Detail sheet: watched action and episodes */
+.watched-action.is-watched {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success-text);
+}
+
+.episodes-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.episodes-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.episodes-head .muted {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.episodes-chevron {
+  transition: transform 0.15s;
+}
+
+.episodes-chevron.open {
+  transform: rotate(180deg);
+}
+
+.season-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 0 6px;
+  scrollbar-width: none;
+}
+
+.season-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.season-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.season-providers {
+  margin: 6px 0 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--subtle-fill);
+}
+
+.season-providers .watch-summary {
+  margin-top: 4px;
+}
+
+.season-providers-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.season-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.season-mark-btn {
+  font-weight: 650;
+  color: var(--accent-bright);
+  white-space: nowrap;
+}
+
+.season-mark-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.episode-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.episode-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--border);
+  min-height: 40px;
+}
+
+.episode-row:last-child {
+  border-bottom: none;
+}
+
+.episode-row input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--success);
+  flex-shrink: 0;
+}
+
+.episode-row label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 0;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.episode-row.unaired label {
+  cursor: default;
+  color: var(--text-soft);
+}
+
+.episode-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+  color: var(--text-muted);
+}
+
+.episode-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.episode-row.watched .episode-name {
+  color: var(--text-muted);
+}
+
+.episode-date {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+/* Watch Next */
+.watch-next {
+  margin-top: 18px;
+}
+
+.watch-next .section-heading h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.watch-next-empty {
+  font-size: 0.84rem;
+}
+
+.watch-next-load {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.watch-next-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 132px;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+@media (min-width: 768px) {
+  .watch-next-row {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    overflow: visible;
+  }
+}
+
+.watch-next-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.watch-next-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--subtle-fill);
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.watch-next-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.watch-next-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.watch-next-title {
+  font-size: 0.82rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watch-next-because {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watch-next-follow {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .episodes-chevron,
+  .control-btn {
+    transition: none !important;
+  }
+}

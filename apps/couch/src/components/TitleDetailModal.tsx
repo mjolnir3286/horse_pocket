@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { BellRing, Bookmark, Check, ExternalLink, X } from 'lucide-react';
+import { BellRing, Bookmark, Check, CheckCircle2, Circle, ExternalLink, X } from 'lucide-react';
 import { getWatchOptions, posterUrl, type TmdbTitle, type WatchOptions } from '../services/tmdb';
 import type { FollowedTitle } from '../services/follows';
+import type { TvmazeEpisode } from '../services/tvmaze';
+import { isTitleWatched, type WatchedEntry } from '../services/watched';
+import { EpisodesSection } from './EpisodesSection';
 import { WatchOptionsFull } from './WatchOptions';
 
+/** A TMDB title, or a TVmaze-only show from the Upcoming feed (tmdbless). */
+export type DetailItem = TmdbTitle & { tvmazeId?: number | null; tmdbless?: boolean; platformName?: string };
+
 interface TitleDetailModalProps {
-  item: TmdbTitle | null;
+  item: DetailItem | null;
   follow: FollowedTitle | undefined;
-  onToggleFollow: (item: TmdbTitle) => void;
+  watchedEntry: WatchedEntry | undefined;
+  onToggleFollow: (item: DetailItem) => void;
+  onToggleWatched: (item: DetailItem) => void;
+  onSetEpisodes: (item: DetailItem, episodes: TvmazeEpisode[], watched: boolean) => void;
+  onTvmazeResolved?: (item: DetailItem, tvmazeId: number | null) => void;
   onClose: () => void;
   onOptionsLoaded?: (item: TmdbTitle, options: WatchOptions) => void;
 }
@@ -18,11 +28,25 @@ function formatDate(iso: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow, onToggleFollow, onClose, onOptionsLoaded }) => {
+export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
+  item,
+  follow,
+  watchedEntry,
+  onToggleFollow,
+  onToggleWatched,
+  onSetEpisodes,
+  onTvmazeResolved,
+  onClose,
+  onOptionsLoaded,
+}) => {
   const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
 
   useEffect(() => {
     if (!item) return;
+    if (item.tmdbless) {
+      setOptions(null);
+      return;
+    }
     const ctrl = new AbortController();
     setOptions(undefined);
     getWatchOptions(item.mediaType, item.id, ctrl.signal)
@@ -49,6 +73,8 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow
   const poster = posterUrl(item.posterPath, 'w342');
   const isFollowed = Boolean(follow);
   const status = follow?.lastStatus;
+  const watched = isTitleWatched(watchedEntry);
+  const tvmazeId = item.tvmazeId ?? follow?.tvmazeId ?? watchedEntry?.tvmazeId ?? null;
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="presentation">
@@ -101,13 +127,32 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow
         )}
 
         <div className="detail-section-label">Where to watch (US)</div>
-        <WatchOptionsFull options={options} />
+        {item.tmdbless ? (
+          <p className="muted small">
+            {item.platformName ? `Announced for ${item.platformName}. ` : ''}Full where-to-watch needs a TMDB match; search it in Discover.
+          </p>
+        ) : (
+          <WatchOptionsFull options={options} />
+        )}
         {options?.link && (
           <a className="fineprint-link" href={options.link} target="_blank" rel="noopener noreferrer">
             More options on TMDB <ExternalLink size={11} />
           </a>
         )}
         <p className="fineprint">Where-to-watch data by JustWatch, via TMDB. Availability can change.</p>
+
+        {item.mediaType === 'tv' && (
+          <EpisodesSection
+            key={`${item.mediaType}-${item.id}-${tvmazeId ?? 'x'}`}
+            title={item.title}
+            tmdbId={item.tmdbless ? null : item.id}
+            tvmazeId={tvmazeId}
+            entry={watchedEntry}
+            showOptions={options}
+            onTvmazeResolved={(id) => onTvmazeResolved?.(item, id)}
+            onSetEpisodes={(eps, w) => onSetEpisodes(item, eps, w)}
+          />
+        )}
 
         <div className="detail-actions">
           <button type="button" className="primary-btn" onClick={() => onToggleFollow(item)}>
@@ -125,8 +170,14 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow
               </>
             )}
           </button>
-          <button type="button" className="secondary-btn" onClick={onClose}>
-            Done
+          <button
+            type="button"
+            className={`secondary-btn watched-action ${watched ? 'is-watched' : ''}`}
+            aria-pressed={watched}
+            onClick={() => onToggleWatched(item)}
+            title={item.mediaType === 'tv' && !watched ? 'Marks every aired episode watched and adds the show to your Watchlist' : undefined}
+          >
+            {watched ? <CheckCircle2 size={16} /> : <Circle size={16} />} {watched ? 'Watched' : item.mediaType === 'tv' ? 'Mark show watched' : 'Mark watched'}
           </button>
         </div>
       </div>

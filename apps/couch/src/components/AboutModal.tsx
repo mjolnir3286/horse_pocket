@@ -120,6 +120,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onClose, restoreFo
           </a>
         </p>
         <p className="about-built-with">{SITE.builtWith}</p>
+        <p className="about-fineprint about-dev-notice">{SITE.devNotice}</p>
 
         <p className="about-fineprint">
           Episode and schedule data:{' '}

@@ -9,6 +9,9 @@ interface AboutModalProps {
 const FOCUSABLE_SELECTOR =
     'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
+const DEV_NOTICE =
+    'These apps are in active development, so expect occasional bugs and changes.'
+
 export default function AboutModal({ open, onClose, restoreFocusRef }: AboutModalProps) {
     const titleId = useId()
     const descId = useId()
@@ -128,8 +131,11 @@ export default function AboutModal({ open, onClose, restoreFocusRef }: AboutModa
                             Kale G.
                         </a>
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3.5">
+                    <p className="text-xs text-gray-500 dark:text-neutral-400 mb-1">
                         Built with Grok Bot
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-neutral-400 mb-3.5">
+                        {DEV_NOTICE}
                     </p>
                     <p className="text-[11px] text-gray-500 dark:text-neutral-400">
                         Everything stays on your device — nothing is sent to a server.

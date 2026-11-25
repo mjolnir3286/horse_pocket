@@ -7,6 +7,7 @@
 }
 
 :root {
+  color-scheme: light;
   --wad-outline: #14532d;
   --wad-fill: #00e64d;
 }
@@ -21,6 +22,7 @@ body {
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --wad-outline: #b8f5c8;
     --wad-fill: #12b35a;
   }
@@ -32,9 +34,24 @@ body {
 }
 
 #root {
-  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+}
+
+.wad-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+  touch-action: pan-y pinch-zoom;
+}
+
+.wad-main {
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .wad-main {
+    padding-bottom: 1.5rem;
+  }
 }
 
 @keyframes wadDrawerFadeIn {
@@ -55,9 +72,18 @@ body {
   animation: wadDrawerSlideIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.wad-help-chevron {
+  transition: transform 0.15s ease;
+}
+
+.wad-help-chevron.is-open {
+  transform: rotate(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wad-drawer-backdrop,
-  .wad-drawer-panel {
+  .wad-drawer-panel,
+  .wad-help-chevron {
     animation: none !important;
     transition: none !important;
   }

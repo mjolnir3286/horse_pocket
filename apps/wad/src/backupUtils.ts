@@ -1,81 +1,36 @@
 import { importFromCSV, type BudgetData } from './csvUtils'
 import {
-    INCOME_CATEGORIES,
-    type ExpenseRow,
-    type IncomeCategory,
-    type IncomeRow,
-    type TaxRow,
-    type Timeframe,
-} from './types'
+    clampDisplayTimeframe,
+    isPlainObject,
+    isTimeframe,
+    isValidExpenseRow,
+    isValidIncomeRow,
+    isValidTaxRow,
+    sanitizePlanState,
+} from './storage'
+import type { PlanState } from './types'
 
 export interface WadBackup extends BudgetData {
     app: 'wad'
     version: 1
     exportedAt: string
+    plan?: PlanState
 }
 
-const VALID_TIMEFRAMES: Timeframe[] = ['hourly', 'weekly', 'biweekly', 'monthly', 'yearly']
-const VALID_CATEGORIES = new Set<string>(INCOME_CATEGORIES)
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null && !Array.isArray(value)
+export interface ImportedWadData extends BudgetData {
+    plan?: PlanState
 }
 
-function isTimeframe(value: unknown): value is Timeframe {
-    return typeof value === 'string' && VALID_TIMEFRAMES.includes(value as Timeframe)
-}
-
-function isFiniteNonNeg(value: unknown): value is number {
-    return typeof value === 'number' && Number.isFinite(value) && value >= 0
-}
-
-function isValidIncomeRow(item: unknown): item is IncomeRow {
-    if (!isPlainObject(item)) return false
-    return (
-        typeof item.id === 'string' &&
-        item.id.length > 0 &&
-        typeof item.name === 'string' &&
-        typeof item.category === 'string' &&
-        VALID_CATEGORIES.has(item.category as IncomeCategory) &&
-        isFiniteNonNeg(item.amount) &&
-        isTimeframe(item.timeframe) &&
-        typeof item.hoursPerWeek === 'number' &&
-        Number.isFinite(item.hoursPerWeek) &&
-        item.hoursPerWeek >= 0
-    )
-}
-
-function isValidTaxRow(item: unknown): item is TaxRow {
-    if (!isPlainObject(item)) return false
-    return (
-        typeof item.id === 'string' &&
-        item.id.length > 0 &&
-        typeof item.name === 'string' &&
-        (item.mode === 'dollar' || item.mode === 'percent') &&
-        isFiniteNonNeg(item.value)
-    )
-}
-
-function isValidExpenseRow(item: unknown): item is ExpenseRow {
-    if (!isPlainObject(item)) return false
-    return (
-        typeof item.id === 'string' &&
-        item.id.length > 0 &&
-        typeof item.name === 'string' &&
-        typeof item.type === 'string' &&
-        isFiniteNonNeg(item.amount)
-    )
-}
-
-export function buildWadBackup(data: BudgetData): WadBackup {
+export function buildWadBackup(data: BudgetData, plan?: PlanState): WadBackup {
     return {
         app: 'wad',
         version: 1,
         exportedAt: new Date().toISOString(),
-        timeframe: data.timeframe,
+        timeframe: clampDisplayTimeframe(data.timeframe),
         incomeRows: data.incomeRows,
         taxes: data.taxes,
         expenses: data.expenses,
+        ...(plan ? { plan } : {}),
     }
 }
 
@@ -98,7 +53,7 @@ export function downloadWadBackup(backup: WadBackup) {
 
 export function parseWadImport(
     rawText: string
-): { ok: true; data: BudgetData } | { ok: false; error: string } {
+): { ok: true; data: ImportedWadData } | { ok: false; error: string } {
     const friendly = 'Could not import file. Make sure it is a valid Wad backup (.json or .csv).'
     const trimmed = rawText.trim()
     if (!trimmed) {
@@ -126,13 +81,17 @@ export function parseWadImport(
         ) {
             return { ok: false, error: friendly }
         }
+        if (parsed.plan !== undefined && !isPlainObject(parsed.plan)) {
+            return { ok: false, error: friendly }
+        }
         return {
             ok: true,
             data: {
-                timeframe: parsed.timeframe,
+                timeframe: clampDisplayTimeframe(parsed.timeframe),
                 incomeRows: parsed.incomeRows,
                 taxes: parsed.taxes,
                 expenses: parsed.expenses,
+                ...(parsed.plan !== undefined ? { plan: sanitizePlanState(parsed.plan) } : {}),
             },
         }
     }
@@ -154,5 +113,11 @@ export function parseWadImport(
     if (!csvData) {
         return { ok: false, error: friendly }
     }
-    return { ok: true, data: csvData }
+    return {
+        ok: true,
+        data: {
+            ...csvData,
+            timeframe: clampDisplayTimeframe(csvData.timeframe),
+        },
+    }
 }

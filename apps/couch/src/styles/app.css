@@ -1832,6 +1832,37 @@ input {
   }
 }
 
+.lead-date {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  color: var(--text);
+}
+
+.lead-unconfirmed {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.lead-episode {
+  font-size: 0.76rem;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+@media (max-width: 520px) {
+  .upcoming-controls .control-btn-label {
+    display: none;
+  }
+  .upcoming-controls .control-btn {
+    width: 34px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+}
+
 .discover-controls {
   display: flex;
   align-items: center;

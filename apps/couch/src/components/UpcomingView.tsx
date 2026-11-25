@@ -1,32 +1,25 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  Bookmark,
-  BookmarkCheck,
-  Calendar,
-  CheckCircle2,
-  ExternalLink,
-  Rss,
-} from 'lucide-react';
+import { Bookmark, BookmarkCheck, Calendar, ExternalLink, Rss } from 'lucide-react';
 import type { CollectorOutput, UpcomingReleaseLead } from '../types/collector';
 import type { PlatformId, StreamingPlatform } from '../types/streaming';
 import { PlatformFilterMenu } from './PlatformFilterMenu';
 import { HideWatchedToggle } from './HideWatchedToggle';
+import { WatchlistOnlyToggle } from './WatchlistOnlyToggle';
 import { WatchedButton } from './WatchedButton';
 import { useMediaQuery } from '../lib/useMediaQuery';
+import { episodeLine, leadDateDisplay, leadSortDate } from '../lib/leadDate';
 import {
   isPlatformFilterList,
   isSortKey,
-  isStatusFilter,
   PLATFORM_STORAGE_KEY,
   readStorage,
+  readWatchlistOnly,
   SORT_OPTIONS,
   SORT_STORAGE_KEY,
-  STATUS_STORAGE_KEY,
   writeStorage,
+  writeWatchlistOnly,
   type PlatformFilterId,
   type SortKey,
-  type StatusFilter,
 } from '../services/backup';
 
 interface UpcomingViewProps {
@@ -42,10 +35,6 @@ interface UpcomingViewProps {
   onHideWatchedChange: (hide: boolean) => void;
 }
 
-function leadSortDate(lead: UpcomingReleaseLead): string | null {
-  return lead.parsedDateIso || null;
-}
-
 export const UpcomingView: React.FC<UpcomingViewProps> = ({
   collectorData,
   platforms,
@@ -59,9 +48,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   onHideWatchedChange,
 }) => {
   const compactSort = useMediaQuery('(max-width: 520px)');
-  const [filter, setFilter] = useState<StatusFilter>(() =>
-    readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter)
-  );
+  const [watchlistOnly, setWatchlistOnly] = useState<boolean>(() => readWatchlistOnly());
   const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformFilterId[]>(() =>
     readStorage(PLATFORM_STORAGE_KEY, [] as PlatformFilterId[], isPlatformFilterList)
   );
@@ -70,8 +57,8 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   );
 
   useEffect(() => {
-    writeStorage(STATUS_STORAGE_KEY, filter);
-  }, [filter]);
+    writeWatchlistOnly(watchlistOnly);
+  }, [watchlistOnly]);
 
   useEffect(() => {
     writeStorage(PLATFORM_STORAGE_KEY, selectedPlatforms);
@@ -89,12 +76,10 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   const statusFilteredLeads = useMemo(() => {
     return leads.filter((lead) => {
       if (hideWatched && isLeadWatched(lead)) return false;
-      if (filter === 'confirmed') return lead.confirmationStatus === 'confirmed';
-      if (filter === 'unconfirmed') return lead.confirmationStatus === 'unconfirmed';
-      if (filter === 'followed') return isLeadFollowed(lead);
+      if (watchlistOnly && !isLeadFollowed(lead)) return false;
       return true;
     });
-  }, [leads, filter, isLeadFollowed, hideWatched, isLeadWatched]);
+  }, [leads, watchlistOnly, isLeadFollowed, hideWatched, isLeadWatched]);
 
   const platformCounts = useMemo(() => {
     const counts = new Map<PlatformFilterId, number>();
@@ -208,27 +193,6 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
         </div>
       </div>
 
-      <div className="chip-row" role="group" aria-label="Filter by confirmation status">
-        {(
-          [
-            ['all', 'All'],
-            ['confirmed', 'Confirmed'],
-            ['unconfirmed', 'Unconfirmed'],
-            ['followed', 'Watchlisted'],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            className={`filter-chip ${filter === key ? 'active' : ''}`}
-            aria-pressed={filter === key}
-            onClick={() => setFilter(key)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
       <div className="upcoming-controls">
         <PlatformFilterMenu
           options={platformChipOptions}
@@ -257,6 +221,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
         </label>
 
         <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} />
+        <WatchlistOnlyToggle on={watchlistOnly} onChange={setWatchlistOnly} />
       </div>
 
       <div className="section-meta" style={{ marginBottom: 10 }}>
@@ -266,55 +231,22 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
 
       {filteredLeads.length === 0 ? (
         <div className="panel" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 24 }}>
-          No upcoming releases match the current filters. Try Platforms: All or another status.
+          No upcoming releases match the current filters. Try Platforms: All, or turn off Watchlist only.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredLeads.map((lead) => {
-            const isConfirmed = lead.confirmationStatus === 'confirmed';
             const followed = isLeadFollowed(lead);
             const watched = isLeadWatched(lead);
             const platform = lead.platformId !== 'unknown' ? platformsById[lead.platformId] : null;
-            const dateLabel = lead.parsedDateIso
-              ? `${lead.parsedDateIso} (${lead.datePrecision})`
-              : lead.extractedDateText
-                ? `${lead.extractedDateText} (${lead.datePrecision})`
-                : 'Date unclear';
+            const date = leadDateDisplay(lead);
+            const episode = episodeLine(lead);
 
             return (
               <article key={lead.id} className={`panel lead-card ${watched ? 'is-watched' : ''}`} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          fontSize: '0.68rem',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: 999,
-                          background: isConfirmed ? 'var(--success-soft)' : 'var(--warning-soft)',
-                          color: isConfirmed ? 'var(--success-text)' : 'var(--warning-text)',
-                        }}
-                      >
-                        {isConfirmed ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
-                        {isConfirmed ? 'CONFIRMED' : 'UNCONFIRMED'}
-                      </span>
-
-                      <span
-                        style={{
-                          fontSize: '0.68rem',
-                          color: 'var(--text-muted)',
-                          padding: '2px 7px',
-                          borderRadius: 999,
-                          background: 'var(--subtle-fill)',
-                        }}
-                      >
-                        Confidence {Math.round(lead.confidenceScore * 100)}%
-                      </span>
-
                       {followed && (
                         <span
                           style={{
@@ -374,23 +306,14 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                     {lead.platformName}
                   </span>
 
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text)' }}>
-                    <Calendar size={13} color="var(--accent-bright)" /> {dateLabel}
+                  <span className="lead-date">
+                    <Calendar size={13} color="var(--accent-bright)" aria-hidden="true" />
+                    {date.dateText && <span>{date.dateText}</span>}
+                    {date.unconfirmed && <span className="lead-unconfirmed">Unconfirmed</span>}
                   </span>
                 </div>
 
-                {lead.tvmaze?.nextEpisodeAirDate && (
-                  <div
-                    style={{
-                      fontSize: '0.76rem',
-                      color: 'var(--success-text)',
-                      marginBottom: 6,
-                    }}
-                  >
-                    TVmaze verified: S{lead.tvmaze.nextEpisodeSeason}E{lead.tvmaze.nextEpisodeNumber} “
-                    {lead.tvmaze.nextEpisodeName}” on {lead.tvmaze.nextEpisodeAirDate}
-                  </div>
-                )}
+                {episode && <div className="lead-episode">{episode}</div>}
 
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lead.rawHeadline}</div>
 

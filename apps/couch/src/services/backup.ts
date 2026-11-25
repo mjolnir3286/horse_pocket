@@ -12,6 +12,7 @@ export type PlatformFilterId = PlatformId | 'unknown' | 'none';
 export type DiscoverTypeFilter = 'all' | 'movie' | 'tv';
 
 export const STATUS_STORAGE_KEY = 'horse_pocket_upcoming_status_v1';
+export const WATCHLIST_ONLY_STORAGE_KEY = 'couch_watchlist_only_v1';
 export const PLATFORM_STORAGE_KEY = 'horse_pocket_upcoming_platforms_v1';
 export const SORT_STORAGE_KEY = 'horse_pocket_upcoming_sort_v1';
 export const WELCOME_DISMISSED_KEY = 'horse_pocket_welcome_dismissed_v1';
@@ -81,6 +82,22 @@ export function writeStorage(key: string, value: unknown) {
   }
 }
 
+/** Read the Watchlist-only toggle, migrating a saved All/Confirmed/Unconfirmed/Watchlisted chip. */
+export function readWatchlistOnly(): boolean {
+  const stored = readStorage(WATCHLIST_ONLY_STORAGE_KEY, null as boolean | null, (value): value is boolean => value === true || value === false);
+  if (stored !== null) return stored;
+  const legacy = readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter);
+  const migrated = legacy === 'followed';
+  writeWatchlistOnly(migrated);
+  return migrated;
+}
+
+export function writeWatchlistOnly(value: boolean) {
+  writeStorage(WATCHLIST_ONLY_STORAGE_KEY, value);
+  // Keep the old key in a compatible shape so backups and older exports still make sense.
+  writeStorage(STATUS_STORAGE_KEY, value ? 'followed' : 'all');
+}
+
 export function readWatchedForBackup(): Record<string, unknown> {
   try {
     const raw = localStorage.getItem(WATCHED_STORAGE_KEY);
@@ -121,6 +138,7 @@ export interface CouchBackup {
     hideWatched: boolean;
   };
   filters: {
+    watchlistOnly: boolean;
     upcomingStatus: StatusFilter;
     upcomingPlatforms: PlatformFilterId[];
     upcomingSort: SortKey;
@@ -155,7 +173,8 @@ export function buildCouchBackup(input: CouchExportInput): CouchBackup {
       hideWatched: input.hideWatched,
     },
     filters: {
-      upcomingStatus: readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter),
+      watchlistOnly: readWatchlistOnly(),
+      upcomingStatus: readWatchlistOnly() ? 'followed' : 'all',
       upcomingPlatforms: readStorage(PLATFORM_STORAGE_KEY, [] as PlatformFilterId[], isPlatformFilterList),
       upcomingSort: readStorage(SORT_STORAGE_KEY, 'date-soonest' as SortKey, isSortKey),
     },
@@ -228,13 +247,20 @@ export function parseCouchBackup(
     ? settings.discoverTypeFilter
     : 'all';
 
+  const watchlistOnly =
+    typeof filters.watchlistOnly === 'boolean'
+      ? filters.watchlistOnly
+      : isStatusFilter(filters.upcomingStatus)
+        ? filters.upcomingStatus === 'followed'
+        : null;
   if (
-    !isStatusFilter(filters.upcomingStatus) ||
+    watchlistOnly === null ||
     !isPlatformFilterList(filters.upcomingPlatforms) ||
     !isSortKey(filters.upcomingSort)
   ) {
     return { ok: false, error: friendly };
   }
+  const upcomingStatus: StatusFilter = watchlistOnly ? 'followed' : 'all';
 
   const watched = parsed.watched === undefined ? {} : parsed.watched;
   if (!isPlainObject(watched)) {
@@ -260,7 +286,8 @@ export function parseCouchBackup(
         hideWatched: settings.hideWatched === true,
       },
       filters: {
-        upcomingStatus: filters.upcomingStatus,
+        watchlistOnly,
+        upcomingStatus,
         upcomingPlatforms: filters.upcomingPlatforms,
         upcomingSort: filters.upcomingSort,
       },
@@ -288,7 +315,7 @@ export function applyCouchBackupToStorage(backup: CouchBackup) {
   } catch {
     // ignore
   }
-  writeStorage(STATUS_STORAGE_KEY, backup.filters.upcomingStatus);
+  writeWatchlistOnly(backup.filters.watchlistOnly);
   writeStorage(PLATFORM_STORAGE_KEY, backup.filters.upcomingPlatforms);
   writeStorage(SORT_STORAGE_KEY, backup.filters.upcomingSort);
   writeWatchedFromBackup(backup.watched);

@@ -18,7 +18,7 @@ export const HideWatchedToggle: React.FC<HideWatchedToggleProps> = ({ hidden, on
       onClick={() => onChange(!hidden)}
     >
       {hidden ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
-      <span>Watched</span>
+      <span className="control-btn-label">Watched</span>
     </button>
   );
 };

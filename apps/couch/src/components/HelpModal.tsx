@@ -3,7 +3,6 @@ import {
   Bookmark,
   BellRing,
   Check,
-  CheckCircle2,
   ChevronDown,
   Download,
   Eye,
@@ -66,9 +65,9 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
     text: 'The eye next to Platforms and Sort hides titles you’re caught up on, in both Upcoming and Discover.',
   },
   {
-    icon: <CheckCircle2 size={16} aria-hidden="true" />,
+    icon: <Bookmark size={16} aria-hidden="true" />,
     label: 'Filters',
-    text: 'Confirmed means Couch matched an episode date on TVmaze. Watchlisted shows only your saved titles.',
+    text: 'Upcoming marks rough or missing dates as Unconfirmed. The bookmark next to the eye shows only titles on your Watchlist.',
   },
   {
     icon: <Sparkles size={16} aria-hidden="true" />,

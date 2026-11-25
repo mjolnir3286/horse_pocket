@@ -1,5 +1,5 @@
 /* Couch Service Worker: static assets, upcoming JSON, and relay/TVmaze/image caching. */
-const SHELL_CACHE = 'couch-shell-v8';
+const SHELL_CACHE = 'couch-shell-v9';
 const RELAY_CACHE = 'couch-relay-v1';
 const DATA_CACHE = 'couch-data-v1';
 const IMAGE_CACHE = 'couch-images-v1';

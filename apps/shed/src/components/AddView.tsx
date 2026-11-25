@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, ImageUp, Loader2, PencilLine, Search, Trash2, TriangleAlert, X } from 'lucide-react';
+import { Camera, ImageUp, Lightbulb, Loader2, PencilLine, Search, Trash2, TriangleAlert, X } from 'lucide-react';
 import {
   emptyNutrients,
   formatAmount,
@@ -14,6 +14,22 @@ import { parseNutritionLabel } from '../lib/parseLabel';
 import { MEALS, type FoodItem, type Meal } from '../lib/storage';
 import { formatDay } from '../lib/dates';
 import { Segmented } from './Segmented';
+import { CameraScanner, type CameraProblem } from './CameraScanner';
+import { isPoorRead, type ScanIssue } from '../lib/frameAnalysis';
+
+/** Short words for the "taken before the checks passed" note. */
+const ISSUE_WORDS: Record<Exclude<ScanIssue, 'ok'>, string> = {
+  dark: 'it was too dark',
+  bright: 'it was too bright',
+  glare: 'there was glare',
+  moving: 'the camera was moving',
+  'no-label': 'the label wasn’t in the frame',
+  blurry: 'the picture was blurry',
+};
+
+/** Live camera needs the camera API (HTTPS only) and, when we can tell, a camera. */
+const liveCameraApiAvailable = () =>
+  typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && window.isSecureContext;
 
 interface Draft {
   name: string;
@@ -92,6 +108,31 @@ export const AddView: React.FC<AddViewProps> = ({ date, meal, onMealChange, food
   const pickerRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const takePhotoRef = useRef<HTMLButtonElement>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  /** Set when the live camera was refused or missing, so Take photo goes straight to the camera app this session. */
+  const [liveCameraOff, setLiveCameraOff] = useState(() => !liveCameraApiAvailable());
+  const [captureIssue, setCaptureIssue] = useState<ScanIssue | null>(null);
+  const [tipDismissed, setTipDismissed] = useState(false);
+
+  // No camera at all (most desktops): skip the live view and use the file picker.
+  useEffect(() => {
+    if (!liveCameraApiAvailable() || !navigator.mediaDevices.enumerateDevices) return;
+    let active = true;
+    const check = () =>
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          if (active && !devices.some((d) => d.kind === 'videoinput')) setLiveCameraOff(true);
+        })
+        .catch(() => undefined);
+    check();
+    navigator.mediaDevices.addEventListener?.('devicechange', check);
+    return () => {
+      active = false;
+      navigator.mediaDevices.removeEventListener?.('devicechange', check);
+    };
+  }, []);
 
   useEffect(() => () => {
     if (photoUrl) URL.revokeObjectURL(photoUrl);
@@ -126,14 +167,40 @@ export const AddView: React.FC<AddViewProps> = ({ date, meal, onMealChange, food
     setMode('servings');
     setFormError(null);
     setScan({ kind: 'idle' });
+    setCaptureIssue(null);
     if (photoUrl) URL.revokeObjectURL(photoUrl);
     setPhotoUrl(null);
   };
 
-  const onPhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onPhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+    void readPhoto(file, null);
+  };
+
+  const openCamera = () => {
+    if (liveCameraOff) cameraRef.current?.click();
+    else setCameraOpen(true);
+  };
+
+  const onCameraCapture = (photo: Blob, issue: ScanIssue | null) => {
+    setCameraOpen(false);
+    void readPhoto(photo, issue);
+  };
+
+  const onCameraUnavailable = (problem: CameraProblem) => {
+    if (problem === 'denied' || problem === 'none') setLiveCameraOff(true);
+  };
+
+  const fallbackTo = (input: React.RefObject<HTMLInputElement | null>) => {
+    setCameraOpen(false);
+    input.current?.click();
+  };
+
+  const readPhoto = async (file: Blob, issue: ScanIssue | null) => {
+    setCaptureIssue(issue);
+    setTipDismissed(false);
     if (photoUrl) URL.revokeObjectURL(photoUrl);
     setPhotoUrl(URL.createObjectURL(file));
     setScan({ kind: 'working', status: 'Loading reader', progress: 0 });
@@ -239,9 +306,10 @@ export const AddView: React.FC<AddViewProps> = ({ date, meal, onMealChange, food
         <p className="muted small">Read on your device. Nothing is uploaded.</p>
         <div className="scan-actions">
           <button
+            ref={takePhotoRef}
             type="button"
             className="primary-btn"
-            onClick={() => cameraRef.current?.click()}
+            onClick={openCamera}
             disabled={scan.kind === 'working'}
           >
             <Camera size={17} aria-hidden="true" />
@@ -293,6 +361,11 @@ export const AddView: React.FC<AddViewProps> = ({ date, meal, onMealChange, food
               )}
               {scan.kind === 'done' && (
                 <>
+                  {captureIssue && captureIssue !== 'ok' && (
+                    <p className="scan-line scan-note">
+                      <TriangleAlert size={15} aria-hidden="true" /> Taken while {ISSUE_WORDS[captureIssue]}, so it may not read well.
+                    </p>
+                  )}
                   <p className="scan-line">
                     {scan.found >= 4 ? 'Read the label.' : scan.found > 0 ? 'Read part of the label.' : 'Couldn’t find label values.'}{' '}
                     {scan.uncertain > 0 ? 'Check the highlighted fields.' : scan.found > 0 ? 'Check the numbers before adding.' : 'Try another photo or type them in.'}
@@ -311,7 +384,39 @@ export const AddView: React.FC<AddViewProps> = ({ date, meal, onMealChange, food
             </div>
           </div>
         )}
+
+        {scan.kind === 'done' && !tipDismissed && isPoorRead(scan.found, scan.uncertain) && (
+          <div className="retry-tip" role="note" aria-labelledby="retry-tip-title">
+            <p id="retry-tip-title" className="retry-tip-title">
+              <Lightbulb size={16} aria-hidden="true" /> Didn’t read well? Try again
+            </p>
+            <ul>
+              <li>Lay the package flat and fill the frame with the top of the label.</li>
+              <li>Use bright, even light. Tilt the package if you see a shiny spot.</li>
+              <li>Hold steady until the frame turns green.</li>
+            </ul>
+            <div className="retry-tip-actions">
+              <button type="button" className="primary-btn" onClick={openCamera}>
+                <Camera size={16} aria-hidden="true" /> Try again
+              </button>
+              <button type="button" className="ghost-btn" onClick={() => setTipDismissed(true)}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
+      {cameraOpen && (
+        <CameraScanner
+          onClose={() => setCameraOpen(false)}
+          onCapture={onCameraCapture}
+          onUnavailable={onCameraUnavailable}
+          onUseCameraApp={() => fallbackTo(cameraRef)}
+          onChoosePhoto={() => fallbackTo(pickerRef)}
+          restoreFocusRef={takePhotoRef}
+        />
+      )}
 
       <section ref={formRef} className="card form-card" aria-labelledby="food-title">
         <form onSubmit={submit} noValidate>

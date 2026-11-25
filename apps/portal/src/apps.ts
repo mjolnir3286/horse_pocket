@@ -15,6 +15,13 @@ export const PORTAL_META = {
   makerName: 'Kale G.',
   makerUrl: 'https://github.com/mjolnir3286/horse_pocket',
   builtWith: 'Built with Grok Bot',
+  devNotice:
+    'These apps are in active development, so expect occasional bugs and changes.',
+  reportIssueUrl:
+    'https://github.com/mjolnir3286/horse_pocket/issues/new?title=Feedback%3A%20',
+  reportIssueLabel: 'Report an issue',
+  reportIssueNote:
+    "Needs a GitHub account. Posts are public, so don't include personal details.",
 } as const;
 
 export const PORTAL_APPS: readonly PortalApp[] = [

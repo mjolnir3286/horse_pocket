@@ -8,6 +8,8 @@ export const SITE = {
   makerName: 'Kale G.',
   makerUrl: 'https://github.com/mjolnir3286/horse_pocket',
   builtWith: 'Built with Grok Bot',
+  devNotice:
+    'These apps are in active development, so expect occasional bugs and changes.',
   credits: [
     { text: 'Label reading: Tesseract.js (Apache 2.0)', url: 'https://github.com/naptha/tesseract.js' },
     { text: 'Icons: Lucide (ISC)', url: 'https://lucide.dev' },

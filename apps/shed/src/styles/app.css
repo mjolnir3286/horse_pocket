@@ -1544,6 +1544,308 @@ select.input {
   color: var(--text-muted);
 }
 
+/* ---------- Live camera (scan) ---------- */
+.scan-note {
+  color: var(--warning-text);
+  margin-bottom: 4px;
+}
+
+.retry-tip {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 0.86rem;
+}
+
+.retry-tip-title {
+  margin: 0 0 6px;
+  font-weight: 650;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.retry-tip ul {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  color: var(--text-muted);
+}
+
+.retry-tip li + li {
+  margin-top: 3px;
+}
+
+.retry-tip-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* The camera is always dark, like a phone's camera app, in light and dark mode. */
+.camera-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #000;
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+.camera-dialog:focus {
+  outline: none;
+}
+
+.camera-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.camera-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: calc(10px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+}
+
+.camera-top,
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.camera-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.camera-round-btn,
+.camera-round-spacer {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+}
+
+.camera-round-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 23, 42, 0.55);
+  color: #f8fafc;
+  cursor: pointer;
+}
+
+.camera-round-btn:hover {
+  background: rgba(30, 41, 59, 0.75);
+}
+
+.camera-round-btn.is-on {
+  background: #fde68a;
+  color: #111827;
+  border-color: #fde68a;
+}
+
+.camera-round-btn:focus-visible,
+.camera-shutter:focus-visible {
+  outline: 3px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+.camera-frame-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 12px 0;
+}
+
+/* Label-shaped frame; the huge shadow dims everything outside it. */
+.camera-frame {
+  position: relative;
+  width: min(80vw, calc((100dvh - 290px) * var(--frame-aspect, 0.68)), 440px);
+  aspect-ratio: var(--frame-aspect, 0.68);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 6px;
+  box-shadow: 0 0 0 100vmax rgba(2, 6, 15, 0.62);
+  transition: border-color 0.2s ease;
+}
+
+.camera-frame.is-ready {
+  border-color: var(--success);
+}
+
+.camera-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 0 solid #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.camera-frame.is-ready .camera-corner {
+  border-color: var(--success);
+}
+
+.camera-corner.tl { top: -6px; left: -6px; border-top-width: 5px; border-left-width: 5px; border-top-left-radius: 8px; }
+.camera-corner.tr { top: -6px; right: -6px; border-top-width: 5px; border-right-width: 5px; border-top-right-radius: 8px; }
+.camera-corner.bl { bottom: -6px; left: -6px; border-bottom-width: 5px; border-left-width: 5px; border-bottom-left-radius: 8px; }
+.camera-corner.br { bottom: -6px; right: -6px; border-bottom-width: 5px; border-right-width: 5px; border-bottom-right-radius: 8px; }
+
+.camera-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.camera-bottom .camera-controls {
+  width: min(100%, 360px);
+}
+
+.camera-hint {
+  margin: 0;
+  min-height: 40px;
+  max-width: min(100%, 420px);
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.camera-hint[hidden] {
+  display: none;
+}
+
+.camera-hint.is-warn svg {
+  color: #fcd34d;
+  flex-shrink: 0;
+}
+
+.camera-hint.is-ready {
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+.camera-hint.is-ready svg {
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.camera-shutter {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.85);
+  background: transparent;
+  padding: 5px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.camera-shutter-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transition: background-color 0.2s ease;
+}
+
+.camera-shutter.is-ready {
+  border-color: var(--success);
+}
+
+.camera-shutter.is-ready .camera-shutter-inner {
+  background: #ffffff;
+}
+
+.camera-shutter:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .camera-shutter.is-ready {
+    animation: shutterReady 0.35s ease-out;
+  }
+}
+
+@keyframes shutterReady {
+  from {
+    transform: scale(0.92);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.camera-note {
+  margin: -4px 0 0;
+  min-height: 1.2em;
+  font-size: 0.78rem;
+  color: rgba(248, 250, 252, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+.camera-problem {
+  max-width: 380px;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: #161c2a;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.camera-problem svg {
+  color: #fcd34d;
+}
+
+.camera-problem p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.camera-problem-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.camera-problem .secondary-btn {
+  background: #121722;
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

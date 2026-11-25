@@ -211,6 +211,13 @@ a {
   color: var(--text);
 }
 
+.app-tile-blurb {
+  margin-top: -6px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
 .portal-footer {
   border-top: 1px solid var(--border);
   padding: 18px 0 28px;

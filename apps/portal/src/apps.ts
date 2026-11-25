@@ -4,6 +4,7 @@ export interface PortalApp {
   path: string;
   category: string;
   description: string;
+  blurb: string;
   cta: string;
   icon: 'couch' | 'wad' | 'shed';
 }
@@ -29,6 +30,7 @@ export const PORTAL_APPS: readonly PortalApp[] = [
     id: 'couch',
     name: 'Couch',
     path: 'couch/',
+    blurb: 'What to watch',
     category: 'Streaming & Alerts',
     description:
       'Find where shows and movies stream, compare example platform plans, and track upcoming episodes.',
@@ -39,6 +41,7 @@ export const PORTAL_APPS: readonly PortalApp[] = [
     id: 'wad',
     name: 'Wad',
     path: 'wad/',
+    blurb: 'Budgeting made simple',
     category: 'Budget & Planning',
     description:
       'Estimate take-home pay, taxes, expenses, and savings goals with local CSV export and import.',
@@ -49,6 +52,7 @@ export const PORTAL_APPS: readonly PortalApp[] = [
     id: 'shed',
     name: 'Shed',
     path: 'shed/',
+    blurb: 'Scan and track calories',
     category: 'Nutrition & Calories',
     description:
       'Scan nutrition labels on your device, work out what you ate, and log calories against a daily target.',

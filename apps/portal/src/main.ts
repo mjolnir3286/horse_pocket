@@ -50,9 +50,10 @@ const root = document.getElementById('app');
 if (root) {
   const tilesHtml = PORTAL_APPS.map(
     (app) => `
-      <a class="app-tile" href="${appUrl(app.path)}" title="${app.name} — ${app.category}">
+      <a class="app-tile" href="${appUrl(app.path)}" title="${app.name} — ${app.blurb}">
         <span class="app-tile-icon">${renderTileIcon(app.icon)}</span>
         <span class="app-tile-name">${app.name}</span>
+        <span class="app-tile-blurb">${app.blurb}</span>
       </a>
     `
   ).join('');

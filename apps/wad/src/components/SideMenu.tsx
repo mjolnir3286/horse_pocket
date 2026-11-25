@@ -1,4 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { MAX_IMPORT_BYTES, resetAppData } from '../lib/resetAppData'
+
+/** Everything wad saves uses the wad_ prefix; other Horse Pocket apps share this origin. */
+const WAD_RESET_PLAN = {
+    ownsKey: (key: string) => key.startsWith('wad_'),
+    cachePrefix: 'wad-',
+    basePath: import.meta.env.BASE_URL,
+}
 
 export interface PendingWadImport {
     summary: string
@@ -65,10 +73,43 @@ function SideMenuPanel({
     const importButtonRef = useRef<HTMLButtonElement>(null)
     const confirmButtonRef = useRef<HTMLButtonElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const resetButtonRef = useRef<HTMLButtonElement>(null)
+    const resetCancelRef = useRef<HTMLButtonElement>(null)
+    const resetTitleId = useId()
+    const resetDescId = useId()
 
     const [pendingImport, setPendingImport] = useState<PendingWadImport | null>(null)
     const [dataError, setDataError] = useState<string | null>(null)
     const [dataStatus, setDataStatus] = useState<string | null>(null)
+    const [confirmReset, setConfirmReset] = useState(false)
+    const [resetting, setResetting] = useState(false)
+
+    useEffect(() => {
+        if (confirmReset) {
+            window.requestAnimationFrame(() => {
+                resetCancelRef.current?.focus()
+            })
+        }
+    }, [confirmReset])
+
+    const openResetConfirm = () => {
+        setPendingImport(null)
+        setDataError(null)
+        setDataStatus(null)
+        setConfirmReset(true)
+    }
+
+    const cancelReset = () => {
+        setConfirmReset(false)
+        window.requestAnimationFrame(() => {
+            resetButtonRef.current?.focus()
+        })
+    }
+
+    const handleReset = async () => {
+        setResetting(true)
+        await resetAppData(WAD_RESET_PLAN)
+    }
 
     const handleCloseWithRestore = () => {
         onClose()
@@ -136,6 +177,11 @@ function SideMenuPanel({
 
         setDataError(null)
         setDataStatus(null)
+        if (file.size > MAX_IMPORT_BYTES) {
+            setPendingImport(null)
+            setDataError('That file is too large to be a Wad backup (over 5 MB).')
+            return
+        }
 
         try {
             const text = await file.text()
@@ -359,6 +405,63 @@ function SideMenuPanel({
                                     <button
                                         type="button"
                                         onClick={handleCancelImport}
+                                        className="flex-1 min-h-8.5 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-neutral-600 text-xs font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <button
+                            ref={resetButtonRef}
+                            type="button"
+                            onClick={openResetConfirm}
+                            aria-expanded={confirmReset}
+                            className="w-full min-h-10.5 px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm font-semibold text-red-700 dark:text-red-300 hover:bg-red-500/10 cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        >
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                            <span>Reset app data</span>
+                        </button>
+
+                        {confirmReset && (
+                            <div
+                                role="alertdialog"
+                                aria-labelledby={resetTitleId}
+                                aria-describedby={resetDescId}
+                                className="p-3 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-red-700/60 dark:border-red-300/60 flex flex-col gap-2.5"
+                            >
+                                <p id={resetTitleId} className="text-sm font-bold text-gray-900 dark:text-neutral-100">
+                                    Reset wad?
+                                </p>
+                                <p id={resetDescId} className="text-xs leading-snug text-gray-800 dark:text-neutral-200">
+                                    This erases your budget and Plan numbers in wad on this device, then reloads. It can’t be
+                                    undone, so export a backup first. Other Horse Pocket apps aren’t affected.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={handleExportClick}
+                                    className="min-h-9.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-semibold inline-flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                                >
+                                    Export backup first
+                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleReset()}
+                                        disabled={resetting}
+                                        className="flex-1 min-h-8.5 px-2.5 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-semibold cursor-pointer disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                                    >
+                                        {resetting ? 'Resetting…' : 'Reset'}
+                                    </button>
+                                    <button
+                                        ref={resetCancelRef}
+                                        type="button"
+                                        onClick={cancelReset}
+                                        disabled={resetting}
                                         className="flex-1 min-h-8.5 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-neutral-600 text-xs font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                                     >
                                         Cancel

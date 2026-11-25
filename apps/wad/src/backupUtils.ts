@@ -6,6 +6,10 @@ import {
     isValidExpenseRow,
     isValidIncomeRow,
     isValidTaxRow,
+    MAX_ROWS,
+    rebuildExpenseRow,
+    rebuildIncomeRow,
+    rebuildTaxRow,
     sanitizePlanState,
 } from './storage'
 import type { PlanState } from './types'
@@ -73,10 +77,13 @@ export function parseWadImport(
             parsed.version !== 1 ||
             !isTimeframe(parsed.timeframe) ||
             !Array.isArray(parsed.incomeRows) ||
+            parsed.incomeRows.length > MAX_ROWS ||
             !parsed.incomeRows.every(isValidIncomeRow) ||
             !Array.isArray(parsed.taxes) ||
+            parsed.taxes.length > MAX_ROWS ||
             !parsed.taxes.every(isValidTaxRow) ||
             !Array.isArray(parsed.expenses) ||
+            parsed.expenses.length > MAX_ROWS ||
             !parsed.expenses.every(isValidExpenseRow)
         ) {
             return { ok: false, error: friendly }
@@ -88,9 +95,9 @@ export function parseWadImport(
             ok: true,
             data: {
                 timeframe: clampDisplayTimeframe(parsed.timeframe),
-                incomeRows: parsed.incomeRows,
-                taxes: parsed.taxes,
-                expenses: parsed.expenses,
+                incomeRows: parsed.incomeRows.map(rebuildIncomeRow),
+                taxes: parsed.taxes.map(rebuildTaxRow),
+                expenses: parsed.expenses.map(rebuildExpenseRow),
                 ...(parsed.plan !== undefined ? { plan: sanitizePlanState(parsed.plan) } : {}),
             },
         }

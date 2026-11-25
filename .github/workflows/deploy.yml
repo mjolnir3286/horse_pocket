@@ -3,6 +3,13 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # Skip rebuilds when a push only touches docs or the relay Worker
+    # (the Worker deploys separately). Daily collector data deploys via
+    # workflow_call from collect.yml, so it is not affected by this filter.
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'apps/couch-relay/**'
   workflow_dispatch:
   workflow_call:
 
@@ -20,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -36,10 +43,11 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Install and build Couch
+      - name: Install, test, and build Couch
         working-directory: apps/couch
         run: |
           npm ci
+          npm test
           npm run build
       - name: Install and build Wad
         working-directory: apps/wad
@@ -61,9 +69,9 @@ jobs:
           cp -r apps/wad/dist/. www/wad/
           cp -r apps/shed/dist/. www/shed/
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: www
 
@@ -76,4 +84,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

@@ -12,6 +12,7 @@ import {
   FileUp,
   Film,
   Layers,
+  RotateCcw,
   Rss,
   Sparkles,
   X,
@@ -109,6 +110,11 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
     ),
     label: 'Back up',
     text: 'In the menu under Your Data, Export saves a file and Import restores it, replacing what’s saved now.',
+  },
+  {
+    icon: <RotateCcw size={16} aria-hidden="true" />,
+    label: 'Reset',
+    text: 'Reset app data in the menu erases Couch’s saved lists and settings on this device and starts fresh. Export first to keep a copy.',
   },
   {
     icon: <Download size={16} aria-hidden="true" />,

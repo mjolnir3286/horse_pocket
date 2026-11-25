@@ -1,6 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { ChevronLeft, CircleHelp, Download, FileDown, FileUp, Info, X } from 'lucide-react';
+import { ChevronLeft, CircleHelp, Download, FileDown, FileUp, Info, RotateCcw, X } from 'lucide-react';
 import { SITE } from '../config/site';
+import { MAX_IMPORT_BYTES, resetAppData } from '../lib/resetAppData';
+import { SHED_RESET_PLAN } from '../lib/reset';
 import { useFocusTrap } from '../lib/useFocusTrap';
 import { ShedMark } from './ShedMark';
 
@@ -44,11 +46,18 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   const [pending, setPending] = useState<PendingImport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const resetRef = useRef<HTMLButtonElement>(null);
+  const resetCancelRef = useRef<HTMLButtonElement>(null);
+  const resetTitleId = useId();
+  const resetDescId = useId();
 
   useFocusTrap(open, panelRef, onClose, closeRef, restoreFocusRef);
 
   useEffect(() => {
     if (!open) {
+      setConfirmReset(false);
       setPending(null);
       setError(null);
       setStatus(null);
@@ -59,12 +68,28 @@ export const SideMenu: React.FC<SideMenuProps> = ({
     if (pending) window.requestAnimationFrame(() => confirmRef.current?.focus());
   }, [pending]);
 
+  useEffect(() => {
+    if (confirmReset) window.requestAnimationFrame(() => resetCancelRef.current?.focus());
+  }, [confirmReset]);
+
+  const exportNow = () => {
+    setError(null);
+    setPending(null);
+    onExport();
+    setStatus('Backup downloaded.');
+  };
+
   const onFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
     setError(null);
     setStatus(null);
+    if (file.size > MAX_IMPORT_BYTES) {
+      setPending(null);
+      setError('That file is too large to be a Shed backup (over 5 MB).');
+      return;
+    }
     try {
       const res = onValidateImport(await file.text());
       if (res.ok) setPending(res.pending);
@@ -161,12 +186,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
               <button
                 type="button"
                 className="secondary-btn drawer-data-btn"
-                onClick={() => {
-                  setError(null);
-                  setPending(null);
-                  onExport();
-                  setStatus('Backup downloaded.');
-                }}
+                onClick={exportNow}
               >
                 <FileDown size={15} aria-hidden="true" />
                 Export JSON
@@ -216,6 +236,66 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                     }}
                   >
                     Replace data
+                  </button>
+                </div>
+              </div>
+            )}
+            <button
+              ref={resetRef}
+              type="button"
+              className="drawer-item drawer-reset-item"
+              aria-expanded={confirmReset}
+              onClick={() => {
+                setPending(null);
+                setError(null);
+                setStatus(null);
+                setConfirmReset(true);
+              }}
+            >
+              <RotateCcw size={17} aria-hidden="true" />
+              <span>Reset app data</span>
+            </button>
+            {confirmReset && (
+              <div
+                className="drawer-confirm-box drawer-reset-box"
+                role="alertdialog"
+                aria-labelledby={resetTitleId}
+                aria-describedby={resetDescId}
+              >
+                <p id={resetTitleId} className="drawer-confirm-title">
+                  Reset {SITE.name}?
+                </p>
+                <p id={resetDescId} className="drawer-data-note">
+                  This erases your profile, saved foods, and log in {SITE.name} on this device, then reloads. It can’t be
+                  undone, so export a backup first. Other Horse Pocket apps aren’t affected.
+                </p>
+                <button type="button" className="secondary-btn drawer-data-btn" onClick={exportNow}>
+                  <FileDown size={15} aria-hidden="true" />
+                  Export backup first
+                </button>
+                <div className="drawer-data-actions">
+                  <button
+                    ref={resetCancelRef}
+                    type="button"
+                    className="secondary-btn drawer-data-btn"
+                    disabled={resetting}
+                    onClick={() => {
+                      setConfirmReset(false);
+                      window.requestAnimationFrame(() => resetRef.current?.focus());
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-btn drawer-data-btn"
+                    disabled={resetting}
+                    onClick={async () => {
+                      setResetting(true);
+                      await resetAppData(SHED_RESET_PLAN);
+                    }}
+                  >
+                    {resetting ? 'Resetting…' : 'Reset'}
                   </button>
                 </div>
               </div>

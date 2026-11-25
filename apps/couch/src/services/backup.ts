@@ -4,7 +4,9 @@ import {
   type FollowedTitle,
 } from './follows';
 import type { NewEpisodeAlert, PlatformId } from '../types/streaming';
-import { HIDE_WATCHED_KEY, sanitizeWatched } from './watched';
+import { HIDE_WATCHED_KEY, sanitizeWatched, UNSAFE_KEYS } from './watched';
+import { safeHttpUrl } from '../lib/safeUrl';
+import type { TvmazeEpisode } from './tvmaze';
 import { isPlatformId } from '../data/platforms';
 import { sanitizeMyServices, saveMyServices } from './myServices';
 
@@ -190,12 +192,76 @@ function isValidFollow(item: unknown): item is FollowedTitle {
   return (
     typeof item.key === 'string' &&
     item.key.length > 0 &&
+    !UNSAFE_KEYS.has(item.key) &&
     (item.mediaType === 'movie' || item.mediaType === 'tv') &&
     typeof item.title === 'string' &&
     typeof item.followedAt === 'string' &&
     (item.tmdbId === null || typeof item.tmdbId === 'number') &&
     (item.tvmazeId === null || typeof item.tvmazeId === 'number')
   );
+}
+
+const MAX_FOLLOWS = 2000;
+const MAX_LEAD_NAMES = 1000;
+const str = (v: unknown, max = 300): string | null => (typeof v === 'string' && v.length <= max ? v : null);
+const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+function rebuildEpisode(v: unknown): TvmazeEpisode | null {
+  if (!isPlainObject(v) || num(v.id) === null || num(v.season) === null) return null;
+  return {
+    id: v.id as number,
+    season: v.season as number,
+    number: num(v.number),
+    name: str(v.name) ?? 'Episode',
+    airdate: str(v.airdate, 40),
+    airstamp: str(v.airstamp, 40),
+  };
+}
+
+/** A fresh FollowedTitle with only known fields; drops lastStatus if its link isn't a plain http(s) URL. */
+function rebuildFollow(f: FollowedTitle): FollowedTitle {
+  const raw = f as unknown as Record<string, unknown>;
+  const out: FollowedTitle = {
+    key: f.key.slice(0, 200),
+    mediaType: f.mediaType,
+    tmdbId: f.tmdbId,
+    tvmazeId: f.tvmazeId,
+    title: f.title.slice(0, 500),
+    year: str(raw.year, 10),
+    posterPath: str(raw.posterPath),
+    followedAt: f.followedAt.slice(0, 40),
+    lastNotifiedEpisodeId: num(raw.lastNotifiedEpisodeId),
+    lastNotifiedAirstamp: str(raw.lastNotifiedAirstamp, 40),
+  };
+  const ls = raw.lastStatus;
+  const url = isPlainObject(ls) ? safeHttpUrl(ls.tvmazeUrl) : null;
+  if (isPlainObject(ls) && url && typeof ls.checkedAt === 'string') {
+    out.lastStatus = {
+      checkedAt: ls.checkedAt.slice(0, 40),
+      network: str(ls.network),
+      showStatus: str(ls.showStatus, 60) ?? 'Unknown',
+      tvmazeUrl: url,
+      previous: rebuildEpisode(ls.previous),
+      next: rebuildEpisode(ls.next),
+    };
+  }
+  if (raw.untracked === true) out.untracked = true;
+  return out;
+}
+
+function rebuildAlert(a: NewEpisodeAlert): NewEpisodeAlert {
+  const raw = a as unknown as Record<string, unknown>;
+  return {
+    id: a.id.slice(0, 200),
+    followKey: a.followKey.slice(0, 200),
+    showTitle: a.showTitle.slice(0, 500),
+    season: a.season,
+    episode: a.episode,
+    episodeTitle: str(raw.episodeTitle, 500) ?? '',
+    airdate: str(raw.airdate, 40),
+    network: str(raw.network),
+    detectedAt: str(raw.detectedAt, 40) ?? new Date().toISOString(),
+  };
 }
 
 function isValidAlert(item: unknown): item is NewEpisodeAlert {
@@ -231,13 +297,17 @@ export function parseCouchBackup(
     return { ok: false, error: friendly };
   }
 
-  if (!Array.isArray(wl.follows) || !wl.follows.every(isValidFollow)) {
+  if (!Array.isArray(wl.follows) || wl.follows.length > MAX_FOLLOWS || !wl.follows.every(isValidFollow)) {
     return { ok: false, error: friendly };
   }
-  if (!Array.isArray(wl.followedLeadNames) || !wl.followedLeadNames.every((s) => typeof s === 'string')) {
+  if (
+    !Array.isArray(wl.followedLeadNames) ||
+    wl.followedLeadNames.length > MAX_LEAD_NAMES ||
+    !wl.followedLeadNames.every((s) => typeof s === 'string' && s.length <= 500)
+  ) {
     return { ok: false, error: friendly };
   }
-  if (!Array.isArray(wl.alerts) || !wl.alerts.every(isValidAlert)) {
+  if (!Array.isArray(wl.alerts) || wl.alerts.length > 1000 || !wl.alerts.every(isValidAlert)) {
     return { ok: false, error: friendly };
   }
   if (wl.lastCheckedAt !== null && wl.lastCheckedAt !== undefined && typeof wl.lastCheckedAt !== 'string') {
@@ -273,12 +343,12 @@ export function parseCouchBackup(
     backup: {
       app: 'couch',
       version: 1,
-      exportedAt: typeof parsed.exportedAt === 'string' ? parsed.exportedAt : new Date().toISOString(),
+      exportedAt: typeof parsed.exportedAt === 'string' ? parsed.exportedAt.slice(0, 40) : new Date().toISOString(),
       watchlist: {
-        follows: wl.follows,
-        followedLeadNames: wl.followedLeadNames,
-        alerts: wl.alerts.slice(0, 30),
-        lastCheckedAt: wl.lastCheckedAt ?? null,
+        follows: wl.follows.map(rebuildFollow),
+        followedLeadNames: wl.followedLeadNames.slice(),
+        alerts: wl.alerts.slice(0, 30).map(rebuildAlert),
+        lastCheckedAt: typeof wl.lastCheckedAt === 'string' ? wl.lastCheckedAt.slice(0, 40) : null,
       },
       watched: sanitizeWatched(watched),
       settings: {

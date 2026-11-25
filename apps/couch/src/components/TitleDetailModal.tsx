@@ -7,6 +7,7 @@ import { isTitleWatched, type WatchedEntry } from '../services/watched';
 import { EpisodesSection } from './EpisodesSection';
 import { WatchOptionsFull } from './WatchOptions';
 import { MoreLikeThis } from './MoreLikeThis';
+import { safeHttpUrl } from '../lib/safeUrl';
 
 /** A TMDB title, or a TVmaze-only show from the Upcoming feed (tmdbless). */
 export type DetailItem = TmdbTitle & { tvmazeId?: number | null; tmdbless?: boolean; platformName?: string };
@@ -156,8 +157,8 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
         ) : (
           <WatchOptionsFull options={options} />
         )}
-        {options?.link && (
-          <a className="fineprint-link" href={options.link} target="_blank" rel="noopener noreferrer">
+        {safeHttpUrl(options?.link) && (
+          <a className="fineprint-link" href={safeHttpUrl(options?.link) ?? undefined} target="_blank" rel="noopener noreferrer">
             More options on TMDB <ExternalLink size={11} />
           </a>
         )}

@@ -22,6 +22,7 @@ import {
   type PlatformFilterId,
   type SortKey,
 } from '../services/backup';
+import { safeHttpUrl } from '../lib/safeUrl';
 
 interface UpcomingViewProps {
   collectorData: CollectorOutput | null;
@@ -346,11 +347,11 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                   }}
                 >
                   <span>Source: {lead.sourceName}</span>
-                  {lead.sourceUrl && (
+                  {safeHttpUrl(lead.sourceUrl) && (
                     <a
-                      href={lead.sourceUrl}
+                      href={safeHttpUrl(lead.sourceUrl) ?? undefined}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="pill-btn"
                       style={{ textDecoration: 'none', padding: '3px 9px', fontSize: '0.7rem' }}
                     >

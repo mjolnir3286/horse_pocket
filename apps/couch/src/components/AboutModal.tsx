@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { SITE } from '../config/site';
 import { assetUrl } from '../lib/baseUrl';
+import { safeHttpUrl } from '../lib/safeUrl';
 
 interface AboutModalProps {
   open: boolean;
@@ -115,7 +116,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onClose, restoreFo
 
         <p className="about-made-by">
           Made by{' '}
-          <a href={SITE.makerUrl} target="_blank" rel="noopener noreferrer">
+          <a href={safeHttpUrl(SITE.makerUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
             {SITE.makerName}
           </a>
         </p>
@@ -124,24 +125,24 @@ export const AboutModal: React.FC<AboutModalProps> = ({ open, onClose, restoreFo
 
         <p className="about-fineprint">
           Episode and schedule data:{' '}
-          <a href={SITE.attribution.sourceUrl} target="_blank" rel="noopener noreferrer">
+          <a href={safeHttpUrl(SITE.attribution.sourceUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
             TVmaze
           </a>{' '}
           (
-          <a href={SITE.attribution.licenseUrl} target="_blank" rel="noopener noreferrer">
+          <a href={safeHttpUrl(SITE.attribution.licenseUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
             CC BY-SA 4.0
           </a>
           )
         </p>
         <div className="about-tmdb">
-          <a href={SITE.tmdb.url} target="_blank" rel="noopener noreferrer" aria-label="TMDB">
+          <a href={safeHttpUrl(SITE.tmdb.url) ?? undefined} target="_blank" rel="noopener noreferrer" aria-label="TMDB">
             <img src={assetUrl('tmdb-logo.svg')} alt="TMDB" width={64} height={8} />
           </a>
           <p className="about-fineprint">{SITE.tmdb.notice}</p>
         </div>
         <p className="about-fineprint">
           Where-to-watch data by{' '}
-          <a href={SITE.justwatchUrl} target="_blank" rel="noopener noreferrer">
+          <a href={safeHttpUrl(SITE.justwatchUrl) ?? undefined} target="_blank" rel="noopener noreferrer">
             JustWatch
           </a>
           .

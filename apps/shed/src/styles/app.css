@@ -1527,6 +1527,53 @@ select.input {
   font-size: 0.82rem;
 }
 
+.drawer-reset-item {
+  color: var(--danger-text);
+}
+
+.drawer-reset-item:hover {
+  background: var(--danger-soft);
+}
+
+.drawer-confirm-box.drawer-reset-box {
+  border-color: var(--danger-text);
+}
+
+.drawer-confirm-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #b91c1c;
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.danger-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.danger-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .drawer-confirm-box {
   padding: 10px 12px;
   border-radius: 10px;

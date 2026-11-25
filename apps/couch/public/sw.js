@@ -1,10 +1,13 @@
 /* Couch Service Worker: static assets, upcoming JSON, and relay/TVmaze/image caching. */
-const SHELL_CACHE = 'couch-shell-v14';
+const SHELL_CACHE = 'couch-shell-v15';
 const RELAY_CACHE = 'couch-relay-v1';
-const DATA_CACHE = 'couch-data-v1';
+// TVmaze responses only; the Upcoming file has its own cache so it is never evicted by TVmaze calls.
+const DATA_CACHE = 'couch-data-v2';
+const UPCOMING_CACHE = 'couch-upcoming-v1';
 const IMAGE_CACHE = 'couch-images-v1';
 const RELAY_MAX = 80;
-const DATA_MAX = 20;
+const DATA_MAX = 60;
+const UPCOMING_MAX = 2;
 const IMAGE_MAX = 60;
 const BASE = self.registration.scope;
 const RELAY_HOST = 'couch-relay.mjolnir3286.workers.dev';
@@ -33,19 +36,18 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = new Set([SHELL_CACHE, RELAY_CACHE, DATA_CACHE, IMAGE_CACHE]);
+  const keep = new Set([SHELL_CACHE, RELAY_CACHE, DATA_CACHE, UPCOMING_CACHE, IMAGE_CACHE]);
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k))))
+    // All Horse Pocket apps share this origin's Cache Storage: only remove old Couch caches.
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('couch-') && !keep.has(k)).map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
 
 function isAsset(url) {
   return url.origin === self.location.origin && url.pathname.includes('/assets/');
-}
-
-function isHtml(url) {
-  return url.origin === self.location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html'));
 }
 
 function isUpcoming(url) {
@@ -133,15 +135,12 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (isUpcoming(url)) {
-    event.respondWith(staleWhileRevalidate(event, DATA_CACHE, DATA_MAX, 6 * 60 * 60));
+    event.respondWith(staleWhileRevalidate(event, UPCOMING_CACHE, UPCOMING_MAX, 6 * 60 * 60));
     return;
   }
+  if (url.pathname.endsWith('/sw.js')) return; // the browser handles worker updates itself
   if (isAsset(url) || url.pathname.endsWith('.webmanifest') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.png')) {
     event.respondWith(cacheFirst(event, SHELL_CACHE, 40));
-    return;
-  }
-  if (isHtml(url) || url.pathname.endsWith('sw.js')) {
-    event.respondWith(networkFirst(event, SHELL_CACHE));
     return;
   }
   event.respondWith(networkFirst(event, SHELL_CACHE));
@@ -171,9 +170,20 @@ self.addEventListener('push', (event) => {
   );
 });
 
+/** Only open pages inside Couch; anything else falls back to Couch's start page. */
+function sameScopeUrl(raw) {
+  try {
+    const u = new URL(raw || BASE, BASE);
+    if (u.origin === self.location.origin && u.href.startsWith(BASE)) return u.href;
+  } catch {
+    // fall through
+  }
+  return BASE;
+}
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || BASE;
+  const targetUrl = sameScopeUrl(event.notification.data && event.notification.data.url);
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

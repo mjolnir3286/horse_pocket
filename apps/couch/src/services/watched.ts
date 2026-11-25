@@ -53,34 +53,52 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-/** Keep only well-formed entries; used on load and on Import. */
+/** Keys that could change an object's prototype if copied onto a plain object. */
+export const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const MAX_WATCHED_ENTRIES = 5000;
+const MAX_EPISODES_PER_TITLE = 5000;
+
+const optStr = (v: unknown, max = 300): string | null => (typeof v === 'string' && v.length <= max ? v : null);
+const optNum = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+/** Keep only well-formed entries; used on load and on Import. Builds fresh objects, never copies unknown fields. */
 export function sanitizeWatched(raw: unknown): WatchedStore {
   if (!isPlainObject(raw)) return {};
-  const out: WatchedStore = {};
+  const out: WatchedStore = Object.create(null) as WatchedStore;
+  let count = 0;
   for (const [k, v] of Object.entries(raw)) {
+    if (count >= MAX_WATCHED_ENTRIES) break;
+    if (UNSAFE_KEYS.has(k) || k.length === 0 || k.length > 200) continue;
     if (!isPlainObject(v)) continue;
     if (v.mediaType !== 'movie' && v.mediaType !== 'tv') continue;
-    if (typeof v.title !== 'string') continue;
+    if (typeof v.title !== 'string' || v.title.length > 500) continue;
     const episodes: Record<string, boolean> = {};
     if (isPlainObject(v.episodes)) {
+      let n = 0;
       for (const [ek, ev] of Object.entries(v.episodes)) {
-        if (/^\d{1,10}$/.test(ek) && typeof ev === 'boolean') episodes[ek] = ev;
+        if (n >= MAX_EPISODES_PER_TITLE) break;
+        if (/^\d{1,10}$/.test(ek) && typeof ev === 'boolean') {
+          episodes[ek] = ev;
+          n++;
+        }
       }
     }
     out[k] = {
       key: k,
       mediaType: v.mediaType,
-      tmdbId: typeof v.tmdbId === 'number' ? v.tmdbId : null,
-      tvmazeId: typeof v.tvmazeId === 'number' ? v.tvmazeId : null,
+      tmdbId: optNum(v.tmdbId),
+      tvmazeId: optNum(v.tvmazeId),
       title: v.title,
-      year: typeof v.year === 'string' ? v.year : null,
-      posterPath: typeof v.posterPath === 'string' ? v.posterPath : null,
-      allAiredAt: typeof v.allAiredAt === 'string' ? v.allAiredAt : null,
+      year: optStr(v.year, 10),
+      posterPath: optStr(v.posterPath),
+      allAiredAt: optStr(v.allAiredAt, 40),
       episodes,
-      updatedAt: typeof v.updatedAt === 'string' ? v.updatedAt : new Date(0).toISOString(),
+      updatedAt: optStr(v.updatedAt, 40) ?? new Date(0).toISOString(),
     };
+    count++;
   }
-  return out;
+  // Return an ordinary object (JSON and spread friendly) built only from the safe keys above.
+  return Object.assign({}, out);
 }
 
 export function loadWatched(): WatchedStore {

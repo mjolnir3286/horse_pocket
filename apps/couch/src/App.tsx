@@ -25,7 +25,7 @@ import {
   type WatchedRef,
   type WatchedStore,
 } from './services/watched';
-import { getLatestAiredEpisode, getShowEpisodes, type TvmazeEpisode } from './services/tvmaze';
+import { getLatestAiredEpisode, getShowEpisodeRefs, peekShowEpisodeRefs, type TvmazeEpisode } from './services/tvmaze';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
 import { HelpModal } from './components/HelpModal';
@@ -64,6 +64,7 @@ import { assetUrl } from './lib/baseUrl';
 import { PLATFORMS } from './data/platforms';
 import type { CollectorOutput, UpcomingReleaseLead } from './types/collector';
 import type { NewEpisodeAlert, PlatformId, StreamingPlatform } from './types/streaming';
+import { safeHttpUrl } from './lib/safeUrl';
 
 type TabId = 'discover' | 'upcoming' | 'watchlist' | 'platforms';
 const TABS: TabId[] = ['upcoming', 'discover', 'watchlist', 'platforms'];
@@ -404,8 +405,9 @@ export const App: React.FC = () => {
       setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId });
     } else if (f.tvmazeId != null) {
       setSelected({ id: 0, mediaType: 'tv', title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId, tmdbless: true });
-    } else if (f.lastStatus?.tvmazeUrl) {
-      window.open(f.lastStatus.tvmazeUrl, '_blank', 'noopener');
+    } else {
+      const url = safeHttpUrl(f.lastStatus?.tvmazeUrl);
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -417,23 +419,48 @@ export const App: React.FC = () => {
   }, [follows, followedLeadNames]);
   const followedTvmazeIds = useMemo(() => new Set(follows.map((f) => f.tvmazeId).filter((x): x is number => x != null)), [follows]);
 
+  /**
+   * Only shows with watched marks need their episode list (to tell "caught up" from "new episode").
+   * Unmarked shows are never caught up, so they're skipped. Kept as a sorted id string so the
+   * effect below only re-runs when that set changes.
+   */
+  const markedTvmazeIdsKey = useMemo(() => {
+    const ids = follows
+      .filter((f) => f.tvmazeId != null && findWatched(watched, { key: f.key, mediaType: f.mediaType, tmdbId: f.tmdbId, tvmazeId: f.tvmazeId, title: f.title }))
+      .map((f) => f.tvmazeId as number);
+    return [...new Set(ids)].sort((a, b) => a - b).join(',');
+  }, [follows, watched]);
+
   useEffect(() => {
-    if (activeTab !== 'watchlist' || followedTvmazeIds.size === 0) return;
+    if (activeTab !== 'watchlist' || !markedTvmazeIdsKey) return;
     let cancelled = false;
-    void Promise.all(
-      [...followedTvmazeIds].map(async (id) => {
+    const ids = markedTvmazeIdsKey.split(',').map(Number);
+    // Cached lists first, in one update.
+    const ready: Record<number, EpisodeRef[]> = {};
+    const missing: number[] = [];
+    for (const id of ids) {
+      const refs = peekShowEpisodeRefs(id);
+      if (refs) ready[id] = refs;
+      else missing.push(id);
+    }
+    if (Object.keys(ready).length) setFollowEpisodes((prev) => ({ ...prev, ...ready }));
+    // Then one TVmaze call at a time, paced like checkFollowedShows (well under 20 calls / 10 s).
+    void (async () => {
+      for (const id of missing) {
+        if (cancelled) return;
         try {
-          const episodes = await getShowEpisodes(id);
+          const episodes = await getShowEpisodeRefs(id);
           if (!cancelled) setFollowEpisodes((prev) => ({ ...prev, [id]: episodes }));
         } catch {
           // Leave the show unloaded so hide and Watch Next keep it visible.
         }
-      })
-    );
+        await new Promise((r) => setTimeout(r, 150));
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [activeTab, followedTvmazeIds]);
+  }, [activeTab, markedTvmazeIdsKey]);
 
   const isLeadFollowed = useCallback(
     (lead: UpcomingReleaseLead) =>

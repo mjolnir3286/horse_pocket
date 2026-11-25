@@ -9,6 +9,8 @@ import {
   leadId,
   mergeLead,
   polishTitle,
+  pruneStaleLeads,
+  AVAILABLE_NOW_KEEP_DAYS,
 } from './titleUtils';
 import { fetchTvMazeScheduleLeads, lookupTvMazeShow, TVMAZE_USER_AGENT } from './tvmazeClient';
 
@@ -344,7 +346,7 @@ async function run() {
     rekeyed.set(id, prev ? mergeLead(prev, updated, nowIso) : updated);
   }
 
-  const allLeads = Array.from(rekeyed.values()).sort((a, b) => b.confidenceScore - a.confidenceScore);
+  let allLeads = Array.from(rekeyed.values()).sort((a, b) => b.confidenceScore - a.confidenceScore);
 
   // Confirm remaining RSS leads via TVmaze singlesearch (no key). Schedule leads are already confirmed.
   const confirmQueue = [
@@ -370,6 +372,9 @@ async function run() {
     }
   }
 
+  const beforePrune = allLeads.length;
+  allLeads = pruneStaleLeads(allLeads, now);
+  console.log(`[collector] Pruned ${beforePrune - allLeads.length} available-now leads older than ${AVAILABLE_NOW_KEEP_DAYS} days`);
   allLeads.sort((a, b) => b.confidenceScore - a.confidenceScore);
   const upcomingCount = allLeads.filter((l) => l.availabilityStatus === 'upcoming').length;
   const availableNowCount = allLeads.filter((l) => l.availabilityStatus === 'available-now').length;

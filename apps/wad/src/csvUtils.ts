@@ -9,7 +9,21 @@ export interface BudgetData {
 
 const VALID_TIMEFRAMES: Timeframe[] = ['hourly', 'weekly', 'biweekly', 'monthly', 'yearly']
 
-function escapeCsvValue(value: string): string {
+/** Spreadsheet apps run cells starting with these as formulas. */
+const FORMULA_START = /^[=+\-@\t\r]/
+
+/** Prefix formula-like text with ' so spreadsheets show it as plain text (CSV injection guard). */
+export function neutralizeFormula(value: string): string {
+    return FORMULA_START.test(value) ? `'${value}` : value
+}
+
+/** Undo neutralizeFormula when reading a wad CSV back in. */
+export function restoreFormulaText(value: string): string {
+    return value.startsWith("'") && FORMULA_START.test(value.slice(1)) ? value.slice(1) : value
+}
+
+function escapeCsvValue(raw: string): string {
+    const value = neutralizeFormula(raw)
     if (value.includes(',') || value.includes('"') || value.includes('\n')) {
         return `"${value.replace(/"/g, '""')}"`
     }
@@ -80,7 +94,7 @@ export function importFromCSV(content: string): BudgetData | null {
             .split('\n')
             .filter(l => l.trim() && !l.startsWith('#'))
 
-        if (lines.length === 0) return null
+        if (lines.length === 0 || lines.length > 2000) return null
 
         const startIndex = lines[0].startsWith('rowType') ? 1 : 0
         let timeframe: Timeframe = 'monthly'
@@ -92,7 +106,7 @@ export function importFromCSV(content: string): BudgetData | null {
         const validCats = INCOME_CATEGORIES as readonly string[]
 
         for (let i = startIndex; i < lines.length; i++) {
-            const parts = parseCsvLine(lines[i])
+            const parts = parseCsvLine(lines[i]).map(restoreFormulaText)
             const rowType = parts[0]?.trim()
 
             if (rowType === 'meta') {

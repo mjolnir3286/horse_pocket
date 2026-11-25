@@ -135,11 +135,51 @@ export async function getShowEpisodes(tvmazeId: number): Promise<TvmazeEpisode[]
     const res = await fetch(`${TVMAZE}/shows/${tvmazeId}/episodes`);
     if (!res.ok) throw new Error(`TVmaze HTTP ${res.status}`);
     const raw = (await res.json()) as RawEpisode[];
-    const episodes = raw.map((e) => toEpisode(e)).filter((e): e is TvmazeEpisode => e !== null);
+    const episodes = (Array.isArray(raw) ? raw : []).map((e) => toEpisode(e)).filter((e): e is TvmazeEpisode => e !== null);
     episodeMemory.set(tvmazeId, { at: Date.now(), episodes });
     if (episodes.length <= 400) cacheSet('session', 'couch_tvmaze_episodes_v1', sessionKey, episodes, EPISODES_TTL_MS);
+    saveEpisodeRefs(tvmazeId, episodes);
     return episodes;
   });
+}
+
+/** Compact episode refs (id, airstamp, airdate) for the Watchlist's caught-up checks. */
+export interface EpisodeRefLite {
+  id: number;
+  airstamp: string | null;
+  airdate: string | null;
+}
+
+type RefTuple = [number, string | null, string | null];
+const REFS_STORE = 'couch_tvmaze_episode_refs_v1';
+const REFS_TTL_MS = 12 * 60 * 60 * 1000;
+/** Very long shows stay in memory only so localStorage isn't crowded. */
+const REFS_MAX_STORED = 1500;
+
+function saveEpisodeRefs(tvmazeId: number, episodes: EpisodeRefLite[]) {
+  if (episodes.length > REFS_MAX_STORED) return;
+  const tuples: RefTuple[] = episodes.map((e) => [e.id, e.airstamp, e.airdate]);
+  cacheSet('local', REFS_STORE, String(tvmazeId), tuples, REFS_TTL_MS);
+}
+
+/** Episode refs already on hand (memory or localStorage), without a network call. */
+export function peekShowEpisodeRefs(tvmazeId: number): EpisodeRefLite[] | undefined {
+  const mem = episodeMemory.get(tvmazeId);
+  if (mem && Date.now() - mem.at < EPISODES_TTL_MS) return mem.episodes;
+  const tuples = cacheGet<RefTuple[]>('local', REFS_STORE, String(tvmazeId));
+  if (!Array.isArray(tuples)) return undefined;
+  return tuples
+    .filter((t) => Array.isArray(t) && typeof t[0] === 'number')
+    .map(([id, airstamp, airdate]) => ({
+      id,
+      airstamp: typeof airstamp === 'string' ? airstamp : null,
+      airdate: typeof airdate === 'string' ? airdate : null,
+    }));
+}
+
+/** Episode refs for a show: cached copy if fresh, otherwise one TVmaze call (also fills the full-episode cache). */
+export async function getShowEpisodeRefs(tvmazeId: number): Promise<EpisodeRefLite[]> {
+  return peekShowEpisodeRefs(tvmazeId) ?? getShowEpisodes(tvmazeId);
 }
 
 const LATEST_AIRED_STORE = 'couch_tvmaze_latest_aired_v1';

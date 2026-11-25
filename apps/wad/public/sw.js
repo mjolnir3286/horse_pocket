@@ -1,5 +1,5 @@
 /* Wad Service Worker: static app shell caching and clean version updates. */
-const SHELL_CACHE = 'wad-shell-v2';
+const SHELL_CACHE = 'wad-shell-v3';
 const BASE = self.registration.scope;
 
 const SHELL_ASSETS = [
@@ -27,17 +27,16 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   const keep = new Set([SHELL_CACHE]);
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k))))
+    // All Horse Pocket apps share this origin's Cache Storage: only remove old wad caches.
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('wad-') && !keep.has(k)).map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
 
 function isAsset(url) {
   return url.origin === self.location.origin && url.pathname.includes('/assets/');
-}
-
-function isHtml(url) {
-  return url.origin === self.location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html'));
 }
 
 async function putCapped(cacheName, request, response, maxEntries) {
@@ -87,9 +86,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cacheFirst(event, SHELL_CACHE, 50));
     return;
   }
-  if (isHtml(url) || url.pathname.endsWith('sw.js')) {
-    event.respondWith(networkFirst(event, SHELL_CACHE));
-    return;
-  }
+  if (url.pathname.endsWith('/sw.js')) return; // the browser handles worker updates itself
   event.respondWith(networkFirst(event, SHELL_CACHE));
 });

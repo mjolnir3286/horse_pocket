@@ -70,11 +70,15 @@ Help is a sheet with collapsible sections and icons (see Couch's `HelpModal`). A
 
 There are no accounts. User data stays on the device. Couch, Wad, and Shed all store data in versioned `localStorage` keys (`*_v1`) and export a versioned JSON backup (`app`, `version: 1`, `exportedAt`). Wad's keys are `wad_budget_v1` and `wad_plan_v1`; older Wad backups without `plan` still import. Shed's keys are `shed_profile_v1`, `shed_foods_v1`, and `shed_log_v1`. When you add stored fields, use a new or bumped `_vN` key so old data is not silently broken.
 
+All apps share one origin (`mjolnir3286.github.io`), so storage and caches are shared too. Prefix every `localStorage`/`sessionStorage` key and Cache Storage name with the app's name (`couch_`/`couch-`, `wad_`/`wad-`, `shed_`/`shed-`), and only delete your own prefix in a service worker's `activate` step. Never call `localStorage.clear()` or delete every cache. Each app's menu has **Reset app data** (`src/lib/resetAppData.ts`), which clears only that app's keys, caches, and service worker; add any new non-prefixed key to that app's reset plan. Bump the app's `sw.js` cache version when cached files change.
+
+Security: each app's `vite.config.ts` adds a `<meta>` Content-Security-Policy and referrer policy at build time (GitHub Pages can't send headers). If an app needs a new host, add it to that app's CSP and test the built site for violations. External links and `window.open` in Couch go through `safeHttpUrl` (`src/lib/safeUrl.ts`). Importers refuse files over 5 MB and rebuild objects from known fields only.
+
 ## Data and cost
 
 Nothing that costs money. Use free APIs and plans only. Do not scrape sites, and do not do anything that goes against a service's terms. Couch's collector uses the public TVmaze API and public RSS feeds, not HTML scraping.
 
-Never put secrets in public code or in GitHub Pages builds. The TMDB token lives only as the Cloudflare Worker secret `TMDB_TOKEN` on `couch-relay` (free plan, 100,000 requests/day). The relay allowlists methods, origins, paths, and query params, and caches successful responses (30 minutes for search, 24 hours for the other allowed routes). Do not add paid Cloudflare features or upgrade the plan.
+Never put secrets in public code or in GitHub Pages builds. The TMDB token lives only as the Cloudflare Worker secret `TMDB_TOKEN` on `couch-relay` (free plan, 100,000 requests/day). The relay allowlists methods, origins, paths, and query params, and caches successful responses (30 minutes for search, 24 hours for the other allowed routes). Do not add paid Cloudflare features or upgrade the plan. The relay only allows `localhost`/`127.0.0.1` origins when the `ALLOW_LOCAL_ORIGINS` var is `"true"` (local dev only), and returns generic JSON errors instead of TMDB's error bodies.
 
 ## Workflow
 

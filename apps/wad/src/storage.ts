@@ -87,6 +87,29 @@ export function isValidExpenseRow(item: unknown): item is ExpenseRow {
     )
 }
 
+/** Most rows a backup can hold per list; far above real use. */
+export const MAX_ROWS = 500
+
+/** Fresh row objects with only known fields (drops anything extra a file carried). */
+export function rebuildIncomeRow(r: IncomeRow): IncomeRow {
+    return {
+        id: r.id.slice(0, 100),
+        name: r.name.slice(0, 50),
+        category: r.category,
+        amount: r.amount,
+        timeframe: r.timeframe,
+        hoursPerWeek: r.hoursPerWeek,
+    }
+}
+
+export function rebuildTaxRow(r: TaxRow): TaxRow {
+    return { id: r.id.slice(0, 100), name: r.name.slice(0, 40), mode: r.mode, value: r.value }
+}
+
+export function rebuildExpenseRow(r: ExpenseRow): ExpenseRow {
+    return { id: r.id.slice(0, 100), name: r.name.slice(0, 50), type: r.type.slice(0, 30), amount: r.amount }
+}
+
 export function defaultIncomeRows(): IncomeRow[] {
     return [
         {
@@ -161,13 +184,13 @@ export function loadBudgetState(): BudgetData {
         return {
             timeframe: clampDisplayTimeframe(parsed.timeframe),
             incomeRows: Array.isArray(parsed.incomeRows)
-                ? parsed.incomeRows.filter(isValidIncomeRow)
+                ? parsed.incomeRows.filter(isValidIncomeRow).slice(0, MAX_ROWS).map(rebuildIncomeRow)
                 : fallback.incomeRows,
             taxes: Array.isArray(parsed.taxes)
-                ? parsed.taxes.filter(isValidTaxRow)
+                ? parsed.taxes.filter(isValidTaxRow).slice(0, MAX_ROWS).map(rebuildTaxRow)
                 : fallback.taxes,
             expenses: Array.isArray(parsed.expenses)
-                ? parsed.expenses.filter(isValidExpenseRow)
+                ? parsed.expenses.filter(isValidExpenseRow).slice(0, MAX_ROWS).map(rebuildExpenseRow)
                 : fallback.expenses,
         }
     } catch {

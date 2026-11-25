@@ -51,12 +51,22 @@ const SEARCH_TTL_MS = 30 * 60 * 1000;
 const DETAILS_TTL_MS = 24 * 60 * 60 * 1000;
 const SEARCH_STORE = 'couch_tmdb_search_v1';
 const PROVIDER_STORE = 'couch_tmdb_providers_v1';
-const POPULAR_STORE = 'couch_tmdb_popular_v1';
+/** One shared cache for /discover pages, used by Discover rows and Platforms cards. */
+const DISCOVER_STORE = 'couch_tmdb_discover_v1';
+/** Short cache for seasons TMDB has no provider page for (404), so reopening doesn't re-ask. */
+const SEASON_MISS_TTL_MS = 6 * 60 * 60 * 1000;
 const EXIDS_STORE = 'couch_tmdb_external_ids_v1';
 const SEASONS_STORE = 'couch_tmdb_seasons_v1';
 const SEASON_PROVIDER_STORE = 'couch_tmdb_season_providers_v1';
 const RECS_STORE = 'couch_tmdb_recommendations_v1';
-const ROW_STORE = 'couch_tmdb_rows_v1';
+const ROW_STORE = 'couch_tmdb_rows_v2';
+// Older caches replaced by DISCOVER_STORE / ROW_STORE v2; drop them once.
+try {
+  localStorage.removeItem('couch_tmdb_popular_v1');
+  localStorage.removeItem('couch_tmdb_rows_v1');
+} catch {
+  // storage blocked
+}
 /** Subscription, free, and free-with-ads: anything but rent/buy. */
 const WATCHABLE_TYPES = 'flatrate|free|ads';
 
@@ -83,12 +93,8 @@ export function peekWatchOptions(type: TmdbMediaType, id: number): WatchOptions 
   return cacheGet<WatchOptions>('local', PROVIDER_STORE, `${type}-${id}`);
 }
 
-export function popularCacheKey(type: TmdbMediaType, providerIds: number[], count = 3): string {
-  return `${type}:${providerIds.slice().sort((a, b) => a - b).join('|')}:${count}`;
-}
-
 export function peekPopularOnProvider(type: TmdbMediaType, providerIds: number[], count = 3): TmdbTitle[] | undefined {
-  return cacheGet<TmdbTitle[]>('local', POPULAR_STORE, popularCacheKey(type, providerIds, count));
+  return peekDiscover(type, providerIds)?.slice(0, count);
 }
 
 interface RawResult {
@@ -203,28 +209,7 @@ export async function getPopularOnProvider(
   providerIds: number[],
   count = 3
 ): Promise<TmdbTitle[]> {
-  const key = popularCacheKey(type, providerIds, count);
-  const cached = cacheGet<TmdbTitle[]>('local', POPULAR_STORE, key);
-  if (cached) return cached;
-  return dedupe(`popular:${key}`, async () => {
-    const again = cacheGet<TmdbTitle[]>('local', POPULAR_STORE, key);
-    if (again) return again;
-    const data = await relayGet<{ results: RawResult[] }>(`/discover/${type}`, {
-      watch_region: WATCH_REGION,
-      with_watch_providers: providerIds.join('|'),
-      with_watch_monetization_types: WATCHABLE_TYPES,
-      sort_by: 'popularity.desc',
-      include_adult: 'false',
-      language: 'en-US',
-      page: '1',
-    });
-    const titles = data.results
-      .map((r) => toTitle(r, type))
-      .filter((t): t is TmdbTitle => t !== null)
-      .slice(0, count);
-    cacheSet('local', POPULAR_STORE, key, titles, DETAILS_TTL_MS);
-    return titles;
-  });
+  return (await discoverPage(type, providerIds)).slice(0, count);
 }
 
 export interface TmdbSeason {
@@ -281,8 +266,11 @@ export async function getSeasonWatchOptions(id: number, season: number, signal?:
       );
       options = toWatchOptions(data.results?.[WATCH_REGION]);
     } catch (err) {
-      // Unknown season (or an older relay without this route): fall back without caching.
-      if (err instanceof RelayError && err.status === 404) return EMPTY_WATCH_OPTIONS;
+      // Unknown season (or an older relay without this route): fall back, and remember the miss briefly.
+      if (err instanceof RelayError && err.status === 404) {
+        cacheSet('local', SEASON_PROVIDER_STORE, key, EMPTY_WATCH_OPTIONS, SEASON_MISS_TTL_MS);
+        return EMPTY_WATCH_OPTIONS;
+      }
       throw err;
     }
     cacheSet('local', SEASON_PROVIDER_STORE, key, options, DETAILS_TTL_MS);
@@ -342,36 +330,59 @@ function rowKey(kind: string, type: RowType, providerIds: number[] = []): string
   return `${kind}:${type}:${providerIds.slice().sort((a, b) => a - b).join('|')}`;
 }
 
-export function peekServiceRow(type: RowType, providerIds: number[]): TmdbTitle[] | undefined {
-  return cacheGet<TmdbTitle[]>('local', ROW_STORE, rowKey('svc', type, providerIds));
+function discoverKey(type: TmdbMediaType, providerIds: number[]): string {
+  return `${type}:${sortedIds(providerIds)}`;
 }
 
+function sortedIds(providerIds: number[]): string {
+  return providerIds.slice().sort((a, b) => a - b).join('|');
+}
+
+function peekDiscover(type: TmdbMediaType, providerIds: number[]): TmdbTitle[] | undefined {
+  return cacheGet<TmdbTitle[]>('local', DISCOVER_STORE, discoverKey(type, providerIds));
+}
+
+function rowFrom(lists: TmdbTitle[][]): TmdbTitle[] {
+  return lists.length === 1 ? lists[0].slice(0, ROW_SIZE) : mergeByPopularity(lists);
+}
+
+export function peekServiceRow(type: RowType, providerIds: number[]): TmdbTitle[] | undefined {
+  const types: TmdbMediaType[] = type === 'all' ? ['tv', 'movie'] : [type];
+  const lists = types.map((t) => peekDiscover(t, providerIds));
+  return lists.every((l): l is TmdbTitle[] => !!l) ? rowFrom(lists) : undefined;
+}
+
+/** Page 1 of /discover/{type} for these providers, shared by every caller. Cached 24 hours. */
 async function discoverPage(type: TmdbMediaType, providerIds: number[]): Promise<TmdbTitle[]> {
-  const data = await relayGet<{ results?: RawResult[] }>(`/discover/${type}`, {
-    watch_region: WATCH_REGION,
-    with_watch_providers: providerIds.join('|'),
-    with_watch_monetization_types: WATCHABLE_TYPES,
-    sort_by: 'popularity.desc',
-    include_adult: 'false',
-    language: 'en-US',
-    page: '1',
+  const key = discoverKey(type, providerIds);
+  const cached = cacheGet<TmdbTitle[]>('local', DISCOVER_STORE, key);
+  if (cached) return cached;
+  return dedupe(`discover:${key}`, async () => {
+    const again = cacheGet<TmdbTitle[]>('local', DISCOVER_STORE, key);
+    if (again) return again;
+    const data = await relayGet<{ results?: RawResult[] }>(`/discover/${type}`, {
+      watch_region: WATCH_REGION,
+      with_watch_providers: sortedIds(providerIds),
+      with_watch_monetization_types: WATCHABLE_TYPES,
+      sort_by: 'popularity.desc',
+      include_adult: 'false',
+      language: 'en-US',
+      page: '1',
+    });
+    const titles = (data.results ?? [])
+      .map((r) => toTitle(r, type))
+      .filter((t): t is TmdbTitle => t !== null)
+      .slice(0, ROW_SIZE)
+      .map(trimOverview);
+    cacheSet('local', DISCOVER_STORE, key, titles, DETAILS_TTL_MS);
+    return titles;
   });
-  return (data.results ?? []).map((r) => toTitle(r, type)).filter((t): t is TmdbTitle => t !== null);
 }
 
 /** "Popular on <Service>" row for Discover: shows, movies, or both merged by popularity. Cached 24 hours. */
 export async function getServiceRow(type: RowType, providerIds: number[]): Promise<TmdbTitle[]> {
-  const key = rowKey('svc', type, providerIds);
-  const cached = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
-  if (cached) return cached;
-  return dedupe(`row:${key}`, async () => {
-    const again = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
-    if (again) return again;
-    const types: TmdbMediaType[] = type === 'all' ? ['tv', 'movie'] : [type];
-    const titles = mergeByPopularity(await Promise.all(types.map((t) => discoverPage(t, providerIds))));
-    cacheSet('local', ROW_STORE, key, titles, DETAILS_TTL_MS);
-    return titles;
-  });
+  const types: TmdbMediaType[] = type === 'all' ? ['tv', 'movie'] : [type];
+  return rowFrom(await Promise.all(types.map((t) => discoverPage(t, providerIds))));
 }
 
 export function peekTrendingRow(type: RowType): TmdbTitle[] | undefined {

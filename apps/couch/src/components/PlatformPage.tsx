@@ -5,6 +5,7 @@ import { PLATFORM_GROUPS } from '../data/platforms';
 import { useMyServices } from '../services/myServices';
 import { getPopularOnProvider, logoUrl, peekPopularOnProvider, type TmdbTitle } from '../services/tmdb';
 import { WatchedButton } from './WatchedButton';
+import { safeHttpUrl } from '../lib/safeUrl';
 
 interface PlatformPageProps {
   platforms: StreamingPlatform[];
@@ -137,7 +138,7 @@ const PlatformCard: React.FC<{
               <Info size={13} aria-hidden="true" /> {platform.note}
             </p>
           )}
-          <a href={platform.websiteUrl} target="_blank" rel="noopener noreferrer" className="pill-btn platform-site">
+          <a href={safeHttpUrl(platform.websiteUrl) ?? undefined} target="_blank" rel="noopener noreferrer" className="pill-btn platform-site">
             {platform.name} website (plans and prices) <ExternalLink size={12} aria-hidden="true" />
           </a>
         </div>

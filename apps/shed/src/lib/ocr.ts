@@ -24,6 +24,9 @@ const STATUS_TEXT: Record<string, string> = {
   'recognizing text': 'Reading label',
 };
 
+/** Prefix of Shed's Tesseract model entry in IndexedDB ("keyval-store"). */
+export const OCR_IDB_CACHE_PATH = 'shed-ocr';
+
 async function getWorker(): Promise<Worker> {
   if (!workerPromise) {
     workerPromise = (async () => {
@@ -32,6 +35,8 @@ async function getWorker(): Promise<Worker> {
         workerPath: absoluteAssetUrl('ocr/worker.min.js'),
         corePath: absoluteAssetUrl('ocr/core/'),
         langPath: absoluteAssetUrl('ocr/lang'),
+        // Shed's own key in the origin-wide Tesseract IndexedDB cache, so Reset can find it.
+        cachePath: OCR_IDB_CACHE_PATH,
         workerBlobURL: false,
         logger: (m: { status: string; progress: number }) => {
           progressListener?.({ status: STATUS_TEXT[m.status] ?? 'Working', progress: m.progress ?? 0 });

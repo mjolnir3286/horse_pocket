@@ -6,9 +6,12 @@ import {
   FileDown,
   FileUp,
   Info,
+  RotateCcw,
   X,
 } from 'lucide-react';
 import { SITE } from '../config/site';
+import { MAX_IMPORT_BYTES, resetAppData } from '../lib/resetAppData';
+import { COUCH_RESET_PLAN } from '../services/reset';
 
 export interface PendingCouchImport {
   summary: string;
@@ -52,13 +55,20 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   const importButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resetButtonRef = useRef<HTMLButtonElement>(null);
+  const resetCancelRef = useRef<HTMLButtonElement>(null);
+  const resetTitleId = useId();
+  const resetDescId = useId();
 
   const [pendingImport, setPendingImport] = useState<PendingCouchImport | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
   const [dataStatus, setDataStatus] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (!open) {
+      setConfirmReset(false);
       setPendingImport(null);
       setDataError(null);
       setDataStatus(null);
@@ -126,6 +136,14 @@ export const SideMenu: React.FC<SideMenuProps> = ({
     }
   }, [pendingImport]);
 
+  useEffect(() => {
+    if (confirmReset) {
+      window.requestAnimationFrame(() => {
+        resetCancelRef.current?.focus();
+      });
+    }
+  }, [confirmReset]);
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -133,6 +151,11 @@ export const SideMenu: React.FC<SideMenuProps> = ({
 
     setDataError(null);
     setDataStatus(null);
+    if (file.size > MAX_IMPORT_BYTES) {
+      setPendingImport(null);
+      setDataError('That file is too large to be a Couch backup (over 5 MB).');
+      return;
+    }
 
     try {
       const text = await file.text();
@@ -172,6 +195,25 @@ export const SideMenu: React.FC<SideMenuProps> = ({
     setPendingImport(null);
     onExport();
     setDataStatus('Backup downloaded.');
+  };
+
+  const openResetConfirm = () => {
+    setPendingImport(null);
+    setDataError(null);
+    setDataStatus(null);
+    setConfirmReset(true);
+  };
+
+  const cancelReset = () => {
+    setConfirmReset(false);
+    window.requestAnimationFrame(() => {
+      resetButtonRef.current?.focus();
+    });
+  };
+
+  const handleReset = async () => {
+    setResetting(true);
+    await resetAppData(COUCH_RESET_PLAN);
   };
 
   if (!open) return null;
@@ -312,6 +354,58 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                     type="button"
                     className="secondary-btn drawer-confirm-btn"
                     onClick={handleCancelImport}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              ref={resetButtonRef}
+              type="button"
+              className="drawer-item drawer-reset-item"
+              onClick={openResetConfirm}
+              aria-expanded={confirmReset}
+            >
+              <RotateCcw size={17} aria-hidden="true" />
+              <span>Reset app data</span>
+            </button>
+
+            {confirmReset && (
+              <div
+                className="drawer-confirm-box drawer-reset-box"
+                role="alertdialog"
+                aria-labelledby={resetTitleId}
+                aria-describedby={resetDescId}
+              >
+                <p id={resetTitleId} className="drawer-confirm-title">
+                  Reset {SITE.name}?
+                </p>
+                <p id={resetDescId} className="drawer-confirm-text">
+                  This erases your Watchlist, watched marks, My services, and settings in {SITE.name} on this
+                  device, then reloads. It can’t be undone, so export a backup first. Other Horse Pocket apps
+                  aren’t affected.
+                </p>
+                <button type="button" className="secondary-btn drawer-data-btn" onClick={handleExportClick}>
+                  <FileDown size={15} aria-hidden="true" />
+                  <span>Export backup first</span>
+                </button>
+                <div className="drawer-confirm-actions">
+                  <button
+                    type="button"
+                    className="danger-btn drawer-confirm-btn"
+                    onClick={() => void handleReset()}
+                    disabled={resetting}
+                  >
+                    {resetting ? 'Resetting…' : 'Reset'}
+                  </button>
+                  <button
+                    ref={resetCancelRef}
+                    type="button"
+                    className="secondary-btn drawer-confirm-btn"
+                    onClick={cancelReset}
+                    disabled={resetting}
                   >
                     Cancel
                   </button>

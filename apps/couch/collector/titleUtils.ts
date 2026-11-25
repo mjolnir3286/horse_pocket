@@ -14,6 +14,22 @@ export function computeAvailabilityStatus(
   return 'upcoming';
 }
 
+/** "Available now" items stay in the feed this many days after their date, then drop off. */
+export const AVAILABLE_NOW_KEEP_DAYS = 14;
+
+/**
+ * Drop "available now" leads whose date is more than `keepDays` days ago, so the data file
+ * doesn't grow forever. Upcoming leads are always kept.
+ */
+export function pruneStaleLeads<T extends { availabilityStatus: string; parsedDateIso: string | null }>(
+  leads: T[],
+  now = new Date(),
+  keepDays = AVAILABLE_NOW_KEEP_DAYS
+): T[] {
+  const cutoff = todayIso(new Date(now.getTime() - keepDays * 24 * 60 * 60 * 1000));
+  return leads.filter((l) => !(l.availabilityStatus === 'available-now' && l.parsedDateIso && l.parsedDateIso.slice(0, 10) < cutoff));
+}
+
 /**
  * Clean extracted titles: unwrap quotes, drop "First Last and Other Name's" prefixes,
  * and strip trailing premiere/release phrases.

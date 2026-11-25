@@ -6,12 +6,14 @@
  *
  * - GET only, a short allowlist of TMDB v3 read endpoints, under /tmdb/...
  * - Query parameters are allowlisted too; anything else is dropped.
- * - CORS only for https://mjolnir3286.github.io and http://localhost:* / 127.0.0.1:*
+ * - CORS only for https://mjolnir3286.github.io. http://localhost:* / 127.0.0.1:* are allowed
+ *   only when the ALLOW_LOCAL_ORIGINS var is "true" (local dev; off by default and in production).
  *   Requests without an allowed Origin are refused with 403.
  * - Adds `Authorization: Bearer <TMDB_TOKEN>` (Worker secret) server-side.
  * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, season providers, recommendations, discover, and trending).
  * - Discover and trending have their own strict parameter rules (see ROUTE_PARAMS).
- * - Returns only TMDB's JSON body.
+ * - Returns only TMDB's JSON body for 200s. Other upstream statuses become a generic JSON error
+ *   (404 stays 404, 429 stays 429, everything else is 502) so TMDB error details never pass through.
  */
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
@@ -67,8 +69,16 @@ const ROUTE_PARAMS = [
   [/^\/trending\//, TRENDING_PARAMS],
 ];
 
-function isAllowedOrigin(origin) {
-  return !!origin && (origin === PROD_ORIGIN || LOCAL_ORIGIN.test(origin));
+function isAllowedOrigin(origin, env) {
+  if (!origin) return false;
+  if (origin === PROD_ORIGIN) return true;
+  return env?.ALLOW_LOCAL_ORIGINS === 'true' && LOCAL_ORIGIN.test(origin);
+}
+
+function upstreamError(status, origin) {
+  if (status === 404) return jsonError(404, 'Not found', origin);
+  if (status === 429) return jsonError(429, 'Rate limited, try again later', origin);
+  return jsonError(502, 'Upstream error', origin);
 }
 
 function corsHeaders(origin) {
@@ -119,7 +129,7 @@ function sanitizeQuery(searchParams, tmdbPath = '') {
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin');
-    const allowed = isAllowedOrigin(origin);
+    const allowed = isAllowedOrigin(origin, env);
 
     if (!allowed) return jsonError(403, 'Origin not allowed');
 
@@ -152,11 +162,9 @@ export default {
     }
 
     let body;
-    let status;
     let cacheState = 'MISS';
-    if (cached) {
+    if (cached && cached.status === 200) {
       body = await cached.text();
-      status = cached.status;
       cacheState = 'HIT';
     } else {
       let upstream;
@@ -170,27 +178,29 @@ export default {
       } catch {
         return jsonError(502, 'Upstream unavailable', origin);
       }
-      status = upstream.status;
+      if (upstream.status !== 200) {
+        // Drain and drop TMDB's error body; callers get a generic JSON error.
+        await upstream.body?.cancel().catch(() => undefined);
+        return upstreamError(upstream.status, origin);
+      }
       body = await upstream.text();
       const isJson = (upstream.headers.get('Content-Type') || '').includes('application/json');
       if (!isJson) return jsonError(502, 'Unexpected upstream response', origin);
-      if (status === 200) {
-        const toCache = new Response(body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Cache-Control': `public, max-age=${ttl}`,
-          },
-        });
-        ctx.waitUntil(cache.put(cacheKey, toCache).catch(() => undefined));
-      }
+      const toCache = new Response(body, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': `public, max-age=${ttl}`,
+        },
+      });
+      ctx.waitUntil(cache.put(cacheKey, toCache).catch(() => undefined));
     }
 
     return new Response(body, {
-      status,
+      status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': status === 200 ? `public, max-age=${ttl}` : 'no-store',
+        'Cache-Control': `public, max-age=${ttl}`,
         'X-Relay-Cache': cacheState,
         ...corsHeaders(origin),
       },

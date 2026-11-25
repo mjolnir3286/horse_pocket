@@ -10,9 +10,8 @@ export interface PortalApp {
 
 export const PORTAL_META = {
   title: 'Horse Pocket',
-  subtitle: 'Personal mini apps',
   intro:
-    'A compact home for lightweight web apps — open a tool below to jump right in. Everything runs locally in your browser with no accounts.',
+    'Open a tool below — everything runs in your browser, with no accounts.',
   makerName: 'Kale G.',
   makerUrl: 'https://github.com/mjolnir3286/horse_pocket',
   builtWith: 'Built with Grok Bot',

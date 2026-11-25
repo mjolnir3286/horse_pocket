@@ -71,7 +71,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
               New episode alerts: {permissionLabel}
             </div>
             <div className="muted small">
-              Couch checks your followed shows each time you open it.
+              Couch checks your Watchlist each time you open it.
               {lastCheckedAt ? ` Last checked ${new Date(lastCheckedAt).toLocaleString()}.` : ''}
             </div>
           </div>
@@ -120,7 +120,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
 
       {follows.length === 0 ? (
         <div className="panel empty-panel">
-          Nothing here yet. Search for a show or movie on Discover and tap the bookmark to follow it.
+          Nothing here yet. Open a show or movie and tap Add to Watchlist.
         </div>
       ) : (
         <div className="watch-list">
@@ -143,7 +143,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
                     </span>
                   </span>
                 </button>
-                <button type="button" className="follow-icon-btn" aria-label={`Unfollow ${f.title}`} title="Remove" onClick={() => onUnfollow(f.key)}>
+                <button type="button" className="follow-icon-btn" aria-label={`Remove ${f.title} from Watchlist`} title="Remove" onClick={() => onUnfollow(f.key)}>
                   <X size={15} />
                 </button>
               </div>

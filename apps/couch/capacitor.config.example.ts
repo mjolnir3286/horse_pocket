@@ -7,7 +7,7 @@
  */
 const config = {
   appId: 'com.horsepocket.app',
-  appName: 'Horse Pocket',
+  appName: 'Couch',
   webDir: 'www',
   server: {
     androidScheme: 'https',

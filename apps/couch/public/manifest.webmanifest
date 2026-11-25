@@ -1,7 +1,7 @@
 {
   "name": "Couch",
   "short_name": "Couch",
-  "description": "Find where to stream shows & movies, compare platform plans, and get new episode alerts.",
+  "description": "Browse upcoming releases, find where to stream shows and movies, and get new episode alerts.",
   "start_url": "/horse_pocket/couch/",
   "scope": "/horse_pocket/couch/",
   "display": "standalone",

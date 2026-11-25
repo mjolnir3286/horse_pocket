@@ -6,6 +6,11 @@
   --color-danger: #ff2d2d;
 }
 
+:root {
+  --wad-outline: #14532d;
+  --wad-fill: #00e64d;
+}
+
 body {
   margin: 0;
   background-color: #ffffff;
@@ -15,6 +20,11 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
+  :root {
+    --wad-outline: #b8f5c8;
+    --wad-fill: #12b35a;
+  }
+
   body {
     background-color: #0d0d0d;
     color: #f0f0f0;

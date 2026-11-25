@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
-  BellRing,
   Bookmark,
   BookmarkCheck,
   Calendar,
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { CollectorOutput, UpcomingReleaseLead } from '../types/collector';
 import type { PlatformId, StreamingPlatform } from '../types/streaming';
+import { PlatformFilterMenu } from './PlatformFilterMenu';
 
 interface UpcomingViewProps {
   collectorData: CollectorOutput | null;
@@ -18,12 +18,11 @@ interface UpcomingViewProps {
   platformsById: Record<PlatformId, StreamingPlatform>;
   isLeadFollowed: (lead: UpcomingReleaseLead) => boolean;
   onToggleFollowLead: (lead: UpcomingReleaseLead) => void;
-  onTriggerFollowedAlerts: () => void;
 }
 
 type StatusFilter = 'all' | 'confirmed' | 'unconfirmed' | 'followed';
 type SortKey = 'date-soonest' | 'date-latest' | 'provider-az' | 'title-az' | 'confidence';
-type PlatformFilterId = PlatformId | 'unknown';
+type PlatformFilterId = PlatformId | 'unknown' | 'none';
 
 const STATUS_STORAGE_KEY = 'horse_pocket_upcoming_status_v1';
 const PLATFORM_STORAGE_KEY = 'horse_pocket_upcoming_platforms_v1';
@@ -32,7 +31,7 @@ const SORT_STORAGE_KEY = 'horse_pocket_upcoming_sort_v1';
 const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
   { value: 'date-soonest', label: 'Date: soonest first' },
   { value: 'date-latest', label: 'Date: latest first' },
-  { value: 'provider-az', label: 'Provider A–Z' },
+  { value: 'provider-az', label: 'Platform A–Z' },
   { value: 'title-az', label: 'Title A–Z' },
   { value: 'confidence', label: 'Confidence' },
 ];
@@ -66,6 +65,7 @@ const isPlatformFilterList = (value: unknown): value is PlatformFilterId[] =>
   Array.isArray(value) &&
   value.every(
     (id) =>
+      id === 'none' ||
       id === 'unknown' ||
       id === 'netflix' ||
       id === 'disney-plus' ||
@@ -87,7 +87,6 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   platformsById,
   isLeadFollowed,
   onToggleFollowLead,
-  onTriggerFollowedAlerts,
 }) => {
   const [filter, setFilter] = useState<StatusFilter>(() =>
     readStorage(STATUS_STORAGE_KEY, 'all' as StatusFilter, isStatusFilter)
@@ -164,14 +163,17 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   }, [platforms, platformCounts]);
 
   const isAllPlatforms = selectedPlatforms.length === 0;
+  const isNonePlatforms = selectedPlatforms.length === 1 && selectedPlatforms[0] === 'none';
 
   const filteredLeads = useMemo(() => {
     const platformMatched = isAllPlatforms
       ? statusFilteredLeads
-      : statusFilteredLeads.filter((lead) => {
-          const key: PlatformFilterId = lead.platformId === 'unknown' ? 'unknown' : lead.platformId;
-          return selectedPlatforms.includes(key);
-        });
+      : isNonePlatforms
+        ? []
+        : statusFilteredLeads.filter((lead) => {
+            const key: PlatformFilterId = lead.platformId === 'unknown' ? 'unknown' : lead.platformId;
+            return selectedPlatforms.includes(key);
+          });
 
     const sorted = [...platformMatched];
     sorted.sort((a, b) => {
@@ -195,16 +197,22 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       return sortKey === 'date-latest' ? -cmp : cmp;
     });
     return sorted;
-  }, [statusFilteredLeads, isAllPlatforms, selectedPlatforms, sortKey]);
+  }, [statusFilteredLeads, isAllPlatforms, isNonePlatforms, selectedPlatforms, sortKey]);
 
-  const togglePlatform = (id: PlatformFilterId) => {
+  const setPlatformChecked = (id: string, checked: boolean) => {
+    const allIds = platformChipOptions.map((option) => option.id);
     setSelectedPlatforms((prev) => {
-      if (prev.length === 0) return [id];
-      if (prev.includes(id)) {
-        const next = prev.filter((item) => item !== id);
-        return next;
-      }
-      return [...prev, id];
+      const isAll = prev.length === 0;
+      const isNone = prev.length === 1 && prev[0] === 'none';
+      const current: PlatformFilterId[] = isAll ? allIds : isNone ? [] : prev.filter((item) => item !== 'none');
+      const next = checked
+        ? current.includes(id as PlatformFilterId)
+          ? current
+          : [...current, id as PlatformFilterId]
+        : current.filter((item) => item !== id);
+      if (next.length === 0) return ['none'];
+      if (allIds.length > 0 && allIds.every((item) => next.includes(item))) return [];
+      return next;
     });
   };
 
@@ -219,40 +227,21 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
   return (
     <div>
       <div className="panel">
-        <div className="panel-row">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
-              <Rss size={17} color="var(--accent-bright)" />
-              Upcoming Releases (RSS Alert Collector)
-            </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 3 }}>
-              Polled {collectorData.feedsPolled.length} public feeds ({collectorData.totalRawItems}{' '}
-              items) • {collectorData.upcomingCount ?? leads.length} upcoming •{' '}
-              {collectorData.availableNowCount ?? 0} available now (shown on Platforms) • Updated{' '}
-              {new Date(collectorData.generatedAt).toLocaleString()}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="primary-btn"
-            disabled={followedLeadsCount === 0}
-            onClick={onTriggerFollowedAlerts}
-          >
-            <BellRing size={15} />
-            Notify Followed ({followedLeadsCount})
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+          <Rss size={17} color="var(--accent-bright)" />
+          Upcoming Releases
         </div>
-
-        <div className="tech-note">
-          <strong>How it works:</strong> Public RSS feeds (Google News queries, Deadline, Variety,
-          TVLine) are scanned for premiere/release keywords, parsed with <code>chrono-node</code>,
-          and cross-checked against <strong>TVmaze</strong>. Unverified news leads stay{' '}
-          <strong>Unconfirmed</strong>; TVmaze schedule matches become <strong>Confirmed</strong>.
+        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 3 }}>
+          Updated{' '}
+          {new Date(collectorData.generatedAt).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
         </div>
       </div>
 
-      <div className="chip-scroll" role="group" aria-label="Filter by confirmation status">
+      <div className="chip-row" role="group" aria-label="Filter by confirmation status">
         {(
           [
             ['all', `All (${leads.length})`],
@@ -264,7 +253,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
               'unconfirmed',
               `Unconfirmed (${leads.filter((l) => l.confirmationStatus === 'unconfirmed').length})`,
             ],
-            ['followed', `Followed Matches (${followedLeadsCount})`],
+            ['followed', `Watchlisted (${followedLeadsCount})`],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -279,37 +268,17 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
         ))}
       </div>
 
-      <div className="chip-scroll" role="group" aria-label="Filter by streaming provider">
-        <button
-          type="button"
-          className={`filter-chip ${isAllPlatforms ? 'active' : ''}`}
-          aria-pressed={isAllPlatforms}
-          onClick={() => setSelectedPlatforms([])}
-        >
-          All providers ({statusFilteredLeads.length})
-        </button>
-        {platformChipOptions.map((option) => {
-          const active = selectedPlatforms.includes(option.id);
-          return (
-            <button
-              key={option.id}
-              type="button"
-              className={`filter-chip ${active ? 'active' : ''}`}
-              aria-pressed={active}
-              onClick={() => togglePlatform(option.id)}
-            >
-              <span
-                className="platform-dot"
-                style={{ backgroundColor: option.color, display: 'inline-block', marginRight: 6 }}
-              />
-              {option.name} ({option.count})
-            </button>
-          );
-        })}
-      </div>
+      <div className="upcoming-controls">
+        <PlatformFilterMenu
+          options={platformChipOptions}
+          selectedIds={isNonePlatforms ? [] : selectedPlatforms}
+          isAll={isAllPlatforms}
+          isNone={isNonePlatforms}
+          onToggle={setPlatformChecked}
+          onSelectAll={() => setSelectedPlatforms([])}
+          onClear={() => setSelectedPlatforms(['none'])}
+        />
 
-      <div className="section-heading">
-        <h2>Detected Upcoming & Premiere Leads</h2>
         <label className="sort-control">
           <span className="section-meta">Sort</span>
           <select
@@ -329,12 +298,12 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
 
       <div className="section-meta" style={{ marginBottom: 10 }}>
         {filteredLeads.length} shown
-        {!isAllPlatforms && ` • ${selectedPlatforms.length} provider${selectedPlatforms.length === 1 ? '' : 's'} selected`}
+        {!isAllPlatforms && !isNonePlatforms && ` • ${selectedPlatforms.length} platform${selectedPlatforms.length === 1 ? '' : 's'} selected`}
       </div>
 
       {filteredLeads.length === 0 ? (
         <div className="panel" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 24 }}>
-          No upcoming leads match the current filters. Try All providers or another status.
+          No upcoming releases match the current filters. Try Platforms: All or another status.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -390,7 +359,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                             color: 'var(--accent-bright)',
                           }}
                         >
-                          ★ Following
+                          ★ Watchlisted
                         </span>
                       )}
                     </div>
@@ -401,8 +370,8 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
                   <button
                     type="button"
                     className={`follow-icon-btn ${followed ? 'following' : ''}`}
-                    aria-label={followed ? `Unfollow ${lead.showTitle}` : `Follow ${lead.showTitle}`}
-                    title={followed ? 'Following (triggers alert)' : 'Follow this show'}
+                    aria-label={followed ? `Remove ${lead.showTitle} from Watchlist` : `Add ${lead.showTitle} to Watchlist`}
+                    title={followed ? 'In your Watchlist' : 'Add to Watchlist'}
                     onClick={() => onToggleFollowLead(lead)}
                   >
                     {followed ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}

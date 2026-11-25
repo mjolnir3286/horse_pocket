@@ -136,13 +136,13 @@ export const PlatformPage: React.FC<PlatformPageProps> = ({ platforms, available
   return (
     <div>
       <div className="section-heading">
-        <h2>Main services</h2>
+        <h2>Main platforms</h2>
         <span className="section-meta">Prices hand-checked</span>
       </div>
       <div className="platform-list">{priority.map(renderCard)}</div>
       <div className="section-heading">
-        <h2>More services</h2>
-        <span className="section-meta">{secondary.length} services</span>
+        <h2>More platforms</h2>
+        <span className="section-meta">{secondary.length} platforms</span>
       </div>
       <div className="platform-list">{secondary.map(renderCard)}</div>
     </div>

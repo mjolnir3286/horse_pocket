@@ -41,8 +41,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({ item, options, isFollowe
           <button
             type="button"
             className={`follow-icon-btn ${isFollowed ? 'following' : ''}`}
-            aria-label={isFollowed ? `Unfollow ${item.title}` : `Follow ${item.title}`}
-            title={isFollowed ? 'In your Watchlist' : item.mediaType === 'tv' ? 'Follow for episode alerts' : 'Save to Watchlist'}
+            aria-label={isFollowed ? `Remove ${item.title} from Watchlist` : `Add ${item.title} to Watchlist`}
+            title={isFollowed ? 'Watchlisted' : 'Add to Watchlist'}
             onClick={(e) => {
               e.stopPropagation();
               onToggleFollow(item);

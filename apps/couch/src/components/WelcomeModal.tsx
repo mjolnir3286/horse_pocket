@@ -167,20 +167,20 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         <ul className="welcome-features">
           <li>
             <span className="welcome-icon" aria-hidden="true">
-              <Search size={16} />
+              <Clapperboard size={16} />
             </span>
             <div>
-              <strong>Where to watch</strong>
-              <p>Type a title and press Search to see where it streams, plays free, or rents in the US.</p>
+              <strong>Upcoming</strong>
+              <p>Browse new releases, then filter or sort by platform and date.</p>
             </div>
           </li>
           <li>
             <span className="welcome-icon" aria-hidden="true">
-              <Clapperboard size={16} />
+              <Search size={16} />
             </span>
             <div>
-              <strong>Find upcoming shows</strong>
-              <p>Browse premiere leads, then filter or sort by streaming provider and date.</p>
+              <strong>Discover</strong>
+              <p>Type a title and press Search to see where it streams, plays free, or rents in the US.</p>
             </div>
           </li>
           <li>
@@ -188,8 +188,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               <BellRing size={16} />
             </span>
             <div>
-              <strong>Get notified</strong>
-              <p>Follow a show and Couch lets you know about new episodes when you open it.</p>
+              <strong>Watchlist</strong>
+              <p>Add a show to your Watchlist and Couch lets you know about new episodes when you open it.</p>
             </div>
           </li>
           <li>
@@ -197,8 +197,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               <Layers size={16} />
             </span>
             <div>
-              <strong>Plans and popular shows</strong>
-              <p>Compare hand-checked plan prices and what’s popular on each service.</p>
+              <strong>Platforms</strong>
+              <p>Compare hand-checked plan prices and what’s popular on each platform.</p>
             </div>
           </li>
         </ul>

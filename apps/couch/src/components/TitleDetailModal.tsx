@@ -113,15 +113,15 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow
           <button type="button" className="primary-btn" onClick={() => onToggleFollow(item)}>
             {isFollowed ? (
               <>
-                <Check size={16} /> In Watchlist
+                <Check size={16} /> Watchlisted
               </>
             ) : item.mediaType === 'tv' ? (
               <>
-                <BellRing size={16} /> Follow for episode alerts
+                <BellRing size={16} /> Add to Watchlist
               </>
             ) : (
               <>
-                <Bookmark size={16} /> Save to Watchlist
+                <Bookmark size={16} /> Add to Watchlist
               </>
             )}
           </button>

@@ -3,9 +3,8 @@
  */
 export const SITE = {
   name: 'Couch',
-  subtitle: 'Where to watch • Episode alerts',
   description:
-    'Couch helps you find where movies and shows stream, compare plan prices, and keep up with new episodes. No account; everything stays on your device.',
+    'Couch helps you browse upcoming releases, find where movies and shows stream, compare plan prices, and keep up with new episodes. No account; everything stays on your device.',
   portalName: 'Horse Pocket',
   portalUrl: '../',
   makerName: 'Kale G.',
@@ -22,5 +21,5 @@ export const SITE = {
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
   },
   disclaimer:
-    'Couch isn’t affiliated with any streaming service or data provider.',
+    'Couch isn’t affiliated with any streaming platform or data source.',
 } as const;

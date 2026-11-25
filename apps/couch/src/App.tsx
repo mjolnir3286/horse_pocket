@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bookmark, CircleHelp, Download, Film, Info, Layers, Play, Rss, Search, X } from 'lucide-react';
+import { Bookmark, CircleHelp, Download, Film, Info, Layers, Rss, Search, X } from 'lucide-react';
 import { PlatformPage } from './components/PlatformPage';
 import { ResultCard } from './components/ResultCard';
 import { TitleDetailModal } from './components/TitleDetailModal';
@@ -33,7 +33,7 @@ import type { CollectorOutput, UpcomingReleaseLead } from './types/collector';
 import type { NewEpisodeAlert, PlatformId, StreamingPlatform } from './types/streaming';
 
 type TabId = 'discover' | 'upcoming' | 'watchlist' | 'platforms';
-const TABS: TabId[] = ['discover', 'upcoming', 'watchlist', 'platforms'];
+const TABS: TabId[] = ['upcoming', 'discover', 'watchlist', 'platforms'];
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -48,9 +48,21 @@ function normalizeTitle(s: string): string {
 }
 
 function initialTab(): TabId {
-  const t = new URLSearchParams(window.location.search).get('tab');
-  return TABS.includes(t as TabId) ? (t as TabId) : 'discover';
+  const fromUrl = new URLSearchParams(window.location.search).get('tab');
+  return TABS.includes(fromUrl as TabId) ? (fromUrl as TabId) : 'upcoming';
 }
+
+const CouchMarkIcon: React.FC = () => (
+  <svg viewBox="0 0 64 64" fill="none" className="couch-mark-svg" aria-hidden="true">
+    <path fill="var(--couch-outline)" d="M12.8 45.2 L10.2 54.4 C10 55.2 11 55.7 11.7 55 L17.4 46.4 Z" />
+    <path fill="var(--couch-outline)" d="M51.2 45.2 L53.8 54.4 C54 55.2 53 55.7 52.3 55 L46.6 46.4 Z" />
+    <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M10.5 24 C16 13, 48 13, 53.5 24 L56 42.5 C56 46, 52 47, 46 47 C36.5 45.8, 27.5 45.8, 18 47 C12 47, 8 46, 8 42.5 Z" strokeWidth="3.8" strokeLinejoin="round" />
+    <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M9.5 21.5 C5.6 21.5, 4.4 26.5, 5.4 35.5 C6.2 42.8, 8.8 46.8, 14.5 46.8 L13.2 28 C12.8 24, 11.6 21.5, 9.5 21.5 Z" strokeWidth="3.8" strokeLinejoin="round" />
+    <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M54.5 21.5 C58.4 21.5, 59.6 26.5, 58.6 35.5 C57.8 42.8, 55.2 46.8, 49.5 46.8 L50.8 28 C51.2 24, 52.4 21.5, 54.5 21.5 Z" strokeWidth="3.8" strokeLinejoin="round" />
+    <rect fill="var(--couch-fill)" stroke="var(--couch-outline)" x="13.5" y="30.5" width="18.5" height="11.8" rx="3.4" strokeWidth="3.4" strokeLinejoin="round" />
+    <rect fill="var(--couch-fill)" stroke="var(--couch-outline)" x="32" y="30.5" width="18.5" height="11.8" rx="3.4" strokeWidth="3.4" strokeLinejoin="round" />
+  </svg>
+);
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
@@ -117,7 +129,7 @@ export const App: React.FC = () => {
     if (checkingRef.current) return;
     const current = followsRef.current;
     if (!current.some((f) => f.mediaType === 'tv')) {
-      if (manual) showToast('Follow a show first to get episode alerts.');
+      if (manual) showToast('Add a show to your Watchlist first to get episode alerts.');
       return;
     }
     checkingRef.current = true;
@@ -241,14 +253,14 @@ export const App: React.FC = () => {
     };
     setFollows((prev) => [entry, ...prev]);
     if (item.mediaType === 'movie') {
-      showToast(`Saved “${item.title}”`);
+      showToast(`Added “${item.title}” to your Watchlist`);
       return;
     }
-    showToast(`Following “${item.title}”`);
+    showToast(`Added “${item.title}” to your Watchlist`);
     const tvmazeId = await resolveTvmazeId(item.id);
     setFollows((prev) => prev.map((f) => (f.key === key ? { ...f, tvmazeId, untracked: tvmazeId == null } : f)));
     if (tvmazeId == null) {
-      showToast(`Saved “${item.title}”, but episode alerts aren’t available for it.`);
+      showToast(`Added “${item.title}” to your Watchlist, but episode alerts aren’t available for it.`);
     } else {
       setCheckRequest((n) => n + 1);
     }
@@ -285,7 +297,7 @@ export const App: React.FC = () => {
         prev.filter((f) => !(lead.tvmaze?.showId != null && f.tvmazeId === lead.tvmaze.showId) && normalizeTitle(f.title) !== norm)
       );
       setFollowedLeadNames((prev) => prev.filter((x) => normalizeTitle(x) !== norm));
-      showToast(`Unfollowed “${lead.showTitle}”`);
+      showToast(`Removed “${lead.showTitle}” from your Watchlist`);
       return;
     }
     if (lead.tvmaze?.showId != null) {
@@ -302,11 +314,11 @@ export const App: React.FC = () => {
         lastNotifiedAirstamp: null,
       };
       setFollows((prev) => [entry, ...prev]);
-      showToast(`Following “${lead.showTitle}” for episode alerts`);
+      showToast(`Added “${lead.showTitle}” to your Watchlist`);
       setCheckRequest((n) => n + 1);
     } else {
       setFollowedLeadNames((prev) => [...prev, lead.showTitle]);
-      showToast(`Following “${lead.showTitle}” in the Upcoming feed`);
+      showToast(`Added “${lead.showTitle}” to your Watchlist`);
     }
   };
 
@@ -319,20 +331,6 @@ export const App: React.FC = () => {
     [collectorData]
   );
 
-  const notifyFollowedLeads = async () => {
-    if (matchedUpcomingLeads.length === 0) {
-      showToast('None of your follows are in the Upcoming feed yet.');
-      return;
-    }
-    const first = matchedUpcomingLeads[0];
-    const date = first.parsedDateIso ?? first.extractedDateText ?? 'date TBA';
-    const body =
-      matchedUpcomingLeads.length === 1
-        ? `${first.showTitle} on ${first.platformName}: ${date}`
-        : `${first.showTitle} (${date}) and ${matchedUpcomingLeads.length - 1} more coming up`;
-    const delivery = await dispatchLocalEpisodeNotification({ title: `${SITE.name}: coming up`, body, tag: 'couch-upcoming' });
-    if (delivery.deliveredVia === 'in-app-only') showToast(body);
-  };
 
   const platformsById = useMemo(
     () => Object.fromEntries(platforms.map((p) => [p.id, p])) as Record<PlatformId, StreamingPlatform>,
@@ -371,30 +369,33 @@ export const App: React.FC = () => {
 
       <header className="app-header">
         <div className="header-row">
-          <div className="brand">
-            <div className="brand-mark">
-              <Play size={17} fill="currentColor" />
-            </div>
-            <div>
-              <h1 className="brand-title">{SITE.name}</h1>
-              <span className="brand-subtitle">
-                <a href={SITE.portalUrl} className="portal-link">
-                  {SITE.portalName}
-                </a>{' '}
-                • {SITE.subtitle}
-              </span>
-            </div>
+          <div className="brand-identity">
+            <span className="couch-mark">
+              <CouchMarkIcon />
+            </span>
+            <h1 className="brand-title">{SITE.name}</h1>
           </div>
           <div className="header-actions">
-            <button ref={helpButtonRef} type="button" className="pill-btn icon-btn" aria-label={`How to use ${SITE.name}`} title={`How to use ${SITE.name}`} onClick={() => setWelcomeOpen(true)}>
-              <CircleHelp size={16} />
-            </button>
-            <button ref={aboutButtonRef} type="button" className="pill-btn icon-btn" aria-label={`About ${SITE.name}`} title={`About ${SITE.name}`} onClick={() => setAboutOpen(true)}>
-              <Info size={16} />
-            </button>
             <button type="button" className="pill-btn install-btn" onClick={handleInstallClick} title={`Install ${SITE.name}`}>
               <Download size={13} />
               Install
+            </button>
+          </div>
+        </div>
+        <div className="header-subrow">
+          <a
+            href="https://mjolnir3286.github.io/horse_pocket/"
+            className="portal-back"
+            aria-label="Back to Horse Pocket"
+          >
+            ‹ Horse Pocket
+          </a>
+          <div className="header-sub-actions">
+            <button ref={helpButtonRef} type="button" className="sub-icon-btn" aria-label={`How to use ${SITE.name}`} title={`How to use ${SITE.name}`} onClick={() => setWelcomeOpen(true)}>
+              <CircleHelp size={15} />
+            </button>
+            <button ref={aboutButtonRef} type="button" className="sub-icon-btn" aria-label={`About ${SITE.name}`} title={`About ${SITE.name}`} onClick={() => setAboutOpen(true)}>
+              <Info size={15} />
             </button>
           </div>
         </div>
@@ -484,7 +485,6 @@ export const App: React.FC = () => {
             platformsById={platformsById}
             isLeadFollowed={isLeadFollowed}
             onToggleFollowLead={toggleFollowLead}
-            onTriggerFollowedAlerts={notifyFollowedLeads}
           />
         )}
 
@@ -510,14 +510,14 @@ export const App: React.FC = () => {
 
       <nav className="bottom-nav" aria-label="Primary navigation">
         <div className="bottom-nav-inner">
-          <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
-            <Film size={19} />
-            <span>Discover</span>
-          </button>
           <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>
             <Rss size={19} />
             {matchedUpcomingLeads.length > 0 && <span className="nav-badge">{matchedUpcomingLeads.length}</span>}
             <span>Upcoming</span>
+          </button>
+          <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
+            <Film size={19} />
+            <span>Discover</span>
           </button>
           <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
             <Bookmark size={19} />

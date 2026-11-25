@@ -9,7 +9,8 @@
  * - CORS only for https://mjolnir3286.github.io and http://localhost:* / 127.0.0.1:*
  *   Requests without an allowed Origin are refused with 403.
  * - Adds `Authorization: Bearer <TMDB_TOKEN>` (Worker secret) server-side.
- * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, season providers, recommendations, and discover).
+ * - Caches successful responses with the Workers Cache API, and sends Cache-Control so browsers can reuse them (30 minutes for search, 24 hours for details, providers, season providers, recommendations, discover, and trending).
+ * - Discover and trending have their own strict parameter rules (see ROUTE_PARAMS).
  * - Returns only TMDB's JSON body.
  */
 
@@ -26,6 +27,7 @@ const ROUTES = [
   [/^\/tv\/\d{1,9}\/season\/\d{1,3}\/watch\/providers$/, 86400],
   [/^\/(movie|tv)\/\d{1,9}\/recommendations$/, 86400],
   [/^\/discover\/(movie|tv)$/, 86400],
+  [/^\/trending\/(all|movie|tv)\/week$/, 86400],
   [/^\/configuration$/, 86400],
 ];
 
@@ -43,6 +45,27 @@ const ALLOWED_PARAMS = new Set([
   'append_to_response',
 ]);
 const ALLOWED_APPEND = new Set(['watch/providers', 'external_ids']);
+
+// Per-route parameter rules: only these keys, and each value must pass its check.
+const MONETIZATION = new Set(['flatrate', 'free', 'ads']);
+const DISCOVER_PARAMS = {
+  watch_region: (v) => v === 'US',
+  with_watch_providers: (v) => /^\d{1,6}(\|\d{1,6}){0,9}$/.test(v),
+  with_watch_monetization_types: (v) => v.split('|').every((t) => MONETIZATION.has(t)),
+  sort_by: (v) => v === 'popularity.desc',
+  include_adult: (v) => v === 'false',
+  language: (v) => v === 'en-US',
+  page: (v) => /^[1-5]$/.test(v),
+  'vote_count.gte': (v) => /^\d{1,5}$/.test(v),
+};
+const TRENDING_PARAMS = {
+  language: (v) => v === 'en-US',
+  page: (v) => /^[1-5]$/.test(v),
+};
+const ROUTE_PARAMS = [
+  [/^\/discover\/(movie|tv)$/, DISCOVER_PARAMS],
+  [/^\/trending\//, TRENDING_PARAMS],
+];
 
 function isAllowedOrigin(origin) {
   return !!origin && (origin === PROD_ORIGIN || LOCAL_ORIGIN.test(origin));
@@ -64,7 +87,20 @@ function jsonError(status, message, origin) {
   return new Response(JSON.stringify({ error: message }), { status, headers });
 }
 
-function sanitizeQuery(searchParams) {
+function sanitizeStrict(searchParams, rules) {
+  const out = new URLSearchParams();
+  for (const [key, value] of searchParams) {
+    const check = rules[key];
+    if (!check || value.length > 200 || out.has(key) || !check(value)) continue;
+    out.set(key, value);
+  }
+  out.sort();
+  return out;
+}
+
+function sanitizeQuery(searchParams, tmdbPath = '') {
+  const strict = ROUTE_PARAMS.find(([re]) => re.test(tmdbPath));
+  if (strict) return sanitizeStrict(searchParams, strict[1]);
   const out = new URLSearchParams();
   for (const [key, value] of searchParams) {
     if (!ALLOWED_PARAMS.has(key) || value.length > 200 || out.has(key)) continue;
@@ -101,7 +137,7 @@ export default {
 
     if (!env.TMDB_TOKEN) return jsonError(503, 'Relay not configured', origin);
 
-    const query = sanitizeQuery(url.searchParams);
+    const query = sanitizeQuery(url.searchParams, tmdbPath);
     const qs = query.toString();
     const upstreamUrl = `${TMDB_BASE}${tmdbPath}${qs ? `?${qs}` : ''}`;
 

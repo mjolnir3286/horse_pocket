@@ -5,10 +5,17 @@ import {
 } from './follows';
 import type { NewEpisodeAlert, PlatformId } from '../types/streaming';
 import { HIDE_WATCHED_KEY, sanitizeWatched } from './watched';
+import { isPlatformId } from '../data/platforms';
+import { sanitizeMyServices, saveMyServices } from './myServices';
 
 export type StatusFilter = 'all' | 'confirmed' | 'unconfirmed' | 'followed';
 export type SortKey = 'date-soonest' | 'date-latest' | 'provider-az' | 'title-az' | 'confidence';
-export type PlatformFilterId = PlatformId | 'unknown' | 'none';
+/**
+ * Saved Upcoming platform filter. [] = default (My services when any are checked, else All),
+ * ['all'] = All chosen explicitly, ['none'] = None, otherwise a custom pick.
+ * Older saves used [] for All; with no My services that still means All.
+ */
+export type PlatformFilterId = PlatformId | 'unknown' | 'none' | 'all';
 export type DiscoverTypeFilter = 'all' | 'movie' | 'tv';
 
 export const STATUS_STORAGE_KEY = 'horse_pocket_upcoming_status_v1';
@@ -41,20 +48,13 @@ export const isSortKey = (value: unknown): value is SortKey =>
   SORT_OPTIONS.some((option) => option.value === value);
 
 export const isPlatformFilterList = (value: unknown): value is PlatformFilterId[] =>
-  Array.isArray(value) &&
-  value.every(
-    (id) =>
-      id === 'none' ||
-      id === 'unknown' ||
-      id === 'netflix' ||
-      id === 'disney-plus' ||
-      id === 'hulu' ||
-      id === 'prime-video' ||
-      id === 'max' ||
-      id === 'apple-tv-plus' ||
-      id === 'peacock' ||
-      id === 'paramount-plus'
-  );
+  Array.isArray(value) && value.every((id) => id === 'none' || id === 'unknown' || id === 'all' || isPlatformId(id));
+
+/** Older backups could hold ids Couch no longer lists; drop those instead of rejecting the file. */
+export function sanitizePlatformFilterList(value: unknown): PlatformFilterId[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.filter((id): id is PlatformFilterId => id === 'none' || id === 'unknown' || id === 'all' || isPlatformId(id));
+}
 
 const isDiscoverTypeFilter = (value: unknown): value is DiscoverTypeFilter =>
   value === 'all' || value === 'movie' || value === 'tv';
@@ -136,6 +136,8 @@ export interface CouchBackup {
     welcomeDismissed: boolean;
     discoverTypeFilter: DiscoverTypeFilter;
     hideWatched: boolean;
+    /** Platforms-tab "My services" (added in issue #5; optional in older files). */
+    myServices: PlatformId[];
   };
   filters: {
     watchlistOnly: boolean;
@@ -153,6 +155,7 @@ export interface CouchExportInput {
   welcomeDismissed: boolean;
   discoverTypeFilter: DiscoverTypeFilter;
   hideWatched: boolean;
+  myServices: PlatformId[];
 }
 
 export function buildCouchBackup(input: CouchExportInput): CouchBackup {
@@ -171,6 +174,7 @@ export function buildCouchBackup(input: CouchExportInput): CouchBackup {
       welcomeDismissed: input.welcomeDismissed,
       discoverTypeFilter: input.discoverTypeFilter,
       hideWatched: input.hideWatched,
+      myServices: sanitizeMyServices(input.myServices),
     },
     filters: {
       watchlistOnly: readWatchlistOnly(),
@@ -253,11 +257,8 @@ export function parseCouchBackup(
       : isStatusFilter(filters.upcomingStatus)
         ? filters.upcomingStatus === 'followed'
         : null;
-  if (
-    watchlistOnly === null ||
-    !isPlatformFilterList(filters.upcomingPlatforms) ||
-    !isSortKey(filters.upcomingSort)
-  ) {
+  const upcomingPlatforms = sanitizePlatformFilterList(filters.upcomingPlatforms);
+  if (watchlistOnly === null || upcomingPlatforms === null || !isSortKey(filters.upcomingSort)) {
     return { ok: false, error: friendly };
   }
   const upcomingStatus: StatusFilter = watchlistOnly ? 'followed' : 'all';
@@ -284,11 +285,12 @@ export function parseCouchBackup(
         welcomeDismissed: settings.welcomeDismissed,
         discoverTypeFilter,
         hideWatched: settings.hideWatched === true,
+        myServices: sanitizeMyServices(settings.myServices),
       },
       filters: {
         watchlistOnly,
         upcomingStatus,
-        upcomingPlatforms: filters.upcomingPlatforms,
+        upcomingPlatforms,
         upcomingSort: filters.upcomingSort,
       },
     },
@@ -315,6 +317,7 @@ export function applyCouchBackupToStorage(backup: CouchBackup) {
   } catch {
     // ignore
   }
+  saveMyServices(backup.settings.myServices);
   writeWatchlistOnly(backup.filters.watchlistOnly);
   writeStorage(PLATFORM_STORAGE_KEY, backup.filters.upcomingPlatforms);
   writeStorage(SORT_STORAGE_KEY, backup.filters.upcomingSort);

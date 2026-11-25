@@ -6,6 +6,9 @@ import { SideMenu, type PendingCouchImport } from './components/SideMenu';
 import { TitleDetailModal, type DetailItem } from './components/TitleDetailModal';
 import { HideWatchedToggle } from './components/HideWatchedToggle';
 import { WatchNext } from './components/WatchNext';
+import { DiscoverHome } from './components/DiscoverHome';
+import { loadMyServices, MyServicesContext, providerIdsFor, sanitizeMyServices, saveMyServices } from './services/myServices';
+import { useMediaQuery } from './lib/useMediaQuery';
 import {
   findWatched,
   isTitleWatched,
@@ -106,6 +109,9 @@ export const App: React.FC = () => {
   const searchAbort = useRef<AbortController | null>(null);
   const [selected, setSelected] = useState<DetailItem | null>(null);
   const [watched, setWatched] = useState<WatchedStore>(loadWatched);
+  const [myServices, setMyServices] = useState<PlatformId[]>(loadMyServices);
+  const myServicesValue = useMemo(() => ({ ids: myServices, providerIds: providerIdsFor(myServices) }), [myServices]);
+  const isPhone = useMediaQuery('(max-width: 767px)');
   const [hideWatched, setHideWatched] = useState<boolean>(loadHideWatched);
 
   const [follows, setFollows] = useState<FollowedTitle[]>(loadFollows);
@@ -152,6 +158,44 @@ export const App: React.FC = () => {
   useEffect(() => saveAlerts(alerts), [alerts]);
   useEffect(() => saveWatched(watched), [watched]);
   useEffect(() => saveHideWatched(hideWatched), [hideWatched]);
+  useEffect(() => saveMyServices(myServices), [myServices]);
+
+  const toggleService = useCallback((id: PlatformId, checked: boolean) => {
+    setMyServices((prev) => sanitizeMyServices(checked ? [...prev, id] : prev.filter((x) => x !== id)));
+  }, []);
+
+  // ---- Phones: swipe sideways on the bottom tab bar to change tabs (issue #5) ----
+  const swipeStart = useRef<{ x: number; y: number; id: number } | null>(null);
+  const suppressNavClick = useRef(false);
+  const SWIPE_MIN_PX = 40;
+  const onNavPointerDown = (e: React.PointerEvent) => {
+    if (!isPhone || !e.isPrimary) return;
+    swipeStart.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  };
+  const onNavPointerUp = (e: React.PointerEvent) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (!isPhone || !start || start.id !== e.pointerId) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    // Mostly horizontal and past the threshold; anything smaller stays a tap.
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    suppressNavClick.current = true;
+    window.setTimeout(() => {
+      suppressNavClick.current = false;
+    }, 400);
+    setActiveTab((current) => {
+      const i = TABS.indexOf(current);
+      const next = dx < 0 ? i + 1 : i - 1; // swipe left = next tab, no wraparound
+      return next >= 0 && next < TABS.length ? TABS[next] : current;
+    });
+  };
+  const onNavClickCapture = (e: React.MouseEvent) => {
+    if (!suppressNavClick.current) return;
+    suppressNavClick.current = false;
+    e.preventDefault();
+    e.stopPropagation();
+  };
   useEffect(() => {
     try {
       localStorage.setItem(FOLLOWED_LEADS_STORAGE_KEY, JSON.stringify(followedLeadNames));
@@ -255,6 +299,15 @@ export const App: React.FC = () => {
       if (!ctrl.signal.aborted) setSearching(false);
     }
   }, [submittedQuery, results.length, searchError]);
+
+  const clearSearch = () => {
+    searchAbort.current?.abort();
+    setQueryText('');
+    setSubmittedQuery('');
+    setResults([]);
+    setSearchError(null);
+    setSearching(false);
+  };
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -550,18 +603,18 @@ export const App: React.FC = () => {
     [watched]
   );
   const isTmdbFollowed = useCallback((t: TmdbTitle) => followsByKey.has(followKey(t.mediaType, t.id)), [followsByKey]);
+  const isTmdbCaughtUp = useCallback(
+    (t: TmdbTitle) => isTitleWatched(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id })),
+    [watched]
+  );
+  /** Discover rows and More like this hide titles you're caught up on when Hide watched is on. */
+  const isRowHidden = useCallback((t: TmdbTitle) => hideWatched && isTmdbCaughtUp(t), [hideWatched, isTmdbCaughtUp]);
 
   const detailFollow = selected
     ? selected.tmdbless
       ? follows.find((f) => f.tvmazeId === selected.tvmazeId)
       : followsByKey.get(followKey(selected.mediaType, selected.id))
     : undefined;
-
-  const availableNowLeads = useMemo(
-    () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'available-now'),
-    [collectorData]
-  );
-
 
   const platformsById = useMemo(
     () => Object.fromEntries(platforms.map((p) => [p.id, p])) as Record<PlatformId, StreamingPlatform>,
@@ -577,6 +630,7 @@ export const App: React.FC = () => {
       welcomeDismissed: readWelcomeDismissed(),
       discoverTypeFilter: typeFilter,
       hideWatched,
+      myServices,
     });
     downloadJsonFile(backup, couchBackupFilename());
     showToast('Backup exported.');
@@ -603,6 +657,7 @@ export const App: React.FC = () => {
           setTypeFilter(backup.settings.discoverTypeFilter);
           setWatched(sanitizeWatched(backup.watched));
           setHideWatched(backup.settings.hideWatched);
+          setMyServices(backup.settings.myServices);
           setBackupGeneration((n) => n + 1);
           showToast('Lists replaced from backup.');
         },
@@ -633,6 +688,7 @@ export const App: React.FC = () => {
   const tvFollowCount = follows.filter((f) => f.mediaType === 'tv').length;
 
   return (
+    <MyServicesContext.Provider value={myServicesValue}>
     <div className="app-shell">
       {toast && (
         <div className="toast" role="status">
@@ -671,23 +727,30 @@ export const App: React.FC = () => {
           </div>
         </header>
 
-        <nav className="primary-nav" aria-label="Primary navigation">
+        <nav
+          className="primary-nav"
+          aria-label="Primary navigation"
+          onPointerDown={onNavPointerDown}
+          onPointerUp={onNavPointerUp}
+          onPointerCancel={() => (swipeStart.current = null)}
+          onClickCapture={onNavClickCapture}
+        >
           <div className="primary-nav-inner">
-            <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>
+            <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} aria-current={activeTab === 'upcoming' ? 'page' : undefined} onClick={() => setActiveTab('upcoming')}>
               <Rss size={19} />
               {matchedUpcomingLeads.length > 0 && <span className="nav-badge">{matchedUpcomingLeads.length}</span>}
               <span>Upcoming</span>
             </button>
-            <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
+            <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} aria-current={activeTab === 'discover' ? 'page' : undefined} onClick={() => setActiveTab('discover')}>
               <Film size={19} />
               <span>Discover</span>
             </button>
-            <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
+            <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} aria-current={activeTab === 'watchlist' ? 'page' : undefined} onClick={() => setActiveTab('watchlist')}>
               <Bookmark size={19} />
               {(alerts.length > 0 || tvFollowCount > 0) && <span className="nav-badge">{alerts.length > 0 ? alerts.length : follows.length}</span>}
               <span>Watchlist</span>
             </button>
-            <button type="button" className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`} onClick={() => setActiveTab('platforms')}>
+            <button type="button" className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`} aria-current={activeTab === 'platforms' ? 'page' : undefined} onClick={() => setActiveTab('platforms')}>
               <Layers size={19} />
               <span>Platforms</span>
             </button>
@@ -706,12 +769,15 @@ export const App: React.FC = () => {
                   className="search-input"
                   placeholder="Search any movie or show"
                   value={queryText}
-                  onChange={(e) => setQueryText(e.target.value)}
+                  onChange={(e) => {
+                    setQueryText(e.target.value);
+                    if (!e.target.value.trim()) clearSearch();
+                  }}
                   aria-label="Search movies and shows"
                   autoComplete="off"
                 />
                 {queryText && (
-                  <button type="button" className="search-clear" onClick={() => setQueryText('')} aria-label="Clear search">
+                  <button type="button" className="search-clear" onClick={clearSearch} aria-label="Clear search">
                     <X size={16} />
                   </button>
                 )}
@@ -739,9 +805,16 @@ export const App: React.FC = () => {
             </div>
 
             {!submittedQuery && !searching ? (
-              <div className="panel empty-panel">
-                Type a title, then press Enter or tap Search to see where it streams, plays free, or is for rent or purchase in the US.
-              </div>
+              <DiscoverHome
+                type={typeFilter}
+                isHidden={isRowHidden}
+                isFollowed={isTmdbFollowed}
+                isWatched={isTmdbCaughtUp}
+                onToggleFollow={(t) => void toggleFollowTitle(t)}
+                onToggleWatched={(t) => toggleTitleWatched(t)}
+                onSelect={setSelected}
+                onOpenPlatforms={() => setActiveTab('platforms')}
+              />
             ) : searchError ? (
               <div className="panel empty-panel">{searchError}</div>
             ) : (
@@ -813,6 +886,7 @@ export const App: React.FC = () => {
                 isWatched={isTmdbWatched}
                 isFollowed={isTmdbFollowed}
                 onToggleFollow={(t) => void toggleFollowTitle(t)}
+                onToggleWatched={(t) => toggleTitleWatched(t)}
                 onSelect={setSelected}
               />
             }
@@ -820,7 +894,7 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === 'platforms' && (
-          <PlatformPage platforms={platforms} availableNowLeads={availableNowLeads} onSelectTitle={setSelected} />
+          <PlatformPage platforms={platforms} onSelectTitle={setSelected} onToggleService={toggleService} isWatched={isTmdbCaughtUp} onToggleWatched={(t) => toggleTitleWatched(t)} />
         )}
       </main>
 
@@ -852,8 +926,16 @@ export const App: React.FC = () => {
         onToggleWatched={toggleTitleWatched}
         onSetEpisodes={setDetailEpisodes}
         onTvmazeResolved={onDetailTvmazeResolved}
-        onClose={closeDetail} onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
+        onClose={closeDetail}
+        onSelectTitle={setSelected}
+        isTitleFollowed={isTmdbFollowed}
+        onToggleFollowTitle={(t) => void toggleFollowTitle(t)}
+        isTitleHidden={isRowHidden}
+        isTitleWatchedMark={isTmdbCaughtUp}
+        onToggleWatchedTitle={(t) => toggleTitleWatched(t)}
+        onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
     </div>
+    </MyServicesContext.Provider>
   );
 };
 

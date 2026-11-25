@@ -1,40 +1,45 @@
 export type PlatformId =
   | 'netflix'
+  | 'prime-video'
   | 'disney-plus'
   | 'hulu'
-  | 'prime-video'
   | 'max'
   | 'apple-tv-plus'
   | 'peacock'
-  | 'paramount-plus';
+  | 'paramount-plus'
+  | 'starz'
+  | 'mgm-plus'
+  | 'amc-plus'
+  | 'crunchyroll'
+  | 'discovery-plus'
+  | 'angel'
+  | 'tubi'
+  | 'pluto-tv'
+  | 'roku-channel'
+  | 'pbs'
+  | 'investigation-discovery'
+  | 'ae'
+  | 'history'
+  | 'lifetime'
+  | 'abc'
+  | 'nbc';
 
-export type PlatformPriorityTier = 'priority' | 'secondary';
-
-export interface PlatformPlan {
-  name: string;
-  /** Exact price text as published, e.g. "$8.99/mo". null = not verified. */
-  monthlyPrice: string | null;
-  annualPrice?: string | null;
-  hasAds: boolean;
-  notes?: string;
-}
+/** How the Platforms tab groups a service. */
+export type PlatformGroup = 'subscription' | 'free' | 'network';
 
 export interface StreamingPlatform {
   id: PlatformId;
-  /** TMDB watch-provider ids (US) that count as this service. */
+  /** TMDB watch-provider ids (US) that count as this service (ad tiers and plan splits merged). */
   tmdbProviderIds: number[];
-  tier: PlatformPriorityTier;
+  group: PlatformGroup;
   name: string;
   shortCode: string;
   brandColor: string;
-  tagline: string;
-  plans: PlatformPlan[];
-  /** Official page the prices were read from. */
-  pricingUrl: string;
-  /** ISO date the prices were checked against pricingUrl. */
-  pricesCheckedOn: string;
-  pricingNote?: string;
+  /** TMDB provider logo path (served from image.tmdb.org). */
+  logoPath: string | null;
+  /** Official homepage. Prices live there, not in Couch. */
   websiteUrl: string;
+  note?: string;
 }
 
 export interface NewEpisodeAlert {

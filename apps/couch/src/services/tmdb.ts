@@ -56,6 +56,9 @@ const EXIDS_STORE = 'couch_tmdb_external_ids_v1';
 const SEASONS_STORE = 'couch_tmdb_seasons_v1';
 const SEASON_PROVIDER_STORE = 'couch_tmdb_season_providers_v1';
 const RECS_STORE = 'couch_tmdb_recommendations_v1';
+const ROW_STORE = 'couch_tmdb_rows_v1';
+/** Subscription, free, and free-with-ads: anything but rent/buy. */
+const WATCHABLE_TYPES = 'flatrate|free|ads';
 
 async function relayGet<T>(path: string, params: Record<string, string> = {}, signal?: AbortSignal): Promise<T> {
   const qs = new URLSearchParams(params).toString();
@@ -194,7 +197,7 @@ export async function getTvExternalIds(id: number): Promise<{ imdbId: string | n
   });
 }
 
-/** TMDB's most popular titles currently streaming (flatrate) on the given US providers. Cached 24 hours. */
+/** TMDB's most popular titles watchable (subscription, free, or with ads) on the given US providers. Cached 24 hours. */
 export async function getPopularOnProvider(
   type: TmdbMediaType,
   providerIds: number[],
@@ -209,7 +212,7 @@ export async function getPopularOnProvider(
     const data = await relayGet<{ results: RawResult[] }>(`/discover/${type}`, {
       watch_region: WATCH_REGION,
       with_watch_providers: providerIds.join('|'),
-      with_watch_monetization_types: 'flatrate',
+      with_watch_monetization_types: WATCHABLE_TYPES,
       sort_by: 'popularity.desc',
       include_adult: 'false',
       language: 'en-US',
@@ -308,6 +311,88 @@ export async function getRecommendations(type: TmdbMediaType, id: number): Promi
       .filter((t): t is TmdbTitle => t !== null)
       .slice(0, 12);
     cacheSet('local', RECS_STORE, key, titles, DETAILS_TTL_MS);
+    return titles;
+  });
+}
+
+export type RowType = 'all' | TmdbMediaType;
+const ROW_SIZE = 20;
+
+function mergeByPopularity(lists: TmdbTitle[][]): TmdbTitle[] {
+  const seen = new Set<string>();
+  return lists
+    .flat()
+    .sort((a, b) => b.popularity - a.popularity)
+    .filter((t) => {
+      const k = `${t.mediaType}-${t.id}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .slice(0, ROW_SIZE)
+    .map(trimOverview);
+}
+
+/** Rows are cached per service and type, so keep stored overviews short. */
+function trimOverview(t: TmdbTitle): TmdbTitle {
+  return t.overview.length > 400 ? { ...t, overview: `${t.overview.slice(0, 397).trimEnd()}…` } : t;
+}
+
+function rowKey(kind: string, type: RowType, providerIds: number[] = []): string {
+  return `${kind}:${type}:${providerIds.slice().sort((a, b) => a - b).join('|')}`;
+}
+
+export function peekServiceRow(type: RowType, providerIds: number[]): TmdbTitle[] | undefined {
+  return cacheGet<TmdbTitle[]>('local', ROW_STORE, rowKey('svc', type, providerIds));
+}
+
+async function discoverPage(type: TmdbMediaType, providerIds: number[]): Promise<TmdbTitle[]> {
+  const data = await relayGet<{ results?: RawResult[] }>(`/discover/${type}`, {
+    watch_region: WATCH_REGION,
+    with_watch_providers: providerIds.join('|'),
+    with_watch_monetization_types: WATCHABLE_TYPES,
+    sort_by: 'popularity.desc',
+    include_adult: 'false',
+    language: 'en-US',
+    page: '1',
+  });
+  return (data.results ?? []).map((r) => toTitle(r, type)).filter((t): t is TmdbTitle => t !== null);
+}
+
+/** "Popular on <Service>" row for Discover: shows, movies, or both merged by popularity. Cached 24 hours. */
+export async function getServiceRow(type: RowType, providerIds: number[]): Promise<TmdbTitle[]> {
+  const key = rowKey('svc', type, providerIds);
+  const cached = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
+  if (cached) return cached;
+  return dedupe(`row:${key}`, async () => {
+    const again = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
+    if (again) return again;
+    const types: TmdbMediaType[] = type === 'all' ? ['tv', 'movie'] : [type];
+    const titles = mergeByPopularity(await Promise.all(types.map((t) => discoverPage(t, providerIds))));
+    cacheSet('local', ROW_STORE, key, titles, DETAILS_TTL_MS);
+    return titles;
+  });
+}
+
+export function peekTrendingRow(type: RowType): TmdbTitle[] | undefined {
+  return cacheGet<TmdbTitle[]>('local', ROW_STORE, rowKey('trending', type));
+}
+
+/** TMDB trending this week (/trending/{all|movie|tv}/week). Cached 24 hours. */
+export async function getTrendingRow(type: RowType): Promise<TmdbTitle[]> {
+  const key = rowKey('trending', type);
+  const cached = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
+  if (cached) return cached;
+  return dedupe(`row:${key}`, async () => {
+    const again = cacheGet<TmdbTitle[]>('local', ROW_STORE, key);
+    if (again) return again;
+    const data = await relayGet<{ results?: RawResult[] }>(`/trending/${type}/week`, { language: 'en-US' });
+    const titles = (data.results ?? [])
+      .map((r) => toTitle(r, type === 'all' ? undefined : type))
+      .filter((t): t is TmdbTitle => t !== null)
+      .slice(0, ROW_SIZE)
+      .map(trimOverview);
+    cacheSet('local', ROW_STORE, key, titles, DETAILS_TTL_MS);
     return titles;
   });
 }

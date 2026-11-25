@@ -4,7 +4,7 @@
 export const SITE = {
   name: 'Couch',
   description:
-    'Couch helps you browse upcoming releases, find where movies and shows stream, compare plan prices, and keep up with new episodes. No account; everything stays on your device.',
+    'Couch helps you browse upcoming releases, find where movies and shows stream, see what’s popular on your services, and keep up with new episodes. No account; everything stays on your device.',
   portalName: 'Horse Pocket',
   portalUrl: '../',
   makerName: 'Kale G.',

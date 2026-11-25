@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BellRing, Bookmark, Check, CheckCircle2, Circle, ExternalLink, X } from 'lucide-react';
 import { getWatchOptions, posterUrl, type TmdbTitle, type WatchOptions } from '../services/tmdb';
 import type { FollowedTitle } from '../services/follows';
@@ -6,6 +6,7 @@ import type { TvmazeEpisode } from '../services/tvmaze';
 import { isTitleWatched, type WatchedEntry } from '../services/watched';
 import { EpisodesSection } from './EpisodesSection';
 import { WatchOptionsFull } from './WatchOptions';
+import { MoreLikeThis } from './MoreLikeThis';
 
 /** A TMDB title, or a TVmaze-only show from the Upcoming feed (tmdbless). */
 export type DetailItem = TmdbTitle & { tvmazeId?: number | null; tmdbless?: boolean; platformName?: string };
@@ -20,6 +21,13 @@ interface TitleDetailModalProps {
   onTvmazeResolved?: (item: DetailItem, tvmazeId: number | null) => void;
   onClose: () => void;
   onOptionsLoaded?: (item: TmdbTitle, options: WatchOptions) => void;
+  /** More like this: open another title in this sheet, and its Watchlist / hide-watched state. */
+  onSelectTitle?: (t: TmdbTitle) => void;
+  isTitleFollowed?: (t: TmdbTitle) => boolean;
+  onToggleFollowTitle?: (t: TmdbTitle) => void;
+  isTitleHidden?: (t: TmdbTitle) => boolean;
+  isTitleWatchedMark?: (t: TmdbTitle) => boolean;
+  onToggleWatchedTitle?: (t: TmdbTitle) => void;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -38,12 +46,21 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
   onTvmazeResolved,
   onClose,
   onOptionsLoaded,
+  onSelectTitle,
+  isTitleFollowed,
+  onToggleFollowTitle,
+  isTitleHidden,
+  isTitleWatchedMark,
+  onToggleWatchedTitle,
 }) => {
+  const sheetRef = useRef<HTMLDivElement>(null);
   const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
   const [caughtUp, setCaughtUp] = useState<boolean | null>(null);
 
   useEffect(() => {
     setCaughtUp(null);
+    // Opening a title from More like this swaps the sheet's content: start at the top.
+    sheetRef.current?.scrollTo?.({ top: 0 });
   }, [item]);
 
   useEffect(() => {
@@ -83,7 +100,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="presentation">
-      <div className="modal-sheet" role="dialog" aria-modal="true" aria-label={item.title} onClick={(e) => e.stopPropagation()}>
+      <div ref={sheetRef} className="modal-sheet" role="dialog" aria-modal="true" aria-label={item.title} onClick={(e) => e.stopPropagation()}>
         <div className="detail-head">
           <div className="detail-identity">
             <div className="poster-tile detail-poster">
@@ -157,6 +174,20 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
             onTvmazeResolved={(id) => onTvmazeResolved?.(item, id)}
             onSetEpisodes={(eps, w) => onSetEpisodes(item, eps, w)}
             onCaughtUp={setCaughtUp}
+          />
+        )}
+
+        {!item.tmdbless && onSelectTitle && onToggleFollowTitle && onToggleWatchedTitle && (
+          <MoreLikeThis
+            mediaType={item.mediaType}
+            id={item.id}
+            title={item.title}
+            isHidden={isTitleHidden ?? (() => false)}
+            isFollowed={isTitleFollowed ?? (() => false)}
+            isWatched={isTitleWatchedMark ?? (() => false)}
+            onToggleFollow={onToggleFollowTitle}
+            onToggleWatched={onToggleWatchedTitle}
+            onSelect={onSelectTitle}
           />
         )}
 

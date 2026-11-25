@@ -840,6 +840,35 @@ input {
   background: var(--subtle-fill-hover);
 }
 
+.top3-select {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.top3-select .top3-left {
+  flex: 1;
+}
+
+.top3-select .muted {
+  flex-shrink: 0;
+}
+
+.top3-item .watched-btn {
+  flex-shrink: 0;
+}
+
 .top3-rank {
   width: 22px;
   height: 22px;
@@ -2196,18 +2225,332 @@ input {
   min-height: calc(1.3em * 2);
 }
 
+.watch-next-card.is-watched .watch-next-poster {
+  opacity: 0.72;
+}
+
+.watch-next-watched,
 .watch-next-follow {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 28px;
-  height: 28px;
+  top: 2px;
+  width: 36px;
+  height: 36px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.watch-next-watched {
+  left: 2px;
+}
+
+.watch-next-follow {
+  right: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .episodes-chevron,
   .control-btn {
     transition: none !important;
+  }
+}
+
+/* ---- Issue #5: My services, Platforms list, Discover rows, More like this ---- */
+.platforms-intro {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.platforms-page .platform-list {
+  align-items: start;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.platforms-page .platform-card {
+  padding: 0;
+  gap: 0;
+}
+
+.platform-row {
+  display: flex;
+  align-items: stretch;
+  min-height: 56px;
+}
+
+.platform-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px 10px 12px;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.platform-toggle .platform-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.platform-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.platforms-page .platform-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+}
+
+/* The check has its own 48px tap area, separate from the expand button. */
+.my-service-check {
+  flex-shrink: 0;
+  width: 52px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  position: relative;
+}
+
+.my-service-check input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.my-service-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-strong);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, border-color 0.15s;
+  pointer-events: none;
+}
+
+.my-service-check input:checked + .my-service-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.my-service-check input:checked + .my-service-box::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  border: solid var(--accent-on);
+  border-width: 0 2.5px 2.5px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+.my-service-check input:focus-visible + .my-service-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.platform-card.is-mine {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.platform-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  animation: platform-panel-in 0.16s ease-out;
+}
+
+@keyframes platform-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.platform-note {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.platform-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.platform-site {
+  align-self: flex-start;
+}
+
+/* Horizontal poster rows (Discover, More like this). Always swipe/scroll sideways. */
+.title-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 124px;
+  gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.title-row > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .title-row {
+    grid-auto-columns: 140px;
+  }
+}
+
+.discover-home {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.discover-row-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.row-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: block;
+}
+
+.discover-row-status {
+  padding: 8px 0;
+}
+
+.skeleton-card .skeleton {
+  cursor: default;
+  background: var(--subtle-fill);
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.discover-hint {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.discover-hint svg {
+  flex-shrink: 0;
+}
+
+.more-like-this {
+  margin-top: 14px;
+}
+
+.more-like-toggle {
+  margin-bottom: 6px;
+}
+
+.more-like-toggle .detail-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+/* Where-to-watch: services you have get a small check. */
+.provider-chip {
+  position: relative;
+}
+
+.provider-chip.owned:not(.compact) {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+.owned-mark {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-on);
+  flex-shrink: 0;
+}
+
+.provider-chip.compact .owned-mark {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  box-shadow: 0 0 0 2px var(--bg-card);
+}
+
+/* Phones: let the tab bar take sideways swipes without the page panning. */
+@media (max-width: 767px) {
+  .primary-nav {
+    touch-action: pan-y pinch-zoom;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-panel,
+  .skeleton-card .skeleton {
+    animation: none !important;
+  }
+  .my-service-box {
+    transition: none !important;
+  }
+  .title-row {
+    scroll-snap-type: none;
   }
 }

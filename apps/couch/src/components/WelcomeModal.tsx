@@ -180,7 +180,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </span>
             <div>
               <strong>Discover</strong>
-              <p>Type a title and press Search to see where it streams, plays free, or rents in the US.</p>
+              <p>See what’s popular on your services, or search any title to find where it streams in the US.</p>
             </div>
           </li>
           <li>
@@ -198,7 +198,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </span>
             <div>
               <strong>Platforms</strong>
-              <p>Compare hand-checked plan prices and what’s popular on each platform.</p>
+              <p>Check the services you have, see what’s popular on each, and visit their sites.</p>
             </div>
           </li>
         </ul>

@@ -1,21 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Bookmark,
-  CircleHelp,
-  Info,
-  Crown,
-  Download,
-  Film,
-  Layers,
-  Play,
-  Rss,
-  Search,
-  Sparkles,
-  X,
-} from 'lucide-react';
-import { NativeAdCard, FooterAdBanner } from './components/AdSlot';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Bookmark, CircleHelp, Download, Film, Info, Layers, Play, Rss, Search, X } from 'lucide-react';
 import { PlatformPage } from './components/PlatformPage';
-import { TitleCard } from './components/TitleCard';
+import { ResultCard } from './components/ResultCard';
 import { TitleDetailModal } from './components/TitleDetailModal';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
@@ -28,55 +14,59 @@ import {
   requestEpisodeNotificationPermission,
   type NotificationSupportState,
 } from './services/notifications';
+import {
+  checkFollowedShows,
+  followKey,
+  loadAlerts,
+  loadFollows,
+  readLastCheck,
+  resolveTvmazeId,
+  saveAlerts,
+  saveFollows,
+  type FollowedTitle,
+} from './services/follows';
+import { getWatchOptions, RelayError, searchTitles, type TmdbTitle, type WatchOptions } from './services/tmdb';
 import { SITE } from './config/site';
 import { assetUrl } from './lib/baseUrl';
-import { streamingProvider } from './services/streamingProvider';
+import { PLATFORMS } from './data/platforms';
 import type { CollectorOutput, UpcomingReleaseLead } from './types/collector';
-import type {
-  MediaTitle,
-  MediaType,
-  NewEpisodeAlert,
-  PlatformId,
-  StreamingPlatform,
-} from './types/streaming';
+import type { NewEpisodeAlert, PlatformId, StreamingPlatform } from './types/streaming';
 
 type TabId = 'discover' | 'upcoming' | 'watchlist' | 'platforms';
+const TABS: TabId[] = ['discover', 'upcoming', 'watchlist', 'platforms'];
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const WATCHLIST_STORAGE_KEY = 'horse_pocket_watchlist_v2';
+/** Name-only follows from the Upcoming feed (leads with no TVmaze id). */
 const FOLLOWED_LEADS_STORAGE_KEY = 'horse_pocket_followed_leads_v1';
-const PREMIUM_STORAGE_KEY = 'horse_pocket_premium_preview_v1';
-const DEFAULT_WATCHLIST = ['stranger-things', 'the-bear', 'severance', 'yellowjackets'];
+const PROVIDER_LOOKUPS_PER_SEARCH = 12;
 
 function normalizeTitle(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+function initialTab(): TabId {
+  const t = new URLSearchParams(window.location.search).get('tab');
+  return TABS.includes(t as TabId) ? (t as TabId) : 'discover';
+}
+
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('discover');
-  const [platforms, setPlatforms] = useState<StreamingPlatform[]>([]);
-  const [allTitles, setAllTitles] = useState<MediaTitle[]>([]);
-  const [searchResults, setSearchResults] = useState<MediaTitle[]>([]);
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+  const platforms = PLATFORMS;
   const [collectorData, setCollectorData] = useState<CollectorOutput | null>(null);
 
   const [queryText, setQueryText] = useState('');
-  const [typeFilter, setTypeFilter] = useState<MediaType | 'all'>('all');
-  const [platformFilter, setPlatformFilter] = useState<PlatformId | 'all'>('all');
-  const [selectedTitle, setSelectedTitle] = useState<MediaTitle | null>(null);
+  const [typeFilter, setTypeFilter] = useState<'all' | 'movie' | 'tv'>('all');
+  const [results, setResults] = useState<TmdbTitle[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [optionsByKey, setOptionsByKey] = useState<Record<string, WatchOptions | null>>({});
+  const [selected, setSelected] = useState<TmdbTitle | null>(null);
 
-  const [followedIds, setFollowedIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-      return saved ? (JSON.parse(saved) as string[]) : DEFAULT_WATCHLIST;
-    } catch {
-      return DEFAULT_WATCHLIST;
-    }
-  });
-
+  const [follows, setFollows] = useState<FollowedTitle[]>(loadFollows);
   const [followedLeadNames, setFollowedLeadNames] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(FOLLOWED_LEADS_STORAGE_KEY);
@@ -85,38 +75,25 @@ export const App: React.FC = () => {
       return [];
     }
   });
-
-  const [isPremium, setIsPremium] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(PREMIUM_STORAGE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  const [alerts, setAlerts] = useState<NewEpisodeAlert[]>([]);
-  const [checkingEpisodes, setCheckingEpisodes] = useState(false);
-  const [permissionState, setPermissionState] = useState<NotificationSupportState>(() =>
-    getNotificationPermission()
-  );
+  const [alerts, setAlerts] = useState<NewEpisodeAlert[]>(loadAlerts);
+  const [checking, setChecking] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(readLastCheck);
+  const [permissionState, setPermissionState] = useState<NotificationSupportState>(() => getNotificationPermission());
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
   const [aboutOpen, setAboutOpen] = useState(false);
-  const helpButtonRef = React.useRef<HTMLButtonElement>(null);
-  const aboutButtonRef = React.useRef<HTMLButtonElement>(null);
+  const helpButtonRef = useRef<HTMLButtonElement>(null);
+  const aboutButtonRef = useRef<HTMLButtonElement>(null);
+  const followsRef = useRef(follows);
+  followsRef.current = follows;
+  const checkingRef = useRef(false);
+  const [checkRequest, setCheckRequest] = useState(0);
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-  };
-
-  const closeWelcome = useCallback(() => {
-    setWelcomeOpen(false);
-  }, []);
-
-  const closeAbout = useCallback(() => {
-    setAboutOpen(false);
-  }, []);
+  const showToast = (msg: string) => setToast(msg);
+  const closeWelcome = useCallback(() => setWelcomeOpen(false), []);
+  const closeAbout = useCallback(() => setAboutOpen(false), []);
+  const closeDetail = useCallback(() => setSelected(null), []);
 
   useEffect(() => {
     if (!toast) return;
@@ -124,56 +101,8 @@ export const App: React.FC = () => {
     return () => clearTimeout(t);
   }, [toast]);
 
-  useEffect(() => {
-    registerServiceWorker();
-    const onBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-    };
-    window.addEventListener('beforeinstallprompt', onBeforeInstall);
-    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstall);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      streamingProvider.getPlatforms(),
-      streamingProvider.getAllTitles(),
-      fetch(assetUrl('data/upcoming-releases.json'))
-        .then((r) => (r.ok ? (r.json() as Promise<CollectorOutput>) : null))
-        .catch(() => null),
-    ]).then(([plats, titles, collected]) => {
-      if (!active) return;
-      setPlatforms(plats);
-      setAllTitles(titles);
-      setSearchResults(titles);
-      setCollectorData(collected);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    streamingProvider
-      .searchTitles({ text: queryText, type: typeFilter, platformId: platformFilter })
-      .then((results) => {
-        if (active) setSearchResults(results);
-      });
-    return () => {
-      active = false;
-    };
-  }, [queryText, typeFilter, platformFilter]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(followedIds));
-    } catch {
-      // ignore
-    }
-  }, [followedIds]);
-
+  useEffect(() => saveFollows(follows), [follows]);
+  useEffect(() => saveAlerts(alerts), [alerts]);
   useEffect(() => {
     try {
       localStorage.setItem(FOLLOWED_LEADS_STORAGE_KEY, JSON.stringify(followedLeadNames));
@@ -182,96 +111,235 @@ export const App: React.FC = () => {
     }
   }, [followedLeadNames]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(PREMIUM_STORAGE_KEY, String(isPremium));
-    } catch {
-      // ignore
+  // ---- Episode checks: on open, and when the user taps "Check now" ----
+  const runEpisodeCheck = useCallback(async (manual: boolean) => {
+    if (checkingRef.current) return;
+    const current = followsRef.current;
+    if (!current.some((f) => f.mediaType === 'tv')) {
+      if (manual) showToast('Follow a show first to get episode alerts.');
+      return;
     }
-  }, [isPremium]);
+    checkingRef.current = true;
+    setChecking(true);
+    try {
+      const result = await checkFollowedShows(current);
+      // Merge so follows added or removed during the check aren't lost.
+      setFollows((prev) => prev.map((f) => result.follows.find((u) => u.key === f.key) ?? f));
+      setLastCheckedAt(new Date().toISOString());
+      if (result.alerts.length > 0) {
+        setAlerts((prev) => [...result.alerts, ...prev.filter((p) => !result.alerts.some((a) => a.id === p.id))]);
+        const first = result.alerts[0];
+        const body =
+          result.alerts.length === 1
+            ? `${first.showTitle} S${first.season}E${first.episode} “${first.episodeTitle}” is out${first.network ? ` on ${first.network}` : ''}.`
+            : `${first.showTitle} and ${result.alerts.length - 1} more have new episodes.`;
+        const delivery = await dispatchLocalEpisodeNotification({ title: `${SITE.name}: new episode`, body, tag: `couch-ep-${first.id}` });
+        if (delivery.deliveredVia === 'in-app-only') showToast(body);
+      } else if (manual) {
+        showToast(result.errors > 0 ? 'Some shows could not be checked. Try again later.' : 'No new episodes since the last check.');
+      }
+    } finally {
+      checkingRef.current = false;
+      setChecking(false);
+    }
+  }, []);
 
-  const platformsById = useMemo(() => {
-    return platforms.reduce(
-      (acc, p) => {
-        acc[p.id] = p;
-        return acc;
-      },
-      {} as Record<PlatformId, StreamingPlatform>
-    );
-  }, [platforms]);
+  useEffect(() => {
+    registerServiceWorker();
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
+    fetch(assetUrl('data/upcoming-releases.json'))
+      .then((r) => (r.ok ? (r.json() as Promise<CollectorOutput>) : null))
+      .catch(() => null)
+      .then((d) => setCollectorData(d));
+    void runEpisodeCheck(false);
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const last = readLastCheck();
+      if (!last || Date.now() - new Date(last).getTime() > 30 * 60 * 1000) void runEpisodeCheck(false);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [runEpisodeCheck]);
 
-  const titlesById = useMemo(() => {
-    return allTitles.reduce(
-      (acc, t) => {
-        acc[t.id] = t;
-        return acc;
-      },
-      {} as Record<string, MediaTitle>
-    );
-  }, [allTitles]);
+  useEffect(() => {
+    if (checkRequest > 0) void runEpisodeCheck(false);
+  }, [checkRequest, runEpisodeCheck]);
 
-  const followedTitles = useMemo(
-    () => allTitles.filter((t) => followedIds.includes(t.id)),
-    [allTitles, followedIds]
+  // ---- Search as you type (debounced), then where-to-watch for the top results ----
+  useEffect(() => {
+    const q = queryText.trim();
+    if (q.length < 2) {
+      setResults([]);
+      setSearchError(null);
+      setSearching(false);
+      return;
+    }
+    const ctrl = new AbortController();
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const found = await searchTitles(q, ctrl.signal);
+        if (ctrl.signal.aborted) return;
+        setResults(found);
+        setSearchError(null);
+        found.slice(0, PROVIDER_LOOKUPS_PER_SEARCH).forEach((t) => {
+          const key = followKey(t.mediaType, t.id);
+          getWatchOptions(t.mediaType, t.id, ctrl.signal)
+            .then((o) => setOptionsByKey((prev) => ({ ...prev, [key]: o })))
+            .catch(() => {
+              if (!ctrl.signal.aborted) setOptionsByKey((prev) => ({ ...prev, [key]: null }));
+            });
+        });
+      } catch (err) {
+        if (ctrl.signal.aborted) return;
+        setResults([]);
+        setSearchError(
+          err instanceof RelayError && err.status === 503
+            ? 'Search is not set up yet (the data relay is missing its key).'
+            : 'Search is unavailable right now. Please try again shortly.'
+        );
+      } finally {
+        if (!ctrl.signal.aborted) setSearching(false);
+      }
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [queryText]);
+
+  const visibleResults = useMemo(
+    () => (typeFilter === 'all' ? results : results.filter((r) => r.mediaType === typeFilter)),
+    [results, typeFilter]
   );
 
-  const followedNormalizedNames = useMemo(() => {
-    const set = new Set<string>(followedLeadNames.map(normalizeTitle));
-    for (const t of followedTitles) {
-      set.add(normalizeTitle(t.title));
+  const followsByKey = useMemo(() => new Map(follows.map((f) => [f.key, f])), [follows]);
+
+  const toggleFollowTitle = async (item: TmdbTitle) => {
+    const key = followKey(item.mediaType, item.id);
+    if (followsByKey.has(key)) {
+      setFollows((prev) => prev.filter((f) => f.key !== key));
+      showToast(`Removed “${item.title}” from your Watchlist`);
+      return;
     }
+    const entry: FollowedTitle = {
+      key,
+      mediaType: item.mediaType,
+      tmdbId: item.id,
+      tvmazeId: null,
+      title: item.title,
+      year: item.year,
+      posterPath: item.posterPath,
+      followedAt: new Date().toISOString(),
+      lastNotifiedEpisodeId: null,
+      lastNotifiedAirstamp: null,
+    };
+    setFollows((prev) => [entry, ...prev]);
+    if (item.mediaType === 'movie') {
+      showToast(`Saved “${item.title}”`);
+      return;
+    }
+    showToast(`Following “${item.title}”`);
+    const tvmazeId = await resolveTvmazeId(item.id);
+    setFollows((prev) => prev.map((f) => (f.key === key ? { ...f, tvmazeId, untracked: tvmazeId == null } : f)));
+    if (tvmazeId == null) {
+      showToast(`Saved “${item.title}”, but episode alerts aren’t available for it.`);
+    } else {
+      setCheckRequest((n) => n + 1);
+    }
+  };
+
+  const unfollow = (key: string) => setFollows((prev) => prev.filter((f) => f.key !== key));
+
+  const openFollow = (f: FollowedTitle) => {
+    if (f.tmdbId != null) {
+      setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0 });
+    } else if (f.lastStatus?.tvmazeUrl) {
+      window.open(f.lastStatus.tvmazeUrl, '_blank', 'noopener');
+    }
+  };
+
+  // ---- Upcoming feed follows ----
+  const followedNames = useMemo(() => {
+    const set = new Set<string>(followedLeadNames.map(normalizeTitle));
+    for (const f of follows) set.add(normalizeTitle(f.title));
     return set;
-  }, [followedTitles, followedLeadNames]);
+  }, [follows, followedLeadNames]);
+  const followedTvmazeIds = useMemo(() => new Set(follows.map((f) => f.tvmazeId).filter((x): x is number => x != null)), [follows]);
 
   const isLeadFollowed = useCallback(
-    (lead: UpcomingReleaseLead) => followedNormalizedNames.has(normalizeTitle(lead.showTitle)),
-    [followedNormalizedNames]
+    (lead: UpcomingReleaseLead) =>
+      (lead.tvmaze?.showId != null && followedTvmazeIds.has(lead.tvmaze.showId)) || followedNames.has(normalizeTitle(lead.showTitle)),
+    [followedNames, followedTvmazeIds]
   );
 
+  const toggleFollowLead = (lead: UpcomingReleaseLead) => {
+    const norm = normalizeTitle(lead.showTitle);
+    if (isLeadFollowed(lead)) {
+      setFollows((prev) =>
+        prev.filter((f) => !(lead.tvmaze?.showId != null && f.tvmazeId === lead.tvmaze.showId) && normalizeTitle(f.title) !== norm)
+      );
+      setFollowedLeadNames((prev) => prev.filter((x) => normalizeTitle(x) !== norm));
+      showToast(`Unfollowed “${lead.showTitle}”`);
+      return;
+    }
+    if (lead.tvmaze?.showId != null) {
+      const entry: FollowedTitle = {
+        key: `tvmaze-${lead.tvmaze.showId}`,
+        mediaType: 'tv',
+        tmdbId: null,
+        tvmazeId: lead.tvmaze.showId,
+        title: lead.showTitle,
+        year: null,
+        posterPath: null,
+        followedAt: new Date().toISOString(),
+        lastNotifiedEpisodeId: null,
+        lastNotifiedAirstamp: null,
+      };
+      setFollows((prev) => [entry, ...prev]);
+      showToast(`Following “${lead.showTitle}” for episode alerts`);
+      setCheckRequest((n) => n + 1);
+    } else {
+      setFollowedLeadNames((prev) => [...prev, lead.showTitle]);
+      showToast(`Following “${lead.showTitle}” in the Upcoming feed`);
+    }
+  };
+
+  const matchedUpcomingLeads = useMemo(
+    () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'upcoming' && isLeadFollowed(l)),
+    [collectorData, isLeadFollowed]
+  );
   const availableNowLeads = useMemo(
     () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'available-now'),
     [collectorData]
   );
 
-  const matchedUpcomingLeads = useMemo(
-    () =>
-      (collectorData?.leads ?? []).filter(
-        (l) => l.availabilityStatus === 'upcoming' && isLeadFollowed(l)
-      ),
-    [collectorData, isLeadFollowed]
-  );
-
-  const toggleFollow = (id: string) => {
-    setFollowedIds((prev) => {
-      const exists = prev.includes(id);
-      const next = exists ? prev.filter((x) => x !== id) : [...prev, id];
-      const title = titlesById[id]?.title ?? 'Show';
-      showToast(exists ? `Removed "${title}" from Watchlist` : `Following "${title}" for episode alerts`);
-      return next;
-    });
-  };
-
-  const toggleFollowLead = (lead: UpcomingReleaseLead) => {
-    const catalogMatch = allTitles.find(
-      (t) => normalizeTitle(t.title) === normalizeTitle(lead.showTitle)
-    );
-    if (catalogMatch) {
-      toggleFollow(catalogMatch.id);
+  const notifyFollowedLeads = async () => {
+    if (matchedUpcomingLeads.length === 0) {
+      showToast('None of your follows are in the Upcoming feed yet.');
       return;
     }
-
-    const norm = normalizeTitle(lead.showTitle);
-    setFollowedLeadNames((prev) => {
-      const exists = prev.some((x) => normalizeTitle(x) === norm);
-      const next = exists ? prev.filter((x) => normalizeTitle(x) !== norm) : [...prev, lead.showTitle];
-      showToast(
-        exists
-          ? `Unfollowed "${lead.showTitle}"`
-          : `Following "${lead.showTitle}" — matched collector leads will trigger alerts`
-      );
-      return next;
-    });
+    const first = matchedUpcomingLeads[0];
+    const date = first.parsedDateIso ?? first.extractedDateText ?? 'date TBA';
+    const body =
+      matchedUpcomingLeads.length === 1
+        ? `${first.showTitle} on ${first.platformName}: ${date}`
+        : `${first.showTitle} (${date}) and ${matchedUpcomingLeads.length - 1} more coming up`;
+    const delivery = await dispatchLocalEpisodeNotification({ title: `${SITE.name}: coming up`, body, tag: 'couch-upcoming' });
+    if (delivery.deliveredVia === 'in-app-only') showToast(body);
   };
+
+  const platformsById = useMemo(
+    () => Object.fromEntries(platforms.map((p) => [p.id, p])) as Record<PlatformId, StreamingPlatform>,
+    [platforms]
+  );
 
   const handleInstallClick = async () => {
     if (installPrompt) {
@@ -279,107 +347,21 @@ export const App: React.FC = () => {
       const choice = await installPrompt.userChoice;
       if (choice.outcome === 'accepted') {
         setInstallPrompt(null);
-        showToast(`${SITE.name} installed to your device!`);
+        showToast(`${SITE.name} installed`);
       }
       return;
     }
-    showToast('To install on Android Chrome: open browser menu (⋮) → "Add to Home screen"');
+    showToast('To install: open your browser menu and choose “Add to Home screen” or “Install app”.');
   };
 
   const handleRequestNotifications = async () => {
     const result = await requestEpisodeNotificationPermission();
     setPermissionState(result);
-    if (result === 'granted') {
-      showToast(`Push notifications enabled for ${SITE.name}!`);
-    } else if (result === 'denied') {
-      showToast('Notifications blocked in browser settings — in-app alerts remain active.');
-    }
+    if (result === 'granted') showToast('Episode alerts turned on.');
+    else if (result === 'denied') showToast('Notifications are blocked in browser settings. Alerts will still show in the Watchlist.');
   };
 
-  const triggerFollowedCollectorAlerts = async () => {
-    if (matchedUpcomingLeads.length === 0) {
-      showToast('No followed shows match the current RSS collector leads yet.');
-      return;
-    }
-
-    const leadAlerts: NewEpisodeAlert[] = matchedUpcomingLeads.map((lead) => ({
-      id: `rss-${lead.id}-${Date.now()}`,
-      titleId: lead.id,
-      showTitle: lead.showTitle,
-      platformId: lead.platformId === 'unknown' ? 'paramount-plus' : lead.platformId,
-      season: lead.tvmaze?.nextEpisodeSeason ?? 1,
-      episode: lead.tvmaze?.nextEpisodeNumber ?? 1,
-      episodeTitle:
-        lead.tvmaze?.nextEpisodeName ||
-        `${lead.confirmationStatus.toUpperCase()} release (${lead.parsedDateIso ?? lead.extractedDateText ?? 'TBA'})`,
-      detectedAt: new Date().toISOString(),
-      read: false,
-    }));
-
-    setAlerts((prev) => [...leadAlerts, ...prev].slice(0, 12));
-    const first = matchedUpcomingLeads[0];
-    const datePart = first.parsedDateIso ?? first.extractedDateText ?? 'Upcoming';
-    const body = `${first.showTitle} (${first.confirmationStatus.toUpperCase()}) on ${first.platformName} — ${datePart}`;
-    const delivery = await dispatchLocalEpisodeNotification({
-      title: `${SITE.name} — Followed Release Lead`,
-      body,
-      tag: `couch-lead-${Date.now()}`,
-    });
-
-    showToast(
-      delivery.deliveredVia === 'in-app-only'
-        ? `Followed lead alert: ${body}`
-        : `Push sent (${delivery.deliveredVia}): ${body}`
-    );
-  };
-
-  const handleCheckNewEpisodes = async () => {
-    setCheckingEpisodes(true);
-    try {
-      const found = await streamingProvider.checkNewEpisodes(followedIds);
-      const rssAlerts: NewEpisodeAlert[] = matchedUpcomingLeads.map((lead) => ({
-        id: `rss-${lead.id}-${Date.now()}`,
-        titleId: lead.id,
-        showTitle: `${lead.showTitle} [${lead.confirmationStatus.toUpperCase()} RSS]`,
-        platformId: lead.platformId === 'unknown' ? 'paramount-plus' : lead.platformId,
-        season: lead.tvmaze?.nextEpisodeSeason ?? 1,
-        episode: lead.tvmaze?.nextEpisodeNumber ?? 1,
-        episodeTitle:
-          lead.tvmaze?.nextEpisodeName ??
-          `Air date ${lead.parsedDateIso ?? lead.extractedDateText ?? 'TBA'}`,
-        detectedAt: new Date().toISOString(),
-        read: false,
-      }));
-
-      const combined = [...rssAlerts, ...found];
-      if (combined.length === 0) {
-        showToast('No ongoing series or collector matches in your watchlist yet.');
-        return;
-      }
-
-      setAlerts((prev) => [...combined, ...prev].slice(0, 12));
-      const lead = combined[0];
-      const platName = platformsById[lead.platformId]?.name ?? lead.platformId;
-      const body =
-        combined.length === 1
-          ? `${lead.showTitle} S${lead.season}E${lead.episode} ("${lead.episodeTitle}") on ${platName}.`
-          : `${lead.showTitle} S${lead.season}E${lead.episode} + ${combined.length - 1} more alert(s) found!`;
-
-      const delivery = await dispatchLocalEpisodeNotification({
-        title: `${SITE.name} — New Episode Alert`,
-        body,
-        tag: `couch-${Date.now()}`,
-      });
-
-      if (delivery.deliveredVia === 'in-app-only') {
-        showToast(`New episode alert: ${body}`);
-      } else {
-        showToast(`Notification sent via ${delivery.deliveredVia}: ${lead.showTitle}`);
-      }
-    } finally {
-      setCheckingEpisodes(false);
-    }
-  };
+  const tvFollowCount = follows.filter((f) => f.mediaType === 'tv').length;
 
   return (
     <div className="app-shell">
@@ -397,72 +379,26 @@ export const App: React.FC = () => {
             </div>
             <div>
               <h1 className="brand-title">{SITE.name}</h1>
-              <span className="brand-subtitle"><a href={SITE.portalUrl} className="portal-link">{SITE.portalName}</a> • {SITE.subtitle}</span>
+              <span className="brand-subtitle">
+                <a href={SITE.portalUrl} className="portal-link">
+                  {SITE.portalName}
+                </a>{' '}
+                • {SITE.subtitle}
+              </span>
             </div>
           </div>
-
           <div className="header-actions">
-            <button
-              ref={helpButtonRef}
-              type="button"
-              className="pill-btn icon-btn"
-              aria-label={`How to use ${SITE.name}`}
-              title={`How to use ${SITE.name}`}
-              onClick={() => setWelcomeOpen(true)}
-            >
+            <button ref={helpButtonRef} type="button" className="pill-btn icon-btn" aria-label={`How to use ${SITE.name}`} title={`How to use ${SITE.name}`} onClick={() => setWelcomeOpen(true)}>
               <CircleHelp size={16} />
             </button>
-
-            <button
-              ref={aboutButtonRef}
-              type="button"
-              className="pill-btn icon-btn"
-              aria-label={`About ${SITE.name}`}
-              title={`About ${SITE.name}`}
-              onClick={() => setAboutOpen(true)}
-            >
+            <button ref={aboutButtonRef} type="button" className="pill-btn icon-btn" aria-label={`About ${SITE.name}`} title={`About ${SITE.name}`} onClick={() => setAboutOpen(true)}>
               <Info size={16} />
             </button>
-
-            <button
-              type="button"
-              className={`pill-btn ${isPremium ? 'premium-on' : ''}`}
-              onClick={() => {
-                const next = !isPremium;
-                setIsPremium(next);
-                showToast(
-                  next
-                    ? 'Premium Preview ON — ad slots hidden'
-                    : 'Free Tier Preview — unobtrusive ad slots visible'
-                );
-              }}
-              title="Toggle mock Free vs. Ad-Free Premium view"
-            >
-              <Crown size={13} color={isPremium ? 'var(--accent-bright)' : 'var(--text-muted)'} />
-              {isPremium ? 'Premium' : 'Free Tier'}
-            </button>
-
-            <button
-              type="button"
-              className="pill-btn install-btn"
-              onClick={handleInstallClick}
-              title={`Install ${SITE.name} as an Android/Desktop PWA`}
-            >
+            <button type="button" className="pill-btn install-btn" onClick={handleInstallClick} title={`Install ${SITE.name}`}>
               <Download size={13} />
               Install
             </button>
           </div>
-        </div>
-
-        <div className="demo-strip">
-          <span className="demo-badge">
-            <Sparkles size={11} /> {streamingProvider.providerName}
-          </span>
-          <span>
-            {isPremium
-              ? 'Ad-free preview active'
-              : 'Unobtrusive ad placeholders active (toggle Free/Premium above)'}
-          </span>
         </div>
       </header>
 
@@ -474,106 +410,67 @@ export const App: React.FC = () => {
               <input
                 type="search"
                 className="search-input"
-                placeholder="Search shows, movies, genres (e.g. Severance, Dune, Sci-Fi)..."
+                placeholder="Search any movie or show"
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
-                aria-label="Search shows and movies"
+                aria-label="Search movies and shows"
+                autoComplete="off"
               />
               {queryText && (
-                <button
-                  type="button"
-                  className="search-clear"
-                  onClick={() => setQueryText('')}
-                  aria-label="Clear search"
-                >
+                <button type="button" className="search-clear" onClick={() => setQueryText('')} aria-label="Clear search">
                   <X size={16} />
                 </button>
               )}
             </div>
 
-            <div className="chip-scroll" aria-label="Filter by media type">
-              {(['all', 'series', 'movie'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`filter-chip ${typeFilter === t ? 'active' : ''}`}
-                  onClick={() => setTypeFilter(t)}
-                >
-                  {t === 'all' ? 'All Titles' : t === 'series' ? 'TV Series' : 'Movies'}
+            <div className="chip-scroll" aria-label="Filter by type">
+              {(
+                [
+                  ['all', 'All'],
+                  ['tv', 'Shows'],
+                  ['movie', 'Movies'],
+                ] as const
+              ).map(([value, label]) => (
+                <button key={value} type="button" className={`filter-chip ${typeFilter === value ? 'active' : ''}`} aria-pressed={typeFilter === value} onClick={() => setTypeFilter(value)}>
+                  {label}
                 </button>
               ))}
             </div>
 
-            <div className="chip-scroll" aria-label="Filter by streaming platform">
-              <button
-                type="button"
-                className={`filter-chip ${platformFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setPlatformFilter('all')}
-              >
-                All Platforms
-              </button>
-              {platforms.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`filter-chip ${platformFilter === p.id ? 'active' : ''}`}
-                  onClick={() => setPlatformFilter(p.id)}
-                >
-                  <span
-                    className="platform-dot"
-                    style={{
-                      backgroundColor: p.brandColor,
-                      display: 'inline-block',
-                      marginRight: 6,
-                    }}
-                  />
-                  {p.name}
-                </button>
-              ))}
-            </div>
-
-            <div className="section-heading">
-              <h2>Where to Watch</h2>
-              <span className="section-meta">{searchResults.length} results</span>
-            </div>
-
-            {searchResults.length === 0 ? (
-              <div className="panel" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 28 }}>
-                No matching titles in the current catalog. Try clearing a filter or searching another title.
+            {queryText.trim().length < 2 ? (
+              <div className="panel empty-panel">
+                Type a title to see where it’s streaming, free, or for rent or purchase in the US.
               </div>
+            ) : searchError ? (
+              <div className="panel empty-panel">{searchError}</div>
             ) : (
-              <div className="card-grid">
-                {searchResults.map((item, idx) => (
-                  <React.Fragment key={item.id}>
-                    <TitleCard
-                      item={item}
-                      platformsById={platformsById}
-                      isFollowed={followedIds.includes(item.id)}
-                      onToggleFollow={toggleFollow}
-                      onSelect={setSelectedTitle}
-                    />
-                    {idx === 2 && (
-                      <NativeAdCard
-                        isPremium={isPremium}
-                        onEnablePremium={() => {
-                          setIsPremium(true);
-                          showToast('Premium Preview ON — ad slots hidden');
-                        }}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-                {searchResults.length > 0 && searchResults.length <= 2 && (
-                  <NativeAdCard
-                    isPremium={isPremium}
-                    onEnablePremium={() => {
-                      setIsPremium(true);
-                      showToast('Premium Preview ON — ad slots hidden');
-                    }}
-                  />
+              <>
+                <div className="section-heading">
+                  <h2>Where to watch</h2>
+                  <span className="section-meta">{searching ? 'Searching…' : `${visibleResults.length} results`}</span>
+                </div>
+                {!searching && visibleResults.length === 0 ? (
+                  <div className="panel empty-panel">No matches. Check the spelling or try another title.</div>
+                ) : (
+                  <div className="card-grid">
+                    {visibleResults.map((item) => {
+                      const key = followKey(item.mediaType, item.id);
+                      return (
+                        <ResultCard
+                          key={key}
+                          item={item}
+                          options={optionsByKey[key]}
+                          isFollowed={followsByKey.has(key)}
+                          onToggleFollow={toggleFollowTitle}
+                          onSelect={setSelected}
+                        />
+                      );
+                    })}
+                  </div>
                 )}
-              </div>
+              </>
             )}
+            <p className="fineprint center">Where-to-watch data by JustWatch, via TMDB.</p>
           </div>
         )}
 
@@ -584,113 +481,56 @@ export const App: React.FC = () => {
             platformsById={platformsById}
             isLeadFollowed={isLeadFollowed}
             onToggleFollowLead={toggleFollowLead}
-            onTriggerFollowedAlerts={triggerFollowedCollectorAlerts}
+            onTriggerFollowedAlerts={notifyFollowedLeads}
           />
         )}
 
         {activeTab === 'watchlist' && (
           <WatchlistView
-            followedTitles={followedTitles}
-            platformsById={platformsById}
+            follows={follows}
             alerts={alerts}
             permissionState={permissionState}
-            checking={checkingEpisodes}
+            checking={checking}
+            lastCheckedAt={lastCheckedAt}
             onRequestPermission={handleRequestNotifications}
-            onCheckNewEpisodes={handleCheckNewEpisodes}
-            onToggleFollow={toggleFollow}
-            onSelectTitle={setSelectedTitle}
+            onCheckNow={() => void runEpisodeCheck(true)}
+            onUnfollow={unfollow}
+            onOpen={openFollow}
             onClearAlerts={() => setAlerts([])}
           />
         )}
 
         {activeTab === 'platforms' && (
-          <PlatformPage
-            platforms={platforms}
-            titlesById={titlesById}
-            allTitles={allTitles}
-            followedIds={followedIds}
-            isPremium={isPremium}
-            availableNowLeads={availableNowLeads}
-            onEnablePremium={() => {
-              setIsPremium(true);
-              showToast('Premium Preview ON — ad slots hidden');
-            }}
-            onSelectTitle={setSelectedTitle}
-          />
+          <PlatformPage platforms={platforms} availableNowLeads={availableNowLeads} onSelectTitle={setSelected} />
         )}
       </main>
 
-      <FooterAdBanner isPremium={isPremium} />
-
       <nav className="bottom-nav" aria-label="Primary navigation">
         <div className="bottom-nav-inner">
-          <button
-            type="button"
-            className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`}
-            onClick={() => setActiveTab('discover')}
-          >
+          <button type="button" className={`nav-tab ${activeTab === 'discover' ? 'active' : ''}`} onClick={() => setActiveTab('discover')}>
             <Film size={19} />
             <span>Discover</span>
           </button>
-
-          <button
-            type="button"
-            className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`}
-            onClick={() => setActiveTab('upcoming')}
-          >
+          <button type="button" className={`nav-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>
             <Rss size={19} />
-            {matchedUpcomingLeads.length > 0 && (
-              <span className="nav-badge">{matchedUpcomingLeads.length}</span>
-            )}
+            {matchedUpcomingLeads.length > 0 && <span className="nav-badge">{matchedUpcomingLeads.length}</span>}
             <span>Upcoming</span>
           </button>
-
-          <button
-            type="button"
-            className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`}
-            onClick={() => setActiveTab('watchlist')}
-          >
+          <button type="button" className={`nav-tab ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
             <Bookmark size={19} />
-            {(alerts.length > 0 || followedIds.length > 0) && (
-              <span className="nav-badge">
-                {alerts.length > 0 ? alerts.length : followedIds.length}
-              </span>
-            )}
+            {(alerts.length > 0 || tvFollowCount > 0) && <span className="nav-badge">{alerts.length > 0 ? alerts.length : follows.length}</span>}
             <span>Watchlist</span>
           </button>
-
-          <button
-            type="button"
-            className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`}
-            onClick={() => setActiveTab('platforms')}
-          >
+          <button type="button" className={`nav-tab ${activeTab === 'platforms' ? 'active' : ''}`} onClick={() => setActiveTab('platforms')}>
             <Layers size={19} />
             <span>Platforms</span>
           </button>
         </div>
       </nav>
 
-      <WelcomeModal
-        open={welcomeOpen}
-        permissionState={permissionState}
-        onClose={closeWelcome}
-        onRequestNotifications={handleRequestNotifications}
-        restoreFocusRef={helpButtonRef}
-      />
-
-      <AboutModal
-        open={aboutOpen}
-        onClose={closeAbout}
-        restoreFocusRef={aboutButtonRef}
-      />
-
-      <TitleDetailModal
-        item={selectedTitle}
-        platformsById={platformsById}
-        isFollowed={selectedTitle ? followedIds.includes(selectedTitle.id) : false}
-        onToggleFollow={toggleFollow}
-        onClose={() => setSelectedTitle(null)}
-      />
+      <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={helpButtonRef} />
+      <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={aboutButtonRef} />
+      <TitleDetailModal item={selected} follow={selected ? followsByKey.get(followKey(selected.mediaType, selected.id)) : undefined} onToggleFollow={toggleFollowTitle} onClose={closeDetail} />
     </div>
   );
 };

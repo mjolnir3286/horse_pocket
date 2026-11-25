@@ -1,0 +1,8 @@
+# Couch TMDB relay. Free Workers plan, workers.dev subdomain only.
+name = "couch-relay"
+main = "src/worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+# Secret (not stored here): TMDB_TOKEN = TMDB v4 "API Read Access Token"
+# Set with: npx wrangler secret put TMDB_TOKEN   (or the Cloudflare dashboard)

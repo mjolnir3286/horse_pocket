@@ -1,141 +1,154 @@
 import React from 'react';
-import { Bell, BellOff, BellRing, CheckCircle2, RefreshCw, Sparkles, Trash2 } from 'lucide-react';
-import type { MediaTitle, NewEpisodeAlert, PlatformId, StreamingPlatform } from '../types/streaming';
+import { Bell, BellOff, BellRing, RefreshCw, Trash2, X } from 'lucide-react';
+import type { NewEpisodeAlert } from '../types/streaming';
 import type { NotificationSupportState } from '../services/notifications';
-import { TitleCard } from './TitleCard';
+import type { FollowedTitle } from '../services/follows';
+import { posterUrl } from '../services/tmdb';
 
 interface WatchlistViewProps {
-  followedTitles: MediaTitle[];
-  platformsById: Record<PlatformId, StreamingPlatform>;
+  follows: FollowedTitle[];
   alerts: NewEpisodeAlert[];
   permissionState: NotificationSupportState;
   checking: boolean;
+  lastCheckedAt: string | null;
   onRequestPermission: () => void;
-  onCheckNewEpisodes: () => void;
-  onToggleFollow: (id: string) => void;
-  onSelectTitle: (title: MediaTitle) => void;
+  onCheckNow: () => void;
+  onUnfollow: (key: string) => void;
+  onOpen: (follow: FollowedTitle) => void;
   onClearAlerts: () => void;
 }
 
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return 'TBA';
+  const d = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function episodeLine(f: FollowedTitle): string {
+  if (f.mediaType === 'movie') return 'Movie • saved';
+  if (f.untracked) return 'No TVmaze match, so no episode alerts';
+  const s = f.lastStatus;
+  if (!s) return 'Checking episodes…';
+  if (s.next) return `Next: S${s.next.season}E${s.next.number ?? '?'} • ${formatDate(s.next.airdate)}`;
+  if (s.showStatus === 'Ended') return 'Series ended';
+  return 'No next episode scheduled yet';
+}
+
 export const WatchlistView: React.FC<WatchlistViewProps> = ({
-  followedTitles,
-  platformsById,
+  follows,
   alerts,
   permissionState,
   checking,
+  lastCheckedAt,
   onRequestPermission,
-  onCheckNewEpisodes,
-  onToggleFollow,
-  onSelectTitle,
+  onCheckNow,
+  onUnfollow,
+  onOpen,
   onClearAlerts,
 }) => {
   const permissionLabel =
     permissionState === 'granted'
-      ? 'Enabled (Service Worker ready)'
+      ? 'On'
       : permissionState === 'denied'
-        ? 'Blocked in browser settings (using in-app alerts)'
+        ? 'Blocked in browser settings (alerts still show here)'
         : permissionState === 'unsupported'
-          ? 'Browser Notification API unavailable (using in-app alerts)'
-          : 'Not enabled yet';
+          ? 'Not supported in this browser (alerts still show here)'
+          : 'Off';
+
+  const sorted = [...follows].sort((a, b) => {
+    const an = a.lastStatus?.next?.airdate ?? '9999';
+    const bn = b.lastStatus?.next?.airdate ?? '9999';
+    return an.localeCompare(bn) || a.title.localeCompare(b.title);
+  });
 
   return (
     <div>
       <div className="panel">
         <div className="panel-row">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
-              {permissionState === 'granted' ? (
-                <BellRing size={17} color="#10b981" />
-              ) : (
-                <BellOff size={17} color="#f59e0b" />
-              )}
-              New Episode Push Alerts
+            <div className="panel-title">
+              {permissionState === 'granted' ? <BellRing size={17} /> : <BellOff size={17} />}
+              New episode alerts: {permissionLabel}
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 3 }}>
-              Status: <strong>{permissionLabel}</strong>
+            <div className="muted small">
+              Couch checks your followed shows each time you open it.
+              {lastCheckedAt ? ` Last checked ${new Date(lastCheckedAt).toLocaleString()}.` : ''}
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {permissionState !== 'granted' && permissionState !== 'unsupported' && (
+          <div className="button-row">
+            {permissionState === 'default' && (
               <button type="button" className="secondary-btn" onClick={onRequestPermission}>
-                <Bell size={15} /> Enable Push Alerts
+                <Bell size={15} /> Turn on
               </button>
             )}
-            <button
-              type="button"
-              className="primary-btn"
-              disabled={checking || followedTitles.length === 0}
-              onClick={onCheckNewEpisodes}
-            >
+            <button type="button" className="primary-btn" disabled={checking || follows.length === 0} onClick={onCheckNow}>
               <RefreshCw size={15} />
-              {checking ? 'Checking...' : 'Check for New Episodes'}
+              {checking ? 'Checking…' : 'Check now'}
             </button>
           </div>
-        </div>
-
-        <div className="tech-note">
-          <strong>How real push works:</strong> This MVP uses the browser Service Worker +
-          Notification API to simulate an episode check locally. In production, a scheduled backend
-          worker checks TMDB’s <code>/tv/&#123;id&#125;</code> episode air dates and sends real
-          background pushes via <strong>Web Push (VAPID)</strong> for PWA users and{' '}
-          <strong>Firebase Cloud Messaging (FCM)</strong> for an Android Capacitor build.
         </div>
       </div>
 
       {alerts.length > 0 && (
         <div className="panel">
-          <div className="panel-row" style={{ marginBottom: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontWeight: 700, fontSize: '0.9rem' }}>
-              <Sparkles size={15} color="#10b981" /> Recent Episode Alerts ({alerts.length})
-            </div>
-            <button type="button" className="ad-dismiss-btn" onClick={onClearAlerts}>
-              <Trash2 size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
-              Clear
+          <div className="panel-row">
+            <div className="panel-title">New episodes ({alerts.length})</div>
+            <button type="button" className="text-btn" onClick={onClearAlerts}>
+              <Trash2 size={13} /> Clear
             </button>
           </div>
-
-          {alerts.map((alert) => {
-            const p = platformsById[alert.platformId];
-            return (
-              <div key={alert.id} className="alert-item">
-                <div>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 650 }}>
-                    {alert.showTitle} — S{alert.season}E{alert.episode}: “{alert.episodeTitle}”
-                  </div>
-                  <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>
-                    Streaming on {p ? p.name : alert.platformId} • Simulated push delivered
-                  </div>
+          {alerts.map((a) => (
+            <div key={a.id} className="alert-item">
+              <div>
+                <div className="alert-title">
+                  {a.showTitle} • S{a.season}E{a.episode} “{a.episodeTitle}”
                 </div>
-                <CheckCircle2 size={16} color="#10b981" />
+                <div className="muted small">
+                  Aired {formatDate(a.airdate)}
+                  {a.network ? ` on ${a.network}` : ''}
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
 
       <div className="section-heading">
-        <h2>Your Watchlist ({followedTitles.length})</h2>
-        <span className="section-meta">Tap bookmark to follow/unfollow</span>
+        <h2>Your Watchlist ({follows.length})</h2>
+        <span className="section-meta">Saved on this device</span>
       </div>
 
-      {followedTitles.length === 0 ? (
-        <div className="panel" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 28 }}>
-          Your watchlist is empty. Search for a show on the Discover tab and tap the bookmark icon
-          to follow new episodes.
+      {follows.length === 0 ? (
+        <div className="panel empty-panel">
+          Nothing here yet. Search for a show or movie on Discover and tap the bookmark to follow it.
         </div>
       ) : (
-        <div className="card-grid">
-          {followedTitles.map((item) => (
-            <TitleCard
-              key={item.id}
-              item={item}
-              platformsById={platformsById}
-              isFollowed={true}
-              onToggleFollow={onToggleFollow}
-              onSelect={onSelectTitle}
-            />
-          ))}
+        <div className="watch-list">
+          {sorted.map((f) => {
+            const poster = posterUrl(f.posterPath, 'w92');
+            return (
+              <div key={f.key} className="watch-row">
+                <button type="button" className="watch-row-main" onClick={() => onOpen(f)}>
+                  <span className="watch-thumb">
+                    {poster ? <img src={poster} alt="" loading="lazy" /> : <span>{f.title.slice(0, 2).toUpperCase()}</span>}
+                  </span>
+                  <span className="watch-row-text">
+                    <span className="watch-row-title">
+                      {f.title}
+                      {f.year ? <span className="muted"> ({f.year})</span> : null}
+                    </span>
+                    <span className="muted small">
+                      {episodeLine(f)}
+                      {f.lastStatus?.network ? ` • ${f.lastStatus.network}` : ''}
+                    </span>
+                  </span>
+                </button>
+                <button type="button" className="follow-icon-btn" aria-label={`Unfollow ${f.title}`} title="Remove" onClick={() => onUnfollow(f.key)}>
+                  <X size={15} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,184 +1,128 @@
-import React from 'react';
-import { Bell, BellRing, Check, ExternalLink, Tv, X } from 'lucide-react';
-import type { MediaTitle, PlatformId, StreamingPlatform } from '../types/streaming';
+import React, { useEffect, useState } from 'react';
+import { BellRing, Bookmark, Check, ExternalLink, X } from 'lucide-react';
+import { getWatchOptions, posterUrl, type TmdbTitle, type WatchOptions } from '../services/tmdb';
+import type { FollowedTitle } from '../services/follows';
+import { WatchOptionsFull } from './WatchOptions';
 
 interface TitleDetailModalProps {
-  item: MediaTitle | null;
-  platformsById: Record<PlatformId, StreamingPlatform>;
-  isFollowed: boolean;
-  onToggleFollow: (id: string) => void;
+  item: TmdbTitle | null;
+  follow: FollowedTitle | undefined;
+  onToggleFollow: (item: TmdbTitle) => void;
   onClose: () => void;
 }
 
-export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
-  item,
-  platformsById,
-  isFollowed,
-  onToggleFollow,
-  onClose,
-}) => {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return 'TBA';
+  const d = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({ item, follow, onToggleFollow, onClose }) => {
+  const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!item) return;
+    const ctrl = new AbortController();
+    setOptions(undefined);
+    getWatchOptions(item.mediaType, item.id, ctrl.signal)
+      .then(setOptions)
+      .catch(() => {
+        if (!ctrl.signal.aborted) setOptions(null);
+      });
+    return () => ctrl.abort();
+  }, [item]);
+
+  useEffect(() => {
+    if (!item) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [item, onClose]);
+
   if (!item) return null;
+  const poster = posterUrl(item.posterPath, 'w342');
+  const isFollowed = Boolean(follow);
+  const status = follow?.lastStatus;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <div
-              className="poster-tile"
-              style={{
-                width: 58,
-                height: 82,
-                background: `linear-gradient(155deg, ${item.posterGradient[0]}, ${item.posterGradient[1]})`,
-              }}
-            >
-              {item.posterUrl ? (
-                <img
-                  src={item.posterUrl}
-                  alt={item.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <span>{item.posterInitials}</span>
-              )}
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div className="modal-sheet" role="dialog" aria-modal="true" aria-label={item.title} onClick={(e) => e.stopPropagation()}>
+        <div className="detail-head">
+          <div className="detail-identity">
+            <div className="poster-tile detail-poster">
+              {poster ? <img src={poster} alt="" /> : <span>{item.title.slice(0, 2).toUpperCase()}</span>}
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.15rem' }}>{item.title}</h2>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                {item.type === 'series' ? 'TV Series' : 'Movie'} • {item.releaseYear} • {item.rating} •{' '}
-                {item.genres.join(', ')}
+              <h2 className="detail-title">{item.title}</h2>
+              <div className="muted small">
+                {item.mediaType === 'tv' ? 'TV show' : 'Movie'}
+                {item.year ? ` • ${item.year}` : ''}
               </div>
-              {item.type === 'series' && (
-                <div style={{ fontSize: '0.76rem', color: 'var(--success)', marginTop: 4 }}>
-                  {item.ongoing ? 'Ongoing series — new episode alerts supported' : 'Completed series'}
-                </div>
-              )}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close details"
-            style={{
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: 999,
-              width: 32,
-              height: 32,
-              display: 'grid',
-              placeItems: 'center',
-              cursor: 'pointer',
-            }}
-          >
+          <button type="button" className="follow-icon-btn" onClick={onClose} aria-label="Close details">
             <X size={16} />
           </button>
         </div>
 
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: '14px 0' }}>{item.synopsis}</p>
+        {item.overview && <p className="detail-overview">{item.overview}</p>}
 
-        {item.latestEpisode && (
-          <div className="panel" style={{ marginBottom: 12, padding: 11 }}>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-              EPISODE TRACKER (EXAMPLE DATA)
-            </div>
-            <div style={{ fontSize: '0.84rem', marginTop: 4 }}>
-              Latest: <strong>S{item.latestEpisode.season}E{item.latestEpisode.episode}</strong> — “
-              {item.latestEpisode.title}” ({item.latestEpisode.airDate})
-            </div>
-            {item.upcomingEpisode && (
-              <div style={{ fontSize: '0.82rem', color: 'var(--accent-bright)', marginTop: 3 }}>
-                Next: <strong>S{item.upcomingEpisode.season}E{item.upcomingEpisode.episode}</strong> — “
-                {item.upcomingEpisode.title}” (est. {item.upcomingEpisode.airDate})
+        {item.mediaType === 'tv' && isFollowed && (
+          <div className="panel compact-panel">
+            {follow?.untracked ? (
+              <span className="muted small">Episode alerts aren’t available: no TVmaze match for this show.</span>
+            ) : status ? (
+              <div className="small">
+                <div>
+                  Next episode:{' '}
+                  <strong>
+                    {status.next
+                      ? `S${status.next.season}E${status.next.number ?? '?'} • ${formatDate(status.next.airdate)}`
+                      : 'none scheduled'}
+                  </strong>
+                </div>
+                {status.previous && (
+                  <div className="muted">
+                    Latest: S{status.previous.season}E{status.previous.number ?? '?'} “{status.previous.name}” •{' '}
+                    {formatDate(status.previous.airdate)}
+                  </div>
+                )}
               </div>
+            ) : (
+              <span className="muted small">Episode info loads on the next check.</span>
             )}
           </div>
         )}
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }}>
-            WHERE TO WATCH ({item.availability.length})
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {item.availability.map((avail) => {
-              const platform = platformsById[avail.platformId];
-              if (!platform) return null;
-              const cheapestPlan = platform.plans[0];
-              return (
-                <div
-                  key={avail.platformId}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                    padding: '10px 12px',
-                    borderRadius: 10,
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span
-                      className="platform-avatar"
-                      style={{ width: 34, height: 34, fontSize: '0.75rem', background: platform.brandColor }}
-                    >
-                      {platform.shortCode}
-                    </span>
-                    <div>
-                      <div style={{ fontWeight: 650, fontSize: '0.9rem' }}>
-                        {platform.name}{' '}
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                          • {avail.quality}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                        {avail.accessType === 'subscription'
-                          ? `Subscription required (from ${cheapestPlan?.monthlyPrice ?? 'varies'})`
-                          : `${avail.accessType.toUpperCase()} ${avail.note ? `• ${avail.note}` : ''}`}
-                      </div>
-                    </div>
-                  </div>
-                  <a
-                    href={platform.websiteUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="pill-btn"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    Open <ExternalLink size={12} />
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-soft)', marginTop: 6 }}>
-            Plan costs shown are example/approximate data as of Nov 2026.
-          </div>
-        </div>
+        <div className="detail-section-label">Where to watch (US)</div>
+        <WatchOptionsFull options={options} />
+        {options?.link && (
+          <a className="fineprint-link" href={options.link} target="_blank" rel="noopener noreferrer">
+            More options on TMDB <ExternalLink size={11} />
+          </a>
+        )}
+        <p className="fineprint">Where-to-watch data by JustWatch, via TMDB. Availability can change.</p>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            type="button"
-            className="primary-btn"
-            style={{ flex: 1, justifyContent: 'center' }}
-            onClick={() => onToggleFollow(item.id)}
-          >
+        <div className="detail-actions">
+          <button type="button" className="primary-btn" onClick={() => onToggleFollow(item)}>
             {isFollowed ? (
               <>
-                <Check size={16} /> Following in Watchlist
+                <Check size={16} /> In Watchlist
               </>
-            ) : item.type === 'series' ? (
+            ) : item.mediaType === 'tv' ? (
               <>
-                <BellRing size={16} /> Follow & Enable Episode Alerts
+                <BellRing size={16} /> Follow for episode alerts
               </>
             ) : (
               <>
-                <Bell size={16} /> Save to Watchlist
+                <Bookmark size={16} /> Save to Watchlist
               </>
             )}
           </button>
           <button type="button" className="secondary-btn" onClick={onClose}>
-            <Tv size={15} /> Done
+            Done
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 /* Couch Service Worker (PWA Shell + Episode Alert Notifications) */
-const CACHE_NAME = 'couch-v1';
+const CACHE_NAME = 'couch-v2';
 const BASE = self.registration.scope; // the app's scope URL, including any subpath
 
 const SHELL_ASSETS = [

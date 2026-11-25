@@ -4,3 +4,5 @@ dist
 .env
 .env.local
 *.tsbuildinfo
+apps/couch-relay/.dev.vars
+apps/couch-relay/.wrangler/

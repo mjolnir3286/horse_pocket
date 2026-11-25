@@ -171,7 +171,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </span>
             <div>
               <strong>Where to watch</strong>
-              <p>Search shows and movies to see which platforms carry them.</p>
+              <p>Search any movie or show to see where it streams, plays free, or rents in the US.</p>
             </div>
           </li>
           <li>
@@ -189,7 +189,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             </span>
             <div>
               <strong>Get notified</strong>
-              <p>Follow a show to get an alert when a new episode or premiere is detected.</p>
+              <p>Follow a show and Couch lets you know about new episodes when you open it.</p>
             </div>
           </li>
           <li>
@@ -197,8 +197,8 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               <Layers size={16} />
             </span>
             <div>
-              <strong>Plan costs and top 3</strong>
-              <p>Compare example subscription prices and the top 3 shows on each platform.</p>
+              <strong>Plans and popular shows</strong>
+              <p>Compare hand-checked plan prices and what’s popular on each service.</p>
             </div>
           </li>
         </ul>

@@ -12,74 +12,39 @@ export type PlatformPriorityTier = 'priority' | 'secondary';
 
 export interface PlatformPlan {
   name: string;
-  monthlyPrice: string;
-  annualNote?: string;
+  /** Exact price text as published, e.g. "$8.99/mo". null = not verified. */
+  monthlyPrice: string | null;
+  annualPrice?: string | null;
   hasAds: boolean;
-  notes: string;
+  notes?: string;
 }
 
 export interface StreamingPlatform {
   id: PlatformId;
-  tmdbProviderId: number;
+  /** TMDB watch-provider ids (US) that count as this service. */
+  tmdbProviderIds: number[];
   tier: PlatformPriorityTier;
   name: string;
   shortCode: string;
   brandColor: string;
   tagline: string;
-  subscriptionRequired: boolean;
-  subscriptionNote: string;
-  pricingDisclaimer: string;
   plans: PlatformPlan[];
-  top3ShowIds: [string, string, string];
+  /** Official page the prices were read from. */
+  pricingUrl: string;
+  /** ISO date the prices were checked against pricingUrl. */
+  pricesCheckedOn: string;
+  pricingNote?: string;
   websiteUrl: string;
-}
-
-export type MediaType = 'series' | 'movie';
-export type AccessType = 'subscription' | 'rent' | 'buy' | 'addon';
-
-export interface PlatformAvailability {
-  platformId: PlatformId;
-  accessType: AccessType;
-  quality: 'HD' | '4K UHD';
-  note?: string;
-}
-
-export interface EpisodeInfo {
-  season: number;
-  episode: number;
-  title: string;
-  airDate: string; // ISO YYYY-MM-DD
-  isNew?: boolean;
-}
-
-export interface MediaTitle {
-  id: string;
-  tmdbId?: number;
-  title: string;
-  type: MediaType;
-  releaseYear: number;
-  endYear?: number;
-  ongoing?: boolean;
-  genres: string[];
-  rating: string;
-  score: number;
-  synopsis: string;
-  posterGradient: [string, string];
-  posterInitials: string;
-  posterUrl?: string;
-  availability: PlatformAvailability[];
-  latestEpisode?: EpisodeInfo;
-  upcomingEpisode?: EpisodeInfo;
 }
 
 export interface NewEpisodeAlert {
   id: string;
-  titleId: string;
+  followKey: string;
   showTitle: string;
-  platformId: PlatformId;
   season: number;
   episode: number;
   episodeTitle: string;
+  airdate: string | null;
+  network: string | null;
   detectedAt: string;
-  read: boolean;
 }

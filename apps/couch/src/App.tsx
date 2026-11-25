@@ -21,9 +21,10 @@ import {
   type WatchedRef,
   type WatchedStore,
 } from './services/watched';
-import type { TvmazeEpisode } from './services/tvmaze';
+import { getLatestAiredEpisode, type TvmazeEpisode } from './services/tvmaze';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
+import { HelpModal } from './components/HelpModal';
 import { readWelcomeDismissed, WelcomeModal } from './components/WelcomeModal';
 import { WatchlistView } from './components/WatchlistView';
 import {
@@ -124,6 +125,8 @@ export const App: React.FC = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [discoverEpisodes, setDiscoverEpisodes] = useState<Record<string, EpisodeRef[]>>({});
   const [aboutOpen, setAboutOpen] = useState(false);
   const [backupGeneration, setBackupGeneration] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -135,6 +138,7 @@ export const App: React.FC = () => {
   const showToast = (msg: string) => setToast(msg);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const closeWelcome = useCallback(() => setWelcomeOpen(false), []);
+  const closeHelp = useCallback(() => setHelpOpen(false), []);
   const closeAbout = useCallback(() => setAboutOpen(false), []);
   const closeDetail = useCallback(() => setSelected(null), []);
 
@@ -257,14 +261,48 @@ export const App: React.FC = () => {
     void runSearch(queryText);
   };
 
+  useEffect(() => {
+    let cancelled = false;
+    const targets = results.filter((r) => {
+      if (r.mediaType !== 'tv') return false;
+      const entry = findWatched(watched, { key: followKey(r.mediaType, r.id), mediaType: r.mediaType, tmdbId: r.id });
+      return Boolean(entry?.allAiredAt);
+    });
+    if (targets.length === 0) return;
+
+    void (async () => {
+      const next: Record<string, EpisodeRef[]> = {};
+      for (const r of targets) {
+        if (cancelled) return;
+        const key = followKey(r.mediaType, r.id);
+        const entry = findWatched(watched, { key, mediaType: r.mediaType, tmdbId: r.id });
+        const tvmazeId = entry?.tvmazeId ?? (await resolveTvmazeId(r.id));
+        if (!tvmazeId) continue;
+        try {
+          const ep = await getLatestAiredEpisode(tvmazeId);
+          if (ep) next[key] = [ep];
+        } catch {
+          // Leave the card on the stored mark until the next successful check.
+        }
+      }
+      if (!cancelled && Object.keys(next).length > 0) {
+        setDiscoverEpisodes((prev) => ({ ...prev, ...next }));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [results, watched]);
+
   const visibleResults = useMemo(
     () =>
       results.filter(
         (r) =>
           (typeFilter === 'all' || r.mediaType === typeFilter) &&
-          !(hideWatched && isTitleWatched(findWatched(watched, { key: followKey(r.mediaType, r.id), mediaType: r.mediaType, tmdbId: r.id })))
+          !(hideWatched && isTitleWatched(findWatched(watched, { key: followKey(r.mediaType, r.id), mediaType: r.mediaType, tmdbId: r.id }), discoverEpisodes[followKey(r.mediaType, r.id)]))
       ),
-    [results, typeFilter, hideWatched, watched]
+    [results, typeFilter, hideWatched, watched, discoverEpisodes]
   );
 
   const followsByKey = useMemo(() => new Map(follows.map((f) => [f.key, f])), [follows]);
@@ -444,14 +482,14 @@ export const App: React.FC = () => {
     void enrichTmdbId(ref);
   };
 
-  const toggleTitleWatched = (item: DetailItem, currentlyWatched?: boolean) =>
+  const toggleTitleWatched = (item: DetailItem, currentlyWatched?: boolean, knownEpisodes?: EpisodeRef[]) =>
     toggleWatchedRef(refForTitle(item), () => {
       if (item.tmdbless) {
         if (item.tvmazeId != null && !follows.some((f) => f.tvmazeId === item.tvmazeId)) addTvmazeFollow(item.tvmazeId, item.title);
       } else if (!followsByKey.has(followKey(item.mediaType, item.id))) {
         void toggleFollowTitle(item);
       }
-    }, currentlyWatched);
+    }, currentlyWatched, knownEpisodes);
 
   const toggleLeadWatched = (lead: UpcomingReleaseLead) =>
     toggleWatchedRef(refForLead(lead), () => {
@@ -724,9 +762,9 @@ export const App: React.FC = () => {
                           item={item}
                           options={optionsByKey[key]}
                           isFollowed={followsByKey.has(key)}
-                          isWatched={isTitleWatched(findWatched(watched, { key, mediaType: item.mediaType, tmdbId: item.id }))}
+                          isWatched={isTitleWatched(findWatched(watched, { key, mediaType: item.mediaType, tmdbId: item.id }), discoverEpisodes[key])}
                           onToggleFollow={toggleFollowTitle}
-                          onToggleWatched={toggleTitleWatched}
+                          onToggleWatched={(item) => toggleTitleWatched(item, isTitleWatched(findWatched(watched, { key, mediaType: item.mediaType, tmdbId: item.id }), discoverEpisodes[key]), discoverEpisodes[key])}
                           onSelect={setSelected}
                         />
                       );
@@ -791,7 +829,7 @@ export const App: React.FC = () => {
         open={menuOpen}
         onClose={closeMenu}
         restoreFocusRef={menuButtonRef}
-        onOpenHelp={() => setWelcomeOpen(true)}
+        onOpenHelp={() => setHelpOpen(true)}
         onOpenAbout={() => setAboutOpen(true)}
         onExport={handleExportBackup}
         onValidateImport={handleValidateImport}
@@ -799,6 +837,7 @@ export const App: React.FC = () => {
         brandIcon={<CouchMarkIcon />}
       />
       <WelcomeModal open={welcomeOpen} permissionState={permissionState} onClose={closeWelcome} onRequestNotifications={handleRequestNotifications} restoreFocusRef={menuButtonRef} />
+      <HelpModal open={helpOpen} onClose={closeHelp} restoreFocusRef={menuButtonRef} />
       <AboutModal open={aboutOpen} onClose={closeAbout} restoreFocusRef={menuButtonRef} />
       <TitleDetailModal
         item={selected}

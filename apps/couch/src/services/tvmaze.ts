@@ -141,3 +141,24 @@ export async function getShowEpisodes(tvmazeId: number): Promise<TvmazeEpisode[]
     return episodes;
   });
 }
+
+const LATEST_AIRED_STORE = 'couch_tvmaze_latest_aired_v1';
+const LATEST_AIRED_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The most recently aired episode of a show. Used by Discover so a caught-up
+ * mark does not keep looking “Watched” after something new airs. Cached 24 hours.
+ */
+export async function getLatestAiredEpisode(tvmazeId: number): Promise<TvmazeEpisode | null> {
+  const key = String(tvmazeId);
+  const cached = cacheGet<TvmazeEpisode | null>('local', LATEST_AIRED_STORE, key);
+  if (cached !== undefined) return cached;
+  return dedupe(`latest-aired:${key}`, async () => {
+    const again = cacheGet<TvmazeEpisode | null>('local', LATEST_AIRED_STORE, key);
+    if (again !== undefined) return again;
+    const status = await getShowStatus(tvmazeId);
+    const ep = status.previous;
+    cacheSet('local', LATEST_AIRED_STORE, key, ep, LATEST_AIRED_TTL_MS);
+    return ep;
+  });
+}

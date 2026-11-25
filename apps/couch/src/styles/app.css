@@ -1180,6 +1180,130 @@ input {
   justify-content: center;
 }
 
+/* Help sheet — collapsible Tabs and Tips */
+.help-sheet.modal-sheet {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.help-sheet .welcome-intro {
+  flex-shrink: 0;
+}
+
+.help-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 0 12px;
+  padding-right: 2px;
+}
+
+.help-sheet .welcome-actions {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.help-section {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--subtle-fill, transparent);
+}
+
+.help-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.help-section-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft) inset;
+}
+
+.help-chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.help-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.help-section-body {
+  padding: 0 12px 12px;
+}
+
+.help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.help-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.help-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.help-list strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.help-list p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.help-season-mark {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.help-backup-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-chevron {
+    transition: none !important;
+  }
+}
+
 /* About card — compact credits in fine print */
 .about-sheet .welcome-intro {
   margin-bottom: 12px;

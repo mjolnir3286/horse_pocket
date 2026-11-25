@@ -213,7 +213,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         </label>
         <p className="welcome-hint">
           {dontShowAgain
-            ? `Checked: this card won’t appear the next time you open ${SITE.name}. You can still open it from the help icon.`
+            ? `Checked: this card won’t appear the next time you open ${SITE.name}. You can still open Help from the menu.`
             : 'Unchecked: this card will appear again on your next visit.'}
         </p>
 

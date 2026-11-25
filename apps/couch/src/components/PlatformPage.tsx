@@ -1,16 +1,17 @@
 import React, { useEffect, useId, useState } from 'react';
 import { ChevronDown, ExternalLink, Info, TrendingUp } from 'lucide-react';
-import type { UpcomingReleaseLead } from '../types/collector';
 import type { PlatformId, StreamingPlatform } from '../types/streaming';
 import { PLATFORM_GROUPS } from '../data/platforms';
 import { useMyServices } from '../services/myServices';
 import { getPopularOnProvider, logoUrl, peekPopularOnProvider, type TmdbTitle } from '../services/tmdb';
+import { WatchedButton } from './WatchedButton';
 
 interface PlatformPageProps {
   platforms: StreamingPlatform[];
-  availableNowLeads: UpcomingReleaseLead[];
   onSelectTitle: (title: TmdbTitle) => void;
   onToggleService: (id: PlatformId, checked: boolean) => void;
+  isWatched: (t: TmdbTitle) => boolean;
+  onToggleWatched: (t: TmdbTitle) => void;
 }
 
 const TOP = 3;
@@ -29,7 +30,7 @@ async function loadTop(platform: StreamingPlatform): Promise<TmdbTitle[]> {
   return getPopularOnProvider('movie', platform.tmdbProviderIds, TOP);
 }
 
-const PopularList: React.FC<{ platform: StreamingPlatform; onSelectTitle: (t: TmdbTitle) => void }> = ({ platform, onSelectTitle }) => {
+const PopularList: React.FC<{ platform: StreamingPlatform; onSelectTitle: (t: TmdbTitle) => void; isWatched: (t: TmdbTitle) => boolean; onToggleWatched: (t: TmdbTitle) => void }> = ({ platform, onSelectTitle, isWatched, onToggleWatched }) => {
   const [titles, setTitles] = useState<TmdbTitle[] | null | undefined>(() => peekTop(platform));
   const [attempt, setAttempt] = useState(0);
 
@@ -68,13 +69,16 @@ const PopularList: React.FC<{ platform: StreamingPlatform; onSelectTitle: (t: Tm
       )}
       {titles?.length === 0 && <div className="muted small">No titles listed.</div>}
       {titles?.map((t, idx) => (
-        <button key={`${t.mediaType}-${t.id}`} type="button" className="top3-item" onClick={() => onSelectTitle(t)}>
-          <span className="top3-left">
-            <span className="top3-rank">{idx + 1}</span>
-            <span className="top3-name">{t.title}</span>
-          </span>
-          <span className="muted small">{t.year ?? ''}</span>
-        </button>
+        <div key={`${t.mediaType}-${t.id}`} className={`top3-item ${isWatched(t) ? 'is-watched' : ''}`}>
+          <button type="button" className="top3-select" onClick={() => onSelectTitle(t)}>
+            <span className="top3-left">
+              <span className="top3-rank">{idx + 1}</span>
+              <span className="top3-name">{t.title}</span>
+            </span>
+            <span className="muted small">{t.year ?? ''}</span>
+          </button>
+          <WatchedButton watched={isWatched(t)} title={t.title} onToggle={() => onToggleWatched(t)} />
+        </div>
       ))}
     </div>
   );
@@ -83,10 +87,11 @@ const PopularList: React.FC<{ platform: StreamingPlatform; onSelectTitle: (t: Tm
 const PlatformCard: React.FC<{
   platform: StreamingPlatform;
   mine: boolean;
-  recentLeads: UpcomingReleaseLead[];
   onSelectTitle: (t: TmdbTitle) => void;
   onToggleService: (id: PlatformId, checked: boolean) => void;
-}> = ({ platform, mine, recentLeads, onSelectTitle, onToggleService }) => {
+  isWatched: (t: TmdbTitle) => boolean;
+  onToggleWatched: (t: TmdbTitle) => void;
+}> = ({ platform, mine, onSelectTitle, onToggleService, isWatched, onToggleWatched }) => {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const toggleId = useId();
@@ -126,18 +131,7 @@ const PlatformCard: React.FC<{
 
       {open && (
         <div id={panelId} role="region" aria-labelledby={toggleId} className="platform-panel">
-          <PopularList platform={platform} onSelectTitle={onSelectTitle} />
-          {recentLeads.length > 0 && (
-            <div className="top3-list">
-              <div className="top3-heading">Recently released (Upcoming feed)</div>
-              {recentLeads.slice(0, 5).map((lead) => (
-                <div key={lead.id} className="top3-item static">
-                  <span className="top3-name">{lead.showTitle}</span>
-                  <span className="muted small">{lead.parsedDateIso ?? lead.extractedDateText ?? ''}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <PopularList platform={platform} onSelectTitle={onSelectTitle} isWatched={isWatched} onToggleWatched={onToggleWatched} />
           {platform.note && (
             <p className="platform-note">
               <Info size={13} aria-hidden="true" /> {platform.note}
@@ -152,7 +146,7 @@ const PlatformCard: React.FC<{
   );
 };
 
-export const PlatformPage: React.FC<PlatformPageProps> = ({ platforms, availableNowLeads, onSelectTitle, onToggleService }) => {
+export const PlatformPage: React.FC<PlatformPageProps> = ({ platforms, onSelectTitle, onToggleService, isWatched, onToggleWatched }) => {
   const { ids } = useMyServices();
   return (
     <div className="platforms-page">
@@ -172,9 +166,10 @@ export const PlatformPage: React.FC<PlatformPageProps> = ({ platforms, available
                   key={p.id}
                   platform={p}
                   mine={ids.includes(p.id)}
-                  recentLeads={availableNowLeads.filter((l) => l.platformId === p.id)}
                   onSelectTitle={onSelectTitle}
                   onToggleService={onToggleService}
+                  isWatched={isWatched}
+                  onToggleWatched={onToggleWatched}
                 />
               ))}
             </div>

@@ -10,6 +10,7 @@ interface WatchNextProps {
   isWatched: (t: TmdbTitle) => boolean;
   isFollowed: (t: TmdbTitle) => boolean;
   onToggleFollow: (t: TmdbTitle) => void;
+  onToggleWatched: (t: TmdbTitle) => void;
   onSelect: (t: TmdbTitle) => void;
 }
 
@@ -39,7 +40,7 @@ function rank(sources: WatchedEntry[], lists: Array<TmdbTitle[] | undefined>, is
 }
 
 /** Suggestions from TMDB recommendations for watched titles only. Loads on tap, or instantly from a 24h cache. */
-export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFollowed, onToggleFollow, onSelect }) => {
+export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFollowed, onToggleFollow, onToggleWatched, onSelect }) => {
   const usable = useMemo(() => sources.filter((s) => s.tmdbId != null).slice(0, MAX_SOURCES), [sources]);
   const cachedLists = useMemo(() => usable.map((s) => peekRecommendations(s.mediaType, s.tmdbId as number)), [usable]);
   const allCached = usable.length > 0 && cachedLists.every(Boolean);
@@ -133,8 +134,10 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
               key={`${t.mediaType}-${t.id}`}
               title={t}
               followed={isFollowed(t)}
+              watched={isWatched(t)}
               onSelect={onSelect}
               onToggleFollow={onToggleFollow}
+              onToggleWatched={onToggleWatched}
               note={`Similar to ${because}`}
             />
           ))}

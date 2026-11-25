@@ -840,6 +840,35 @@ input {
   background: var(--subtle-fill-hover);
 }
 
+.top3-select {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.top3-select .top3-left {
+  flex: 1;
+}
+
+.top3-select .muted {
+  flex-shrink: 0;
+}
+
+.top3-item .watched-btn {
+  flex-shrink: 0;
+}
+
 .top3-rank {
   width: 22px;
   height: 22px;
@@ -2196,13 +2225,26 @@ input {
   min-height: calc(1.3em * 2);
 }
 
+.watch-next-card.is-watched .watch-next-poster {
+  opacity: 0.72;
+}
+
+.watch-next-watched,
 .watch-next-follow {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 28px;
-  height: 28px;
+  top: 2px;
+  width: 36px;
+  height: 36px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.watch-next-watched {
+  left: 2px;
+}
+
+.watch-next-follow {
+  right: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

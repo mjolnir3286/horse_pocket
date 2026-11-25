@@ -1,21 +1,24 @@
 import React from 'react';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { posterUrl, type TmdbTitle } from '../services/tmdb';
+import { WatchedButton } from './WatchedButton';
 
 interface PosterCardProps {
   title: TmdbTitle;
   followed: boolean;
+  watched: boolean;
   onSelect: (t: TmdbTitle) => void;
   onToggleFollow: (t: TmdbTitle) => void;
+  onToggleWatched: (t: TmdbTitle) => void;
   /** Optional second muted line, e.g. "Similar to The Bear". Reserves two lines either way. */
   note?: string;
 }
 
 /** Poster card used by Watch Next, the Discover rows, and More like this. */
-export const PosterCard: React.FC<PosterCardProps> = ({ title: t, followed, onSelect, onToggleFollow, note }) => {
+export const PosterCard: React.FC<PosterCardProps> = ({ title: t, followed, watched, onSelect, onToggleFollow, onToggleWatched, note }) => {
   const poster = posterUrl(t.posterPath, 'w185');
   return (
-    <div className="watch-next-card" role="listitem">
+    <div className={`watch-next-card ${watched ? 'is-watched' : ''}`} role="listitem">
       <button type="button" className="watch-next-poster" onClick={() => onSelect(t)} aria-label={`${t.title}, details`}>
         {poster ? <img src={poster} alt="" loading="lazy" /> : <span>{t.title.slice(0, 2).toUpperCase()}</span>}
       </button>
@@ -33,12 +36,16 @@ export const PosterCard: React.FC<PosterCardProps> = ({ title: t, followed, onSe
           </span>
         )}
       </div>
+      <WatchedButton className="watch-next-watched" watched={watched} title={t.title} onToggle={() => onToggleWatched(t)} />
       <button
         type="button"
         className={`follow-icon-btn watch-next-follow ${followed ? 'following' : ''}`}
         aria-label={followed ? `Remove ${t.title} from Watchlist` : `Add ${t.title} to Watchlist`}
         title={followed ? 'Watchlisted' : 'Add to Watchlist'}
-        onClick={() => onToggleFollow(t)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFollow(t);
+        }}
       >
         {followed ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
       </button>

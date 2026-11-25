@@ -26,6 +26,8 @@ interface TitleDetailModalProps {
   isTitleFollowed?: (t: TmdbTitle) => boolean;
   onToggleFollowTitle?: (t: TmdbTitle) => void;
   isTitleHidden?: (t: TmdbTitle) => boolean;
+  isTitleWatchedMark?: (t: TmdbTitle) => boolean;
+  onToggleWatchedTitle?: (t: TmdbTitle) => void;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -48,6 +50,8 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
   isTitleFollowed,
   onToggleFollowTitle,
   isTitleHidden,
+  isTitleWatchedMark,
+  onToggleWatchedTitle,
 }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
@@ -173,14 +177,16 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
           />
         )}
 
-        {!item.tmdbless && onSelectTitle && onToggleFollowTitle && (
+        {!item.tmdbless && onSelectTitle && onToggleFollowTitle && onToggleWatchedTitle && (
           <MoreLikeThis
             mediaType={item.mediaType}
             id={item.id}
             title={item.title}
             isHidden={isTitleHidden ?? (() => false)}
             isFollowed={isTitleFollowed ?? (() => false)}
+            isWatched={isTitleWatchedMark ?? (() => false)}
             onToggleFollow={onToggleFollowTitle}
+            onToggleWatched={onToggleWatchedTitle}
             onSelect={onSelectTitle}
           />
         )}

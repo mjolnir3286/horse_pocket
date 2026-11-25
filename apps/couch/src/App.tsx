@@ -603,23 +603,18 @@ export const App: React.FC = () => {
     [watched]
   );
   const isTmdbFollowed = useCallback((t: TmdbTitle) => followsByKey.has(followKey(t.mediaType, t.id)), [followsByKey]);
-  /** Discover rows and More like this hide titles you're caught up on when Hide watched is on. */
-  const isRowHidden = useCallback(
-    (t: TmdbTitle) => hideWatched && isTitleWatched(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id })),
-    [hideWatched, watched]
+  const isTmdbCaughtUp = useCallback(
+    (t: TmdbTitle) => isTitleWatched(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id })),
+    [watched]
   );
+  /** Discover rows and More like this hide titles you're caught up on when Hide watched is on. */
+  const isRowHidden = useCallback((t: TmdbTitle) => hideWatched && isTmdbCaughtUp(t), [hideWatched, isTmdbCaughtUp]);
 
   const detailFollow = selected
     ? selected.tmdbless
       ? follows.find((f) => f.tvmazeId === selected.tvmazeId)
       : followsByKey.get(followKey(selected.mediaType, selected.id))
     : undefined;
-
-  const availableNowLeads = useMemo(
-    () => (collectorData?.leads ?? []).filter((l) => l.availabilityStatus === 'available-now'),
-    [collectorData]
-  );
-
 
   const platformsById = useMemo(
     () => Object.fromEntries(platforms.map((p) => [p.id, p])) as Record<PlatformId, StreamingPlatform>,
@@ -814,7 +809,9 @@ export const App: React.FC = () => {
                 type={typeFilter}
                 isHidden={isRowHidden}
                 isFollowed={isTmdbFollowed}
+                isWatched={isTmdbCaughtUp}
                 onToggleFollow={(t) => void toggleFollowTitle(t)}
+                onToggleWatched={(t) => toggleTitleWatched(t)}
                 onSelect={setSelected}
                 onOpenPlatforms={() => setActiveTab('platforms')}
               />
@@ -889,6 +886,7 @@ export const App: React.FC = () => {
                 isWatched={isTmdbWatched}
                 isFollowed={isTmdbFollowed}
                 onToggleFollow={(t) => void toggleFollowTitle(t)}
+                onToggleWatched={(t) => toggleTitleWatched(t)}
                 onSelect={setSelected}
               />
             }
@@ -896,7 +894,7 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === 'platforms' && (
-          <PlatformPage platforms={platforms} availableNowLeads={availableNowLeads} onSelectTitle={setSelected} onToggleService={toggleService} />
+          <PlatformPage platforms={platforms} onSelectTitle={setSelected} onToggleService={toggleService} isWatched={isTmdbCaughtUp} onToggleWatched={(t) => toggleTitleWatched(t)} />
         )}
       </main>
 
@@ -933,6 +931,8 @@ export const App: React.FC = () => {
         isTitleFollowed={isTmdbFollowed}
         onToggleFollowTitle={(t) => void toggleFollowTitle(t)}
         isTitleHidden={isRowHidden}
+        isTitleWatchedMark={isTmdbCaughtUp}
+        onToggleWatchedTitle={(t) => toggleTitleWatched(t)}
         onOptionsLoaded={(item, options) => setOptionsByKey((prev) => ({ ...prev, [followKey(item.mediaType, item.id)]: options }))} />
     </div>
     </MyServicesContext.Provider>

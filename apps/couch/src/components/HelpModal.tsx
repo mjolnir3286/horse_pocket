@@ -59,7 +59,7 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Check size={16} aria-hidden="true" />,
     label: 'Watched',
-    text: 'Tap the check on a title to mark it watched. For a show, that marks every aired episode and adds it to your Watchlist. Marking one episode only affects that episode.',
+    text: 'Tap the check on a title to mark it watched, including on Popular rows, More like this, and Watch Next. For a show, that marks every aired episode and adds it to your Watchlist. Marking one episode only affects that episode.',
   },
   {
     icon: <BellRing size={16} aria-hidden="true" />,
@@ -69,7 +69,7 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Eye size={16} aria-hidden="true" />,
     label: 'Hide watched',
-    text: 'The eye next to Platforms and Sort hides titles you’re caught up on, in both Upcoming and Discover.',
+    text: 'The eye next to Platforms and Sort hides titles you’re caught up on in Upcoming and Discover, including the Popular and Trending rows.',
   },
   {
     icon: <Bookmark size={16} aria-hidden="true" />,

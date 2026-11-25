@@ -9,12 +9,14 @@ interface MoreLikeThisProps {
   title: string;
   isHidden: (t: TmdbTitle) => boolean;
   isFollowed: (t: TmdbTitle) => boolean;
+  isWatched: (t: TmdbTitle) => boolean;
   onToggleFollow: (t: TmdbTitle) => void;
+  onToggleWatched: (t: TmdbTitle) => void;
   onSelect: (t: TmdbTitle) => void;
 }
 
 /** TMDB recommendations for one title, loaded only when the user opens it (cached 24 hours). */
-export const MoreLikeThis: React.FC<MoreLikeThisProps> = ({ mediaType, id, title, isHidden, isFollowed, onToggleFollow, onSelect }) => {
+export const MoreLikeThis: React.FC<MoreLikeThisProps> = ({ mediaType, id, title, isHidden, isFollowed, isWatched, onToggleFollow, onToggleWatched, onSelect }) => {
   const panelId = useId();
   const [open, setOpen] = useState(false);
   const [titles, setTitles] = useState<TmdbTitle[] | null | undefined>(undefined);
@@ -67,7 +69,7 @@ export const MoreLikeThis: React.FC<MoreLikeThisProps> = ({ mediaType, id, title
           ) : (
             <div className="title-row" role="list" aria-label={`More like ${title}`}>
               {visible.map((t) => (
-                <PosterCard key={`${t.mediaType}-${t.id}`} title={t} followed={isFollowed(t)} onSelect={onSelect} onToggleFollow={onToggleFollow} />
+                <PosterCard key={`${t.mediaType}-${t.id}`} title={t} followed={isFollowed(t)} watched={isWatched(t)} onSelect={onSelect} onToggleFollow={onToggleFollow} onToggleWatched={onToggleWatched} />
               ))}
             </div>
           )}

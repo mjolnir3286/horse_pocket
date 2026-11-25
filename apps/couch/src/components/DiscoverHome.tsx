@@ -18,7 +18,9 @@ interface DiscoverHomeProps {
   type: RowType;
   isHidden: (t: TmdbTitle) => boolean;
   isFollowed: (t: TmdbTitle) => boolean;
+  isWatched: (t: TmdbTitle) => boolean;
   onToggleFollow: (t: TmdbTitle) => void;
+  onToggleWatched: (t: TmdbTitle) => void;
   onSelect: (t: TmdbTitle) => void;
   onOpenPlatforms: () => void;
 }
@@ -58,7 +60,7 @@ interface RowProps extends Omit<DiscoverHomeProps, 'onOpenPlatforms' | 'type'> {
   emptyText: string;
 }
 
-const TitleRowSection: React.FC<RowProps> = ({ id, heading, label, peek, fetchRow, emptyText, isHidden, isFollowed, onToggleFollow, onSelect }) => {
+const TitleRowSection: React.FC<RowProps> = ({ id, heading, label, peek, fetchRow, emptyText, isHidden, isFollowed, isWatched, onToggleFollow, onToggleWatched, onSelect }) => {
   const [ref, near] = useNearViewport<HTMLElement>();
   const [titles, setTitles] = useState<TmdbTitle[] | null | undefined>(() => peek());
   const [loading, setLoading] = useState(false);
@@ -113,7 +115,7 @@ const TitleRowSection: React.FC<RowProps> = ({ id, heading, label, peek, fetchRo
       ) : (
         <div className="title-row" role="list" aria-label={label}>
           {visible.map((t) => (
-            <PosterCard key={`${t.mediaType}-${t.id}`} title={t} followed={isFollowed(t)} onSelect={onSelect} onToggleFollow={onToggleFollow} />
+            <PosterCard key={`${t.mediaType}-${t.id}`} title={t} followed={isFollowed(t)} watched={isWatched(t)} onSelect={onSelect} onToggleFollow={onToggleFollow} onToggleWatched={onToggleWatched} />
           ))}
         </div>
       )}

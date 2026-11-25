@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    svg {
+      --shed-outline: #4338ca;
+      --shed-fill: #e0e7ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      svg {
+        --shed-outline: #818cf8;
+        --shed-fill: #1b2240;
+      }
+    }
+    .s-outline { fill: var(--shed-outline); }
+    .s-fill { fill: var(--shed-fill); }
+  </style>
+  <polygon class="s-outline" points="4,12 12,4 52,4 60,12 60,52 52,60 12,60 4,52"/>
+  <path class="s-fill" d="M8 12 L12 8 L52 8 L56 12 L56 52 L52 56 L12 56 L8 52 Z"/>
+  <rect class="s-outline" x="12" y="16" width="40" height="8"/>
+  <rect class="s-outline" x="12" y="32" width="40" height="8"/>
+  <rect class="s-outline" x="12" y="44" width="40" height="4"/>
+</svg>

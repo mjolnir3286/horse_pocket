@@ -19,6 +19,8 @@
   --couch-fill: #438188;
   --wad-outline: #b8f5c8;
   --wad-fill: #12b35a;
+  --shed-outline: #818cf8;
+  --shed-fill: #1b2240;
   --tile-shadow: rgba(0, 0, 0, 0.28);
   --radius: 18px;
 }
@@ -45,6 +47,8 @@
     --couch-fill: #458289;
     --wad-outline: #14532d;
     --wad-fill: #00e64d;
+    --shed-outline: #4338ca;
+    --shed-fill: #e0e7ff;
     --tile-shadow: rgba(24, 24, 27, 0.08);
   }
 }

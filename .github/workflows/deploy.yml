@@ -30,6 +30,7 @@ jobs:
             apps/portal/package-lock.json
             apps/couch/package-lock.json
             apps/wad/package-lock.json
+            apps/shed/package-lock.json
       - name: Install and build portal
         working-directory: apps/portal
         run: |
@@ -45,13 +46,20 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Install, test, and build Shed
+        working-directory: apps/shed
+        run: |
+          npm ci
+          npm test
+          npm run build
       - name: Assemble GitHub Pages site
         run: |
           rm -rf www
-          mkdir -p www/couch www/wad
+          mkdir -p www/couch www/wad www/shed
           cp -r apps/portal/dist/. www/
           cp -r apps/couch/www/. www/couch/
           cp -r apps/wad/dist/. www/wad/
+          cp -r apps/shed/dist/. www/shed/
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

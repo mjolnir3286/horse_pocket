@@ -28,9 +28,22 @@ const horsePocketSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
   <polygon points="11.5,3.5 52.5,3.5 60.5,11.5 60.5,52.5 52.5,60.5 11.5,60.5 3.5,52.5 3.5,11.5" stroke="currentColor" stroke-width="5" stroke-linejoin="miter"/>
 </svg>`;
 
+const shedIconSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <polygon fill="var(--shed-outline)" points="4,12 12,4 52,4 60,12 60,52 52,60 12,60 4,52"/>
+  <path fill="var(--shed-fill)" d="M8 12 L12 8 L52 8 L56 12 L56 52 L52 56 L12 56 L8 52 Z"/>
+  <rect fill="var(--shed-outline)" x="10" y="19" width="44" height="6"/>
+  <rect fill="var(--shed-outline)" x="10" y="32" width="44" height="6"/>
+  <rect fill="var(--shed-outline)" x="10" y="41" width="44" height="2"/>
+  <rect fill="var(--shed-outline)" x="10" y="46" width="44" height="2"/>
+  <rect fill="var(--shed-outline)" x="10" y="50" width="44" height="2"/>
+</svg>`;
+
 function renderTileIcon(kind: PortalApp['icon']): string {
-  const file = kind === 'couch' ? 'couch-icon.png' : 'wad-icon.png';
-  return `<img class="app-tile-img" src="${appUrl(file)}" alt="" width="68" height="68" />`;
+  if (kind === 'couch') {
+    return `<img class="app-tile-img" src="${appUrl('couch-icon.png')}" alt="" width="68" height="68" />`;
+  }
+  if (kind === 'shed') return shedIconSvg;
+  return `<img class="app-tile-img" src="${appUrl('wad-icon.png')}" alt="" width="68" height="68" />`;
 }
 
 const root = document.getElementById('app');

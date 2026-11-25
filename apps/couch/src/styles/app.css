@@ -1989,6 +1989,7 @@ input {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  height: 100%;
 }
 
 .watch-next-poster {
@@ -2029,9 +2030,15 @@ input {
 }
 
 .watch-next-because {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  /* Reserve two lines so every card in the row/grid is the same height. */
+  min-height: calc(1.3em * 2);
 }
 
 .watch-next-follow {

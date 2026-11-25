@@ -143,8 +143,8 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
                     {t.mediaType === 'tv' ? 'Show' : 'Movie'}
                     {t.year ? ` • ${t.year}` : ''}
                   </span>
-                  <span className="muted tiny watch-next-because" title={`Because you watched ${because}`}>
-                    Because you watched {because}
+                  <span className="muted tiny watch-next-because" title={`Similar to ${because}`}>
+                    Similar to {because}
                   </span>
                 </div>
                 <button

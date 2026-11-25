@@ -1,0 +1,16 @@
+{
+  "name": "horse-pocket-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Horse Pocket — Mini app portal",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vite": "^8.1.7"
+  }
+}

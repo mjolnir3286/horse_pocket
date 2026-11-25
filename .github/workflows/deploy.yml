@@ -26,10 +26,32 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Install and build
+          cache-dependency-path: |
+            apps/portal/package-lock.json
+            apps/couch/package-lock.json
+            apps/wad/package-lock.json
+      - name: Install and build portal
+        working-directory: apps/portal
         run: |
           npm ci
           npm run build
+      - name: Install and build Couch
+        working-directory: apps/couch
+        run: |
+          npm ci
+          npm run build
+      - name: Install and build Wad
+        working-directory: apps/wad
+        run: |
+          npm ci
+          npm run build
+      - name: Assemble GitHub Pages site
+        run: |
+          rm -rf www
+          mkdir -p www/couch www/wad
+          cp -r apps/portal/dist/. www/
+          cp -r apps/couch/www/. www/couch/
+          cp -r apps/wad/dist/. www/wad/
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

@@ -52,7 +52,7 @@ Reuse these theme colors; do not invent a new palette.
 
 ## Icons
 
-Reuse the user's artwork; do not redraw it. The Wad icon is the user's original wallet (word removed) inside the shared clipped-corner frame (`wad-icon.png`, plus 192/512 and maskable PWA icons in `apps/wad/public/icons/`). The portal mark is a hand-drawn SVG horse head in the same clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). Couch is a two-color loveseat SVG (`--couch-outline`, `--couch-fill`). An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
+Reuse the user's artwork; do not redraw it. The Wad icon is the user's original wallet (word removed) inside the shared clipped-corner frame (`wad-icon.png`, plus 192/512 and maskable PWA icons in `apps/wad/public/icons/`). The portal mark is a hand-drawn SVG horse head in the same clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). The Couch icon is the existing two-color loveseat inside the same clipped-corner frame (`couch-icon.png`, plus 192/512, maskable, and apple-touch icons in `apps/couch/public/icons/`). The PNG frame uses the loveseat outline `#132347` on the existing `#eef2f7` interior; the SVG favicon follows the device theme with `--couch-outline` and `--couch-fill`. An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
 
 ## Shared app patterns
 

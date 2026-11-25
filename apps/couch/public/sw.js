@@ -1,5 +1,5 @@
 /* Couch Service Worker: static assets, upcoming JSON, and relay/TVmaze/image caching. */
-const SHELL_CACHE = 'couch-shell-v11';
+const SHELL_CACHE = 'couch-shell-v12';
 const RELAY_CACHE = 'couch-relay-v1';
 const DATA_CACHE = 'couch-data-v1';
 const IMAGE_CACHE = 'couch-images-v1';
@@ -16,9 +16,13 @@ const SHELL_ASSETS = [
   `${BASE}index.html`,
   `${BASE}manifest.webmanifest`,
   `${BASE}favicon.svg`,
+  `${BASE}couch-icon.png`,
   `${BASE}tmdb-logo.svg`,
   `${BASE}icons/icon-192.png`,
   `${BASE}icons/icon-512.png`,
+  `${BASE}icons/icon-192-maskable.png`,
+  `${BASE}icons/icon-512-maskable.png`,
+  `${BASE}icons/apple-touch-icon.png`,
 ];
 
 self.addEventListener('install', (event) => {

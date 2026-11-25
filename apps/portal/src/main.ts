@@ -28,19 +28,9 @@ const horsePocketSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
   <polygon points="11.5,3.5 52.5,3.5 60.5,11.5 60.5,52.5 52.5,60.5 11.5,60.5 3.5,52.5 3.5,11.5" stroke="currentColor" stroke-width="5" stroke-linejoin="miter"/>
 </svg>`;
 
-const couchIconSvg = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-  <path fill="var(--couch-outline)" d="M12.8 45.2 L10.2 54.4 C10 55.2 11 55.7 11.7 55 L17.4 46.4 Z"/>
-  <path fill="var(--couch-outline)" d="M51.2 45.2 L53.8 54.4 C54 55.2 53 55.7 52.3 55 L46.6 46.4 Z"/>
-  <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M10.5 24 C16 13, 48 13, 53.5 24 L56 42.5 C56 46, 52 47, 46 47 C36.5 45.8, 27.5 45.8, 18 47 C12 47, 8 46, 8 42.5 Z" stroke-width="3.8" stroke-linejoin="round"/>
-  <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M9.5 21.5 C5.6 21.5, 4.4 26.5, 5.4 35.5 C6.2 42.8, 8.8 46.8, 14.5 46.8 L13.2 28 C12.8 24, 11.6 21.5, 9.5 21.5 Z" stroke-width="3.8" stroke-linejoin="round"/>
-  <path fill="var(--couch-fill)" stroke="var(--couch-outline)" d="M54.5 21.5 C58.4 21.5, 59.6 26.5, 58.6 35.5 C57.8 42.8, 55.2 46.8, 49.5 46.8 L50.8 28 C51.2 24, 52.4 21.5, 54.5 21.5 Z" stroke-width="3.8" stroke-linejoin="round"/>
-  <rect fill="var(--couch-fill)" stroke="var(--couch-outline)" x="13.5" y="30.5" width="18.5" height="11.8" rx="3.4" stroke-width="3.4" stroke-linejoin="round"/>
-  <rect fill="var(--couch-fill)" stroke="var(--couch-outline)" x="32" y="30.5" width="18.5" height="11.8" rx="3.4" stroke-width="3.4" stroke-linejoin="round"/>
-</svg>`;
-
 function renderTileIcon(kind: PortalApp['icon']): string {
-  if (kind === 'couch') return couchIconSvg;
-  return `<img class="app-tile-img" src="${appUrl('wad-icon.png')}" alt="" width="68" height="68" />`;
+  const file = kind === 'couch' ? 'couch-icon.png' : 'wad-icon.png';
+  return `<img class="app-tile-img" src="${appUrl(file)}" alt="" width="68" height="68" />`;
 }
 
 const root = document.getElementById('app');

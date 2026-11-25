@@ -120,6 +120,8 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
         </div>
       )}
 
+      {watchNext}
+
       <div className="section-heading">
         <h2>Your Watchlist ({follows.length})</h2>
         <span className="section-meta">Saved on this device</span>
@@ -164,7 +166,6 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
         </div>
       )}
 
-      {watchNext}
     </div>
   );
 };

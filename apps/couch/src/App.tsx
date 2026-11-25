@@ -17,6 +17,7 @@ import {
   setEpisodesWatched,
   setTitleWatched,
   watchedSources,
+  type EpisodeRef,
   type WatchedRef,
   type WatchedStore,
 } from './services/watched';
@@ -415,8 +416,20 @@ export const App: React.FC = () => {
     }
   };
 
-  const toggleWatchedRef = (ref: WatchedRef, ensureFollowed: () => void) => {
-    const wasWatched = isTitleWatched(findWatched(watched, ref));
+
+  const episodesFromLead = (lead: UpcomingReleaseLead): EpisodeRef[] => {
+    const d = lead.tvmaze?.nextEpisodeAirDate;
+    if (!d) return [];
+    return [{ id: 0, airstamp: null, airdate: d }];
+  };
+
+  const episodesFromFollow = (f: FollowedTitle): EpisodeRef[] => {
+    const st = f.lastStatus;
+    return [st?.previous, st?.next].filter((e): e is TvmazeEpisode => e != null);
+  };
+
+  const toggleWatchedRef = (ref: WatchedRef, ensureFollowed: () => void, currentlyWatched?: boolean, knownEpisodes?: EpisodeRef[]) => {
+    const wasWatched = currentlyWatched ?? isTitleWatched(findWatched(watched, ref), knownEpisodes);
     setWatched((prev) => setTitleWatched(prev, ref, !wasWatched));
     if (wasWatched) {
       showToast(`Unmarked “${ref.title}”`);
@@ -431,21 +444,22 @@ export const App: React.FC = () => {
     void enrichTmdbId(ref);
   };
 
-  const toggleTitleWatched = (item: DetailItem) =>
+  const toggleTitleWatched = (item: DetailItem, currentlyWatched?: boolean) =>
     toggleWatchedRef(refForTitle(item), () => {
       if (item.tmdbless) {
         if (item.tvmazeId != null && !follows.some((f) => f.tvmazeId === item.tvmazeId)) addTvmazeFollow(item.tvmazeId, item.title);
       } else if (!followsByKey.has(followKey(item.mediaType, item.id))) {
         void toggleFollowTitle(item);
       }
-    });
+    }, currentlyWatched);
 
   const toggleLeadWatched = (lead: UpcomingReleaseLead) =>
     toggleWatchedRef(refForLead(lead), () => {
       if (!isLeadFollowed(lead)) toggleFollowLead(lead);
-    });
+    }, undefined, episodesFromLead(lead));
 
-  const toggleFollowWatched = (f: FollowedTitle) => toggleWatchedRef(refForFollow(f), () => undefined);
+  const toggleFollowWatched = (f: FollowedTitle) =>
+    toggleWatchedRef(refForFollow(f), () => undefined, undefined, episodesFromFollow(f));
 
   const setDetailEpisodes = (item: DetailItem, episodes: TvmazeEpisode[], value: boolean) => {
     setWatched((prev) => setEpisodesWatched(prev, refForTitle(item), episodes, value));
@@ -460,7 +474,10 @@ export const App: React.FC = () => {
     });
   };
 
-  const isLeadWatched = useCallback((lead: UpcomingReleaseLead) => isTitleWatched(findWatched(watched, refForLead(lead))), [watched]);
+  const isLeadWatched = useCallback(
+    (lead: UpcomingReleaseLead) => isTitleWatched(findWatched(watched, refForLead(lead)), episodesFromLead(lead)),
+    [watched]
+  );
 
   const openLead = (lead: UpcomingReleaseLead) => {
     const showId = lead.tvmaze?.showId;
@@ -477,7 +494,7 @@ export const App: React.FC = () => {
 
   const watchedFollowState = (f: FollowedTitle) => {
     const entry = findWatched(watched, refForFollow(f));
-    const isW = isTitleWatched(entry);
+    const isW = isTitleWatched(entry, episodesFromFollow(f));
     const n = entry ? Object.values(entry.episodes).filter(Boolean).length : 0;
     const partial = isW
       ? null

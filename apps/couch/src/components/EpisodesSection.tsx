@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { resolveTvmazeId } from '../services/follows';
-import { getSeasonWatchOptions, hasAnyWatchOption, type WatchOptions } from '../services/tmdb';
+import { getSeasonWatchOptions, getTvSeasons, hasAnyWatchOption, type TmdbSeason, type WatchOptions } from '../services/tmdb';
 import { getShowEpisodes, type TvmazeEpisode } from '../services/tvmaze';
-import { hasAired, isEpisodeWatched, type WatchedEntry } from '../services/watched';
+import { hasAired, isEpisodeWatched, isTitleWatched, type WatchedEntry } from '../services/watched';
 import { WatchOptionsSummary } from './WatchOptions';
 
 interface EpisodesSectionProps {
@@ -14,6 +14,7 @@ interface EpisodesSectionProps {
   showOptions: WatchOptions | null | undefined;
   onTvmazeResolved?: (id: number | null) => void;
   onSetEpisodes: (episodes: TvmazeEpisode[], watched: boolean) => void;
+  onCaughtUp?: (caughtUp: boolean) => void;
 }
 
 function formatDate(iso: string | null): string {
@@ -31,11 +32,13 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
   showOptions,
   onTvmazeResolved,
   onSetEpisodes,
+  onCaughtUp,
 }) => {
   const [tvmazeId, setTvmazeId] = useState<number | null | undefined>(initialTvmazeId ?? undefined);
   const [episodes, setEpisodes] = useState<TvmazeEpisode[] | null | undefined>(undefined);
   const [season, setSeason] = useState<number | null>(null);
   const [seasonOptions, setSeasonOptions] = useState<WatchOptions | null | undefined>(undefined);
+  const [tmdbSeasons, setTmdbSeasons] = useState<TmdbSeason[] | null | undefined>(undefined);
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
@@ -93,8 +96,44 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
   }, [seasons]);
 
   useEffect(() => {
-    if (season == null || tmdbId == null) {
+    if (tmdbId == null) {
+      setTmdbSeasons(null);
+      return;
+    }
+    let cancelled = false;
+    setTmdbSeasons(undefined);
+    getTvSeasons(tmdbId)
+      .then((list) => !cancelled && setTmdbSeasons(list))
+      .catch(() => !cancelled && setTmdbSeasons(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [tmdbId]);
+
+  useEffect(() => {
+    if (!onCaughtUp) return;
+    if (episodes === undefined) return;
+    onCaughtUp(isTitleWatched(entry, episodes ?? undefined));
+  }, [entry, episodes, onCaughtUp]);
+
+  const current = seasons.find(([n]) => n === season)?.[1] ?? [];
+  const aired = current.filter((e) => hasAired(e));
+  const watchedCount = aired.filter((e) => isEpisodeWatched(entry, e)).length;
+  const seasonDone = aired.length > 0 && watchedCount === aired.length;
+
+  // null = still loading season metadata; false = TVmaze and TMDB disagree (or TMDB has no such season).
+  const countsAgree =
+    season == null || episodes === undefined || tmdbSeasons === undefined
+      ? null
+      : tmdbSeasons != null && tmdbSeasons.some((s) => s.seasonNumber === season && s.episodeCount === current.length);
+
+  useEffect(() => {
+    if (season == null || tmdbId == null || countsAgree === false) {
       setSeasonOptions(null);
+      return;
+    }
+    if (countsAgree == null) {
+      setSeasonOptions(undefined);
       return;
     }
     const ctrl = new AbortController();
@@ -103,16 +142,9 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
       .then((o) => setSeasonOptions(o))
       .catch(() => !ctrl.signal.aborted && setSeasonOptions(null));
     return () => ctrl.abort();
-  }, [tmdbId, season]);
+  }, [tmdbId, season, countsAgree]);
 
-  const current = seasons.find(([n]) => n === season)?.[1] ?? [];
-  const aired = current.filter((e) => hasAired(e));
-  const watchedCount = aired.filter((e) => isEpisodeWatched(entry, e)).length;
-  const seasonDone = aired.length > 0 && watchedCount === aired.length;
-  const totalAired = (episodes ?? []).filter((e) => hasAired(e));
-  const totalWatched = totalAired.filter((e) => isEpisodeWatched(entry, e)).length;
-
-  const seasonHasOwn = seasonOptions ? hasAnyWatchOption(seasonOptions) : false;
+  const seasonHasOwn = countsAgree === true && seasonOptions ? hasAnyWatchOption(seasonOptions) : false;
 
   return (
     <section className="episodes-section" aria-label={`Seasons and episodes of ${title}`}>
@@ -120,10 +152,7 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
         <span className="detail-section-label" style={{ margin: 0 }}>
           Seasons &amp; episodes
         </span>
-        <span className="muted small">
-          {episodes ? `${totalWatched}/${totalAired.length} watched` : ''}
-          <ChevronDown size={14} className={`episodes-chevron ${open ? 'open' : ''}`} aria-hidden="true" />
-        </span>
+        <ChevronDown size={14} className={`episodes-chevron ${open ? 'open' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
@@ -158,13 +187,15 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
               {tmdbId != null && (
                 <div className="season-providers">
                   <div className="season-providers-label">
-                    {seasonOptions === undefined
-                      ? `Season ${season}: checking where to watch…`
-                      : seasonHasOwn
-                        ? `Season ${season} streams on`
-                        : `Season ${season}: no season-specific listing, showing the show’s options`}
+                    {countsAgree === false
+                      ? `Season ${season}: episode counts don’t match, showing the show’s options`
+                      : seasonOptions === undefined
+                        ? `Season ${season}: checking where to watch…`
+                        : seasonHasOwn
+                          ? `Season ${season} streams on`
+                          : `Season ${season}: no season-specific listing, showing the show’s options`}
                   </div>
-                  {seasonOptions !== undefined && (
+                  {(countsAgree === false || seasonOptions !== undefined) && (
                     <WatchOptionsSummary options={seasonHasOwn ? seasonOptions : showOptions} />
                   )}
                 </div>
@@ -173,10 +204,6 @@ export const EpisodesSection: React.FC<EpisodesSectionProps> = ({
               <div className="season-bar">
                 <span className="small">
                   <strong>Season {season}</strong>
-                  <span className="muted">
-                    {' '}
-                    • {watchedCount}/{aired.length} aired watched
-                  </span>
                 </span>
                 <button
                   type="button"

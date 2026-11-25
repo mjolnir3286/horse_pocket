@@ -15,7 +15,7 @@ interface TitleDetailModalProps {
   follow: FollowedTitle | undefined;
   watchedEntry: WatchedEntry | undefined;
   onToggleFollow: (item: DetailItem) => void;
-  onToggleWatched: (item: DetailItem) => void;
+  onToggleWatched: (item: DetailItem, currentlyWatched: boolean) => void;
   onSetEpisodes: (item: DetailItem, episodes: TvmazeEpisode[], watched: boolean) => void;
   onTvmazeResolved?: (item: DetailItem, tvmazeId: number | null) => void;
   onClose: () => void;
@@ -40,6 +40,11 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
   onOptionsLoaded,
 }) => {
   const [options, setOptions] = useState<WatchOptions | null | undefined>(undefined);
+  const [caughtUp, setCaughtUp] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setCaughtUp(null);
+  }, [item]);
 
   useEffect(() => {
     if (!item) return;
@@ -73,7 +78,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
   const poster = posterUrl(item.posterPath, 'w342');
   const isFollowed = Boolean(follow);
   const status = follow?.lastStatus;
-  const watched = isTitleWatched(watchedEntry);
+  const watched = item.mediaType === 'tv' ? (caughtUp ?? isTitleWatched(watchedEntry)) : isTitleWatched(watchedEntry);
   const tvmazeId = item.tvmazeId ?? follow?.tvmazeId ?? watchedEntry?.tvmazeId ?? null;
 
   return (
@@ -151,6 +156,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
             showOptions={options}
             onTvmazeResolved={(id) => onTvmazeResolved?.(item, id)}
             onSetEpisodes={(eps, w) => onSetEpisodes(item, eps, w)}
+            onCaughtUp={setCaughtUp}
           />
         )}
 
@@ -174,10 +180,11 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
             type="button"
             className={`secondary-btn watched-action ${watched ? 'is-watched' : ''}`}
             aria-pressed={watched}
-            onClick={() => onToggleWatched(item)}
+            aria-label={watched ? 'Unmark watched' : item.mediaType === 'tv' ? 'Mark show watched' : 'Mark watched'}
+            onClick={() => onToggleWatched(item, watched)}
             title={item.mediaType === 'tv' && !watched ? 'Marks every aired episode watched and adds the show to your Watchlist' : undefined}
           >
-            {watched ? <CheckCircle2 size={16} /> : <Circle size={16} />} {watched ? 'Watched' : item.mediaType === 'tv' ? 'Mark show watched' : 'Mark watched'}
+            {watched ? <CheckCircle2 size={16} /> : <Circle size={16} />} Watched
           </button>
         </div>
       </div>

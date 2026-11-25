@@ -86,11 +86,6 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
     [collectorData]
   );
 
-  const followedLeadsCount = useMemo(
-    () => leads.filter((l) => isLeadFollowed(l)).length,
-    [leads, isLeadFollowed]
-  );
-
   const statusFilteredLeads = useMemo(() => {
     return leads.filter((lead) => {
       if (hideWatched && isLeadWatched(lead)) return false;
@@ -216,16 +211,10 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       <div className="chip-row" role="group" aria-label="Filter by confirmation status">
         {(
           [
-            ['all', `All (${leads.length})`],
-            [
-              'confirmed',
-              `Confirmed (${leads.filter((l) => l.confirmationStatus === 'confirmed').length})`,
-            ],
-            [
-              'unconfirmed',
-              `Unconfirmed (${leads.filter((l) => l.confirmationStatus === 'unconfirmed').length})`,
-            ],
-            ['followed', `Watchlisted (${followedLeadsCount})`],
+            ['all', 'All'],
+            ['confirmed', 'Confirmed'],
+            ['unconfirmed', 'Unconfirmed'],
+            ['followed', 'Watchlisted'],
           ] as const
         ).map(([key, label]) => (
           <button

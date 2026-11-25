@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bookmark, BookmarkCheck, Sparkles } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronDown, Sparkles } from 'lucide-react';
 import { getRecommendations, peekRecommendations, posterUrl, type TmdbTitle } from '../services/tmdb';
 import type { WatchedEntry } from '../services/watched';
 
@@ -43,13 +43,16 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
   const cachedLists = useMemo(() => usable.map((s) => peekRecommendations(s.mediaType, s.tmdbId as number)), [usable]);
   const allCached = usable.length > 0 && cachedLists.every(Boolean);
 
-  const [lists, setLists] = useState<Array<TmdbTitle[] | undefined> | null>(allCached ? cachedLists : null);
+  const [open, setOpen] = useState(false);
+  const [lists, setLists] = useState<Array<TmdbTitle[] | undefined> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    setLists(allCached ? cachedLists : null);
-  }, [allCached, cachedLists]);
+    // Stay collapsed; if already loaded this session, keep the results for the next expand.
+    if (!open) return;
+    if (allCached) setLists(cachedLists);
+  }, [allCached, cachedLists, open]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,20 +67,48 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
 
   const suggestions = useMemo(() => (lists ? rank(usable, lists, isWatched) : []), [lists, usable, isWatched]);
 
+  const expand = () => {
+    setOpen(true);
+    if (lists || loading) return;
+    if (allCached) {
+      setLists(cachedLists);
+      return;
+    }
+    void load();
+  };
+
+  const canCollapse = usable.length > 0;
+  const showBody = !canCollapse || open;
+
   return (
     <section className="watch-next" aria-labelledby="watch-next-heading">
-      <div className="section-heading">
-        <h2 id="watch-next-heading">
-          <Sparkles size={15} aria-hidden="true" /> Watch Next
-        </h2>
-        {usable.length > 0 && <span className="section-meta">Based on {usable.length} watched</span>}
-      </div>
+      {canCollapse ? (
+        <button type="button" className="watch-next-toggle" aria-expanded={open} onClick={() => (open ? setOpen(false) : expand())}>
+          <h2 id="watch-next-heading">
+            <Sparkles size={15} aria-hidden="true" /> Watch Next
+          </h2>
+          <span className="section-meta">Based on {usable.length} watched</span>
+          <ChevronDown size={16} className={`episodes-chevron ${open ? 'open' : ''}`} aria-hidden="true" />
+        </button>
+      ) : (
+        <div className="section-heading">
+          <h2 id="watch-next-heading">
+            <Sparkles size={15} aria-hidden="true" /> Watch Next
+          </h2>
+        </div>
+      )}
 
       {sources.length === 0 ? (
         <div className="panel empty-panel watch-next-empty">Mark a few titles watched to get suggestions.</div>
       ) : usable.length === 0 ? (
         <div className="panel empty-panel watch-next-empty">
           Suggestions need a title from Discover. Mark something you found in Discover as watched.
+        </div>
+      ) : !showBody ? (
+        null
+      ) : !lists && loading ? (
+        <div className="panel watch-next-load">
+          <span className="muted small">Loading suggestions…</span>
         </div>
       ) : !lists ? (
         <div className="panel watch-next-load">

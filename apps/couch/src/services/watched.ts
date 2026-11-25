@@ -140,10 +140,16 @@ export function findWatched(
   return undefined;
 }
 
-/** Title-level watched: marked as a whole and no aired episode was un-marked since. */
-export function isTitleWatched(entry: WatchedEntry | undefined): boolean {
+/**
+ * Title-level watched: marked as a whole, no episode was un-marked, and no known
+ * episode has aired since the mark (those show as unwatched). Without an episode
+ * list, this is only the stored mark — callers should pass any episodes they have.
+ */
+export function isTitleWatched(entry: WatchedEntry | undefined, episodes?: EpisodeRef[]): boolean {
   if (!entry || !entry.allAiredAt) return false;
-  return !Object.values(entry.episodes).some((v) => v === false);
+  if (Object.values(entry.episodes).some((v) => v === false)) return false;
+  if (!episodes?.length) return true;
+  return !episodes.some((e) => hasAired(e) && !isEpisodeWatched(entry, e));
 }
 
 function airedBy(ep: EpisodeRef, iso: string): boolean {

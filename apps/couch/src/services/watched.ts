@@ -141,15 +141,42 @@ export function findWatched(
 }
 
 /**
- * Title-level watched: marked as a whole, no episode was un-marked, and no known
- * episode has aired since the mark (those show as unwatched). Without an episode
- * list, this is only the stored mark — callers should pass any episodes they have.
+ * Title-level caught up. Movies (and shows with no episode list) are caught up
+ * when the whole title is marked and no episode was un-marked. When a list of
+ * episodes is passed, every aired one must be watched (from the whole-show mark
+ * or per-episode ticks); unaired episodes don't count. A whole-show mark means
+ * caught up as of the mark, so a later aired episode keeps the show unwatched
+ * until that episode is ticked.
  */
 export function isTitleWatched(entry: WatchedEntry | undefined, episodes?: EpisodeRef[]): boolean {
-  if (!entry || !entry.allAiredAt) return false;
+  if (!entry) return false;
+  const aired = (episodes ?? []).filter((e) => hasAired(e));
+  if (aired.length > 0) {
+    if (!aired.every((e) => isEpisodeWatched(entry, e))) return false;
+    // If this list may be incomplete, an explicit unwatch on an unknown episode
+    // means the title is not fully caught up.
+    const known = new Set(aired.map((e) => String(e.id)));
+    if (Object.entries(entry.episodes).some(([id, v]) => v === false && !known.has(id))) return false;
+    return true;
+  }
+  if (!entry.allAiredAt) return false;
   if (Object.values(entry.episodes).some((v) => v === false)) return false;
-  if (!episodes?.length) return true;
-  return !episodes.some((e) => hasAired(e) && !isEpisodeWatched(entry, e));
+  return true;
+}
+
+/**
+ * Caught-up check for hiding titles and leaving them out of Watch Next.
+ * A show whose full episode list has not loaded yet is treated as not caught
+ * up, so it stays visible. Do not pass a previous/next snapshot as the list —
+ * that can look complete and hide the show for a moment, then pop it back.
+ */
+export function isCaughtUpForHide(
+  entry: WatchedEntry | undefined,
+  episodes: EpisodeRef[] | undefined,
+  listReady: boolean,
+): boolean {
+  if (!listReady) return false;
+  return isTitleWatched(entry, episodes);
 }
 
 function airedBy(ep: EpisodeRef, iso: string): boolean {

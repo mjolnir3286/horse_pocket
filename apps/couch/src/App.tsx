@@ -11,6 +11,7 @@ import { loadMyServices, MyServicesContext, providerIdsFor, sanitizeMyServices, 
 import { useMediaQuery } from './lib/useMediaQuery';
 import {
   findWatched,
+  isCaughtUpForHide,
   isTitleWatched,
   loadHideWatched,
   loadWatched,
@@ -24,7 +25,7 @@ import {
   type WatchedRef,
   type WatchedStore,
 } from './services/watched';
-import { getLatestAiredEpisode, type TvmazeEpisode } from './services/tvmaze';
+import { getLatestAiredEpisode, getShowEpisodes, type TvmazeEpisode } from './services/tvmaze';
 import { UpcomingView } from './components/UpcomingView';
 import { AboutModal } from './components/AboutModal';
 import { HelpModal } from './components/HelpModal';
@@ -133,6 +134,8 @@ export const App: React.FC = () => {
   const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
   const [helpOpen, setHelpOpen] = useState(false);
   const [discoverEpisodes, setDiscoverEpisodes] = useState<Record<string, EpisodeRef[]>>({});
+  const [followEpisodes, setFollowEpisodes] = useState<Record<number, EpisodeRef[]>>({});
+
   const [aboutOpen, setAboutOpen] = useState(false);
   const [backupGeneration, setBackupGeneration] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -414,6 +417,24 @@ export const App: React.FC = () => {
   }, [follows, followedLeadNames]);
   const followedTvmazeIds = useMemo(() => new Set(follows.map((f) => f.tvmazeId).filter((x): x is number => x != null)), [follows]);
 
+  useEffect(() => {
+    if (activeTab !== 'watchlist' || followedTvmazeIds.size === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      [...followedTvmazeIds].map(async (id) => {
+        try {
+          const episodes = await getShowEpisodes(id);
+          if (!cancelled) setFollowEpisodes((prev) => ({ ...prev, [id]: episodes }));
+        } catch {
+          // Leave the show unloaded so hide and Watch Next keep it visible.
+        }
+      })
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, followedTvmazeIds]);
+
   const isLeadFollowed = useCallback(
     (lead: UpcomingReleaseLead) =>
       (lead.tvmaze?.showId != null && followedTvmazeIds.has(lead.tvmaze.showId)) || followedNames.has(normalizeTitle(lead.showTitle)),
@@ -514,9 +535,14 @@ export const App: React.FC = () => {
     return [{ id: 0, airstamp: null, airdate: d }];
   };
 
+  const followListReady = (f: FollowedTitle): boolean =>
+    f.tvmazeId == null || Object.prototype.hasOwnProperty.call(followEpisodes, f.tvmazeId);
+
   const episodesFromFollow = (f: FollowedTitle): EpisodeRef[] => {
-    const st = f.lastStatus;
-    return [st?.previous, st?.next].filter((e): e is TvmazeEpisode => e != null);
+    if (f.tvmazeId != null && Object.prototype.hasOwnProperty.call(followEpisodes, f.tvmazeId)) {
+      return followEpisodes[f.tvmazeId];
+    }
+    return [];
   };
 
   const toggleWatchedRef = (ref: WatchedRef, ensureFollowed: () => void, currentlyWatched?: boolean, knownEpisodes?: EpisodeRef[]) => {
@@ -585,7 +611,10 @@ export const App: React.FC = () => {
 
   const watchedFollowState = (f: FollowedTitle) => {
     const entry = findWatched(watched, refForFollow(f));
-    const isW = isTitleWatched(entry, episodesFromFollow(f));
+    const ready = followListReady(f);
+    const episodes = ready ? episodesFromFollow(f) : undefined;
+    const isW = isTitleWatched(entry, episodes);
+    const caughtUp = isCaughtUpForHide(entry, episodes, ready);
     const n = entry ? Object.values(entry.episodes).filter(Boolean).length : 0;
     const partial = isW
       ? null
@@ -594,18 +623,20 @@ export const App: React.FC = () => {
         : n > 0
           ? `${n} episode${n === 1 ? '' : 's'} watched`
           : null;
-    return { watched: isW, partial };
+    return { watched: isW, partial, caughtUp };
   };
 
   const sources = useMemo(() => watchedSources(watched), [watched]);
-  const isTmdbWatched = useCallback(
-    (t: TmdbTitle) => Boolean(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id, title: t.title })),
-    [watched]
-  );
   const isTmdbFollowed = useCallback((t: TmdbTitle) => followsByKey.has(followKey(t.mediaType, t.id)), [followsByKey]);
   const isTmdbCaughtUp = useCallback(
-    (t: TmdbTitle) => isTitleWatched(findWatched(watched, { key: followKey(t.mediaType, t.id), mediaType: t.mediaType, tmdbId: t.id })),
-    [watched]
+    (t: TmdbTitle) => {
+      const key = followKey(t.mediaType, t.id);
+      const entry = findWatched(watched, { key, mediaType: t.mediaType, tmdbId: t.id, title: t.title });
+      const follow = followsByKey.get(key);
+      if (follow) return isCaughtUpForHide(entry, episodesFromFollow(follow), followListReady(follow));
+      return isTitleWatched(entry, discoverEpisodes[key]);
+    },
+    [watched, followsByKey, followEpisodes, discoverEpisodes]
   );
   /** Discover rows and More like this hide titles you're caught up on when Hide watched is on. */
   const isRowHidden = useCallback((t: TmdbTitle) => hideWatched && isTmdbCaughtUp(t), [hideWatched, isTmdbCaughtUp]);
@@ -880,10 +911,12 @@ export const App: React.FC = () => {
             onClearAlerts={() => setAlerts([])}
             watchedState={watchedFollowState}
             onToggleWatched={toggleFollowWatched}
+            hideWatched={hideWatched}
+            onHideWatchedChange={setHideWatched}
             watchNext={
               <WatchNext
                 sources={sources}
-                isWatched={isTmdbWatched}
+                isWatched={isTmdbCaughtUp}
                 isFollowed={isTmdbFollowed}
                 onToggleFollow={(t) => void toggleFollowTitle(t)}
                 onToggleWatched={(t) => toggleTitleWatched(t)}

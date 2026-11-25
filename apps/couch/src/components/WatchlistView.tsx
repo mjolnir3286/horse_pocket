@@ -4,6 +4,7 @@ import type { NewEpisodeAlert } from '../types/streaming';
 import type { NotificationSupportState } from '../services/notifications';
 import type { FollowedTitle } from '../services/follows';
 import { posterUrl } from '../services/tmdb';
+import { HideWatchedToggle } from './HideWatchedToggle';
 import { WatchedButton } from './WatchedButton';
 
 interface WatchlistViewProps {
@@ -17,8 +18,10 @@ interface WatchlistViewProps {
   onUnfollow: (key: string) => void;
   onOpen: (follow: FollowedTitle) => void;
   onClearAlerts: () => void;
-  watchedState: (follow: FollowedTitle) => { watched: boolean; partial: string | null };
+  watchedState: (follow: FollowedTitle) => { watched: boolean; partial: string | null; caughtUp: boolean };
   onToggleWatched: (follow: FollowedTitle) => void;
+  hideWatched: boolean;
+  onHideWatchedChange: (hide: boolean) => void;
   watchNext: React.ReactNode;
 }
 
@@ -51,6 +54,8 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
   onClearAlerts,
   watchedState,
   onToggleWatched,
+  hideWatched,
+  onHideWatchedChange,
   watchNext,
 }) => {
   const permissionLabel =
@@ -67,6 +72,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
     const bn = b.lastStatus?.next?.airdate ?? '9999';
     return an.localeCompare(bn) || a.title.localeCompare(b.title);
   });
+  const visible = hideWatched ? sorted.filter((f) => !watchedState(f).caughtUp) : sorted;
 
   return (
     <div>
@@ -122,22 +128,32 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
 
       {watchNext}
 
-      <div className="section-heading">
-        <h2>Your Watchlist</h2>
-        <span className="section-meta">Saved on this device</span>
+      <div className="section-heading watchlist-heading">
+        <div className="watchlist-heading-text">
+          <h2>Your Watchlist</h2>
+          <span className="section-meta">Saved on this device</span>
+        </div>
+        {follows.length > 0 ? <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} /> : null}
       </div>
 
       {follows.length === 0 ? (
         <div className="panel empty-panel">
           Nothing here yet. Open a show or movie and tap Add to Watchlist.
         </div>
+      ) : visible.length === 0 ? (
+        <div className="panel empty-panel">
+          All caught up.
+          <button type="button" className="text-btn" onClick={() => onHideWatchedChange(false)}>
+            Show watched
+          </button>
+        </div>
       ) : (
         <div className="watch-list">
-          {sorted.map((f) => {
+          {visible.map((f) => {
             const poster = posterUrl(f.posterPath, 'w92');
             const ws = watchedState(f);
             return (
-              <div key={f.key} className={`watch-row ${ws.watched ? 'is-watched' : ''}`}>
+              <div key={f.key} className={`watch-row ${ws.watched ? 'is-watched' : ''}`} data-watch-key={f.key} data-title={f.title}>
                 <button type="button" className="watch-row-main" onClick={() => onOpen(f)}>
                   <span className="watch-thumb">
                     {poster ? <img src={poster} alt="" loading="lazy" /> : <span>{f.title.slice(0, 2).toUpperCase()}</span>}

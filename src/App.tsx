@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Bookmark,
+  CircleHelp,
   Crown,
   Download,
   Film,
@@ -16,6 +17,7 @@ import { PlatformPage } from './components/PlatformPage';
 import { TitleCard } from './components/TitleCard';
 import { TitleDetailModal } from './components/TitleDetailModal';
 import { UpcomingView } from './components/UpcomingView';
+import { readWelcomeDismissed, WelcomeModal } from './components/WelcomeModal';
 import { WatchlistView } from './components/WatchlistView';
 import {
   dispatchLocalEpisodeNotification,
@@ -96,10 +98,16 @@ export const App: React.FC = () => {
   );
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(() => !readWelcomeDismissed());
+  const helpButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
   };
+
+  const closeWelcome = useCallback(() => {
+    setWelcomeOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -386,6 +394,17 @@ export const App: React.FC = () => {
 
           <div className="header-actions">
             <button
+              ref={helpButtonRef}
+              type="button"
+              className="pill-btn icon-btn"
+              aria-label="About Horse Pocket"
+              title="About Horse Pocket"
+              onClick={() => setWelcomeOpen(true)}
+            >
+              <CircleHelp size={16} />
+            </button>
+
+            <button
               type="button"
               className={`pill-btn ${isPremium ? 'premium-on' : ''}`}
               onClick={() => {
@@ -541,6 +560,7 @@ export const App: React.FC = () => {
         {activeTab === 'upcoming' && (
           <UpcomingView
             collectorData={collectorData}
+            platforms={platforms}
             platformsById={platformsById}
             isLeadFollowed={isLeadFollowed}
             onToggleFollowLead={toggleFollowLead}
@@ -629,6 +649,14 @@ export const App: React.FC = () => {
           </button>
         </div>
       </nav>
+
+      <WelcomeModal
+        open={welcomeOpen}
+        permissionState={permissionState}
+        onClose={closeWelcome}
+        onRequestNotifications={handleRequestNotifications}
+        restoreFocusRef={helpButtonRef}
+      />
 
       <TitleDetailModal
         item={selectedTitle}

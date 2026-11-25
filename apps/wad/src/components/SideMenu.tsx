@@ -12,6 +12,7 @@ interface SideMenuProps {
     restoreFocusRef: React.RefObject<HTMLButtonElement | null>
     onOpenHelp: () => void
     onOpenAbout: () => void
+    onInstall: () => void
     onExport: () => void
     onValidateImport: (
         rawText: string
@@ -28,9 +29,35 @@ export default function SideMenu({
     restoreFocusRef,
     onOpenHelp,
     onOpenAbout,
+    onInstall,
     onExport,
     onValidateImport,
 }: SideMenuProps) {
+    if (!open) return null
+    return (
+        <SideMenuPanel
+            id={id}
+            onClose={onClose}
+            restoreFocusRef={restoreFocusRef}
+            onOpenHelp={onOpenHelp}
+            onOpenAbout={onOpenAbout}
+            onInstall={onInstall}
+            onExport={onExport}
+            onValidateImport={onValidateImport}
+        />
+    )
+}
+
+function SideMenuPanel({
+    id,
+    onClose,
+    restoreFocusRef,
+    onOpenHelp,
+    onOpenAbout,
+    onInstall,
+    onExport,
+    onValidateImport,
+}: Omit<SideMenuProps, 'open'>) {
     const titleId = useId()
     const dataHeadingId = useId()
     const panelRef = useRef<HTMLDivElement>(null)
@@ -43,14 +70,6 @@ export default function SideMenu({
     const [dataError, setDataError] = useState<string | null>(null)
     const [dataStatus, setDataStatus] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!open) {
-            setPendingImport(null)
-            setDataError(null)
-            setDataStatus(null)
-        }
-    }, [open])
-
     const handleCloseWithRestore = () => {
         onClose()
         window.requestAnimationFrame(() => {
@@ -59,8 +78,6 @@ export default function SideMenu({
     }
 
     useEffect(() => {
-        if (!open) return
-
         const panel = panelRef.current
         const frame = window.requestAnimationFrame(() => {
             closeButtonRef.current?.focus()
@@ -102,7 +119,7 @@ export default function SideMenu({
             window.cancelAnimationFrame(frame)
             document.removeEventListener('keydown', onKeyDown)
         }
-    }, [open, onClose, restoreFocusRef])
+    }, [onClose, restoreFocusRef])
 
     useEffect(() => {
         if (pendingImport) {
@@ -140,7 +157,7 @@ export default function SideMenu({
         pendingImport.apply()
         setPendingImport(null)
         setDataError(null)
-        setDataStatus('Imported backup. Your lists have been replaced.')
+        setDataStatus('Imported backup. Your saved budget has been replaced.')
         window.requestAnimationFrame(() => {
             importButtonRef.current?.focus()
         })
@@ -159,8 +176,6 @@ export default function SideMenu({
         onExport()
         setDataStatus('Backup downloaded.')
     }
-
-    if (!open) return null
 
     return (
         <div
@@ -208,7 +223,7 @@ export default function SideMenu({
                 <div className="p-3.5 flex flex-col gap-5">
                     <div className="flex flex-col gap-1">
                         <a
-                            href="https://mjolnir3286.github.io/horse_pocket/"
+                            href="../"
                             aria-label="Back to Horse Pocket"
                             className="min-h-10.5 px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
@@ -249,6 +264,22 @@ export default function SideMenu({
                             </svg>
                             <span>About</span>
                         </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                handleCloseWithRestore()
+                                onInstall()
+                            }}
+                            className="w-full min-h-10.5 px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm font-semibold text-left hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        >
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            <span>Install Wad</span>
+                        </button>
                     </div>
 
                     <section
@@ -262,7 +293,7 @@ export default function SideMenu({
                             Your Data
                         </h3>
                         <p className="text-xs leading-relaxed text-gray-600 dark:text-neutral-400">
-                            Your lists are saved on this device only. Clearing browser data erases them.
+                            Your budget and Plan calculators are saved on this device only. Clearing browser data erases them.
                         </p>
 
                         <div className="grid grid-cols-2 gap-2">
@@ -314,7 +345,7 @@ export default function SideMenu({
                                 className="p-3 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 flex flex-col gap-2.5"
                             >
                                 <p className="text-xs leading-snug text-gray-800 dark:text-neutral-200">
-                                    This will replace your current lists ({pendingImport.summary}).
+                                    This will replace your current data ({pendingImport.summary}).
                                 </p>
                                 <div className="flex gap-2">
                                     <button

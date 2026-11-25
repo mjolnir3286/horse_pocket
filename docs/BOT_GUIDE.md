@@ -9,8 +9,8 @@ when the patterns change.
 
 - `apps/portal/` — hub at `/horse_pocket/` (Vite 8). Tiles live in `src/apps.ts`.
 - `apps/couch/` — movies and shows PWA at `/horse_pocket/couch/` (React 19, Vite 6). Title and credits are in `src/config/site.ts`. The daily collector is in `collector/`.
-- `apps/wad/` — budget app at `/horse_pocket/wad/` (React 19, Tailwind, Vite 8).
-- `apps/shed/` — nutrition label scanner and calorie log PWA at `/horse_pocket/shed/` (React 19, Vite 6). Title and credits are in `src/config/site.ts`. Label reading uses Tesseract.js on-device; `scripts/copy-ocr-assets.mjs` copies its worker, WASM cores, and English model into `public/ocr/` (gitignored) on every dev/build, so nothing loads from a CDN. Parser and target math have unit tests (`npm test`). `src/lib/pwa.ts` + `public/sw.js` + `public/manifest.webmanifest` are the reusable PWA setup (planned for Wad).
+- `apps/wad/` — budget PWA at `/horse_pocket/wad/` (React 19, Tailwind, Vite 8). Title is in the header; credits are in About. Auto-saves to versioned `localStorage` keys (`wad_budget_v1`, `wad_plan_v1`).
+- `apps/shed/` — nutrition label scanner and calorie log PWA at `/horse_pocket/shed/` (React 19, Vite 6). Title and credits are in `src/config/site.ts`. Label reading uses Tesseract.js on-device; `scripts/copy-ocr-assets.mjs` copies its worker, WASM cores, and English model into `public/ocr/` (gitignored) on every dev/build, so nothing loads from a CDN. Parser and target math have unit tests (`npm test`). `src/lib/pwa.ts` + `public/sw.js` + `public/manifest.webmanifest` are Shed's PWA setup (Wad has its own in `src/pwa.ts`).
 - `apps/couch-relay/` — Cloudflare Worker that forwards an allowlist of TMDB reads so the token never ships in the public site (`https://couch-relay.mjolnir3286.workers.dev`).
 - `.github/workflows/deploy.yml` — builds the four apps and publishes one GitHub Pages artifact.
 - `.github/workflows/collect.yml` — runs Couch's collector daily at 12:00 UTC (7:00 AM America/New_York), commits `apps/couch/public/data/upcoming-releases.json` when it changes, then calls deploy.
@@ -36,7 +36,7 @@ The relay is deployed separately with `npx wrangler deploy` from `apps/couch-rel
 
 Keep the look conservative and neutral. Follow the device light and dark setting (`prefers-color-scheme`); do not add a theme toggle unless the user asks. No ad banners (leftover unused `.ad-*` CSS in Couch is not an invitation to bring them back). Keep credits compact in About, in fine print.
 
-Use a 768px breakpoint. On phones, put primary tabs at the bottom; on wider screens, put a tab bar under the header. Couch already does this. Wad uses the same breakpoint (Tailwind `md`) but currently places phone tabs under the header.
+Use a 768px breakpoint. On phones, put primary tabs at the bottom, with a sideways swipe on the tab bar only (no wraparound); on wider screens, put a tab bar under the header. Couch, Wad, and Shed all do this. Wad keeps a two-tab Budget/Plan layout from 768px up, and four tabs (Income, Taxes, Expenses, Plan) on phones.
 
 Make controls accessible: `aria-label` on icon-only buttons, focus traps and Escape-to-close on menus and dialogs, restore focus on close, and honor `prefers-reduced-motion`.
 
@@ -54,7 +54,7 @@ Reuse these theme colors; do not invent a new palette.
 
 ## Icons
 
-Reuse the user's artwork; do not redraw it. The Wad icon is the user's original with the word removed (`wad-icon.png`). The portal mark is a hand-drawn SVG horse head in a clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). Couch is a two-color loveseat SVG (`--couch-outline`, `--couch-fill`). Shed is the top of a Nutrition Facts label (blank text lines, thick and thin bars) in the clipped-corner frame (`--shed-outline`, `--shed-fill`, same colors as the horse mark), with a simplified `favicon.svg` for 16px. An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
+Reuse the user's artwork; do not redraw it. The Wad icon is the user's original wallet (word removed) inside the shared clipped-corner frame (`wad-icon.png`, plus 192/512 and maskable PWA icons in `apps/wad/public/icons/`). The portal mark is a hand-drawn SVG horse head in the same clipped-corner frame, in the horse theme colors (`--hp-fg`, `--hp-bg`). Couch is a two-color loveseat SVG (`--couch-outline`, `--couch-fill`). Shed is the top of a Nutrition Facts label (blank text lines, thick and thin bars) in the clipped-corner frame (`--shed-outline`, `--shed-fill`, same colors as the horse mark), with a simplified `favicon.svg` for 16px. An app's icon is its favicon, its PWA icons if it is a PWA, and its portal tile. Keep icons flat, simple, and in one or two theme colors.
 
 ## Shared app patterns
 
@@ -63,12 +63,12 @@ Each mini app should have a left SideMenu with:
 - a ‹ Horse Pocket link back to the portal
 - Help
 - About
-- Install, only if the app is a PWA (Couch and Shed are; Wad is not yet)
+- Install, only if the app is a PWA (Couch, Wad, and Shed all are)
 - a Your Data section with Export and Import JSON, plus the note that data is saved on this device only and that clearing browser data erases it
 
 Help is a sheet with collapsible sections and icons (see Couch's `HelpModal`). About has a short description, "Made by Kale G.", "Built with Grok Bot", and compact source credits. Couch also credits TVmaze, TMDB, and JustWatch. Dialogs use a focus trap.
 
-There are no accounts. User data stays on the device. Couch stores lists in versioned `localStorage` keys (`*_v1`). Both apps export a versioned JSON backup (`app`, `version: 1`, `exportedAt`). Wad currently keeps state in memory until the user exports; still use that backup shape, and add versioned keys if you add auto-save. When you add stored fields, use a new or bumped `_vN` key so old data is not silently broken.
+There are no accounts. User data stays on the device. Couch, Wad, and Shed all store data in versioned `localStorage` keys (`*_v1`) and export a versioned JSON backup (`app`, `version: 1`, `exportedAt`). Wad's keys are `wad_budget_v1` and `wad_plan_v1`; older Wad backups without `plan` still import. Shed's keys are `shed_profile_v1`, `shed_foods_v1`, and `shed_log_v1`. When you add stored fields, use a new or bumped `_vN` key so old data is not silently broken.
 
 ## Data and cost
 

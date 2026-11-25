@@ -4,6 +4,11 @@ import {
   ChevronDown,
   Download,
   FileDown,
+  Frame,
+  Hand,
+  ImageUp,
+  SunMedium,
+  Lightbulb,
   FileUp,
   History,
   Keyboard,
@@ -38,9 +43,20 @@ const SECTIONS: { title: string; items: Item[] }[] = [
   {
     title: 'Scanning a label',
     items: [
-      { icon: <Camera size={16} />, label: 'Get a clear photo', text: 'Lay the package flat in good light, fill the frame with the Nutrition Facts panel, and avoid glare. Curved or shiny labels often read wrong.' },
+      { icon: <Camera size={16} />, label: 'Take photo', text: 'Opens the camera with a frame to line the label up in. Shed checks the picture while you aim and only reads what’s inside the frame.' },
+      { icon: <ImageUp size={16} />, label: 'Choose photo', text: 'Pick a photo you already took. If the camera is blocked or your device has none, Take photo opens your camera app or file picker instead.' },
       { icon: <Keyboard size={16} />, label: 'Check the numbers', text: 'Reading happens on your device and can misread digits, especially a “g” as a “9”. Fields Shed is unsure about are highlighted. Everything stays editable, and you can type a label in by hand.' },
       { icon: <Download size={16} />, label: 'First scan', text: 'The first scan downloads the label reader (about 7 MB) from this site. After that it’s cached and works offline.' },
+    ],
+  },
+  {
+    title: 'Getting a good scan',
+    items: [
+      { icon: <Frame size={16} />, label: 'Fill the frame', text: 'Lay the package flat and line up the top of the Nutrition Facts label with the frame, from the title down past Calories. Curved packages read better if you flatten the label with a finger.' },
+      { icon: <SunMedium size={16} />, label: 'Light', text: 'Use bright, even light. If Shed says it’s too dark, move closer to a light or turn on the flashlight button when your phone has one.' },
+      { icon: <Lightbulb size={16} />, label: 'Glare', text: 'Shiny wrappers reflect light and hide numbers. Tilt the package a little until the bright spot moves off the label.' },
+      { icon: <Hand size={16} />, label: 'Hold steady', text: 'Hold still until the frame turns green and the hint says “Looks good”. If it says blurry, move back a little so the camera can focus. You can still take the photo anytime, but it may not read well.' },
+      { icon: <Camera size={16} />, label: 'Camera access', text: 'The camera only runs while the scan screen is open, and pictures stay on your device. If you said no to camera access, turn it back on in your browser’s site settings.' },
     ],
   },
   {

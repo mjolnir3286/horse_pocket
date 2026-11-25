@@ -7,6 +7,7 @@ import { HideWatchedToggle } from './HideWatchedToggle';
 import { WatchlistOnlyToggle } from './WatchlistOnlyToggle';
 import { WatchedButton } from './WatchedButton';
 import { useMediaQuery } from '../lib/useMediaQuery';
+import { useMyServices } from '../services/myServices';
 import { episodeLine, leadDateDisplay, leadSortDate } from '../lib/leadDate';
 import {
   isPlatformFilterList,
@@ -90,16 +91,20 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
     return counts;
   }, [statusFilteredLeads]);
 
+  const { ids: myServices } = useMyServices();
+  const hasMine = myServices.length > 0;
+
   const platformChipOptions = useMemo(() => {
     const options: Array<{ id: PlatformFilterId; name: string; color: string; count: number }> = [];
-    const priority = platforms.filter((p) => p.tier === 'priority');
-    const secondary = platforms.filter((p) => p.tier === 'secondary');
-    for (const platform of [...priority, ...secondary]) {
+    // 24 services is a lot for a menu: list the ones with releases here, plus the user's own.
+    for (const platform of platforms) {
+      const count = platformCounts.get(platform.id) ?? 0;
+      if (count === 0 && !myServices.includes(platform.id)) continue;
       options.push({
         id: platform.id,
         name: platform.name,
         color: platform.brandColor,
-        count: platformCounts.get(platform.id) ?? 0,
+        count,
       });
     }
     const unknownCount = platformCounts.get('unknown') ?? 0;
@@ -112,10 +117,17 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       });
     }
     return options;
-  }, [platforms, platformCounts]);
+  }, [platforms, platformCounts, myServices]);
 
-  const isAllPlatforms = selectedPlatforms.length === 0;
+  // [] follows My services (or All when none are checked); see PlatformFilterId.
+  const isDefaultPlatforms = selectedPlatforms.length === 0;
+  const isMinePlatforms = isDefaultPlatforms && hasMine;
+  const isAllPlatforms = (isDefaultPlatforms && !hasMine) || (selectedPlatforms.length === 1 && selectedPlatforms[0] === 'all');
   const isNonePlatforms = selectedPlatforms.length === 1 && selectedPlatforms[0] === 'none';
+  const effectivePlatforms = useMemo<PlatformFilterId[]>(
+    () => (isMinePlatforms ? myServices : isAllPlatforms || isNonePlatforms ? [] : selectedPlatforms),
+    [isMinePlatforms, isAllPlatforms, isNonePlatforms, myServices, selectedPlatforms]
+  );
 
   const filteredLeads = useMemo(() => {
     const platformMatched = isAllPlatforms
@@ -124,7 +136,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
         ? []
         : statusFilteredLeads.filter((lead) => {
             const key: PlatformFilterId = lead.platformId === 'unknown' ? 'unknown' : lead.platformId;
-            return selectedPlatforms.includes(key);
+            return effectivePlatforms.includes(key);
           });
 
     const sorted = [...platformMatched];
@@ -149,23 +161,23 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       return sortKey === 'date-latest' ? -cmp : cmp;
     });
     return sorted;
-  }, [statusFilteredLeads, isAllPlatforms, isNonePlatforms, selectedPlatforms, sortKey]);
+  }, [statusFilteredLeads, isAllPlatforms, isNonePlatforms, effectivePlatforms, sortKey]);
+
+  const sameSet = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((x) => b.includes(x));
+  const selectAllPlatforms = () => setSelectedPlatforms(hasMine ? ['all'] : []);
 
   const setPlatformChecked = (id: string, checked: boolean) => {
     const allIds = platformChipOptions.map((option) => option.id);
-    setSelectedPlatforms((prev) => {
-      const isAll = prev.length === 0;
-      const isNone = prev.length === 1 && prev[0] === 'none';
-      const current: PlatformFilterId[] = isAll ? allIds : isNone ? [] : prev.filter((item) => item !== 'none');
-      const next = checked
-        ? current.includes(id as PlatformFilterId)
-          ? current
-          : [...current, id as PlatformFilterId]
-        : current.filter((item) => item !== id);
-      if (next.length === 0) return ['none'];
-      if (allIds.length > 0 && allIds.every((item) => next.includes(item))) return [];
-      return next;
-    });
+    const current: PlatformFilterId[] = isAllPlatforms ? allIds : isNonePlatforms ? [] : effectivePlatforms;
+    const next = checked
+      ? current.includes(id as PlatformFilterId)
+        ? current
+        : [...current, id as PlatformFilterId]
+      : current.filter((item) => item !== id);
+    if (next.length === 0) return setSelectedPlatforms(['none']);
+    if (allIds.length > 0 && allIds.every((item) => next.includes(item))) return selectAllPlatforms();
+    if (hasMine && sameSet(next, myServices)) return setSelectedPlatforms([]);
+    setSelectedPlatforms(next);
   };
 
   if (!collectorData) {
@@ -196,11 +208,14 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       <div className="upcoming-controls">
         <PlatformFilterMenu
           options={platformChipOptions}
-          selectedIds={isNonePlatforms ? [] : selectedPlatforms}
+          selectedIds={effectivePlatforms}
           isAll={isAllPlatforms}
           isNone={isNonePlatforms}
+          isMine={isMinePlatforms}
+          hasMine={hasMine}
           onToggle={setPlatformChecked}
-          onSelectAll={() => setSelectedPlatforms([])}
+          onSelectAll={selectAllPlatforms}
+          onSelectMine={() => setSelectedPlatforms([])}
           onClear={() => setSelectedPlatforms(['none'])}
         />
 
@@ -226,7 +241,9 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
 
       <div className="section-meta" style={{ marginBottom: 10 }}>
         {filteredLeads.length} shown
-        {!isAllPlatforms && !isNonePlatforms && ` • ${selectedPlatforms.length} platform${selectedPlatforms.length === 1 ? '' : 's'} selected`}
+        {isMinePlatforms
+          ? ' • My services'
+          : !isAllPlatforms && !isNonePlatforms && ` • ${effectivePlatforms.length} platform${effectivePlatforms.length === 1 ? '' : 's'} selected`}
       </div>
 
       {filteredLeads.length === 0 ? (

@@ -13,8 +13,12 @@ interface PlatformFilterMenuProps {
   selectedIds: string[];
   isAll: boolean;
   isNone: boolean;
+  /** Following the Platforms tab's My services. */
+  isMine?: boolean;
+  hasMine?: boolean;
   onToggle: (id: string, checked: boolean) => void;
   onSelectAll: () => void;
+  onSelectMine?: () => void;
   onClear: () => void;
 }
 
@@ -27,8 +31,11 @@ export const PlatformFilterMenu: React.FC<PlatformFilterMenuProps> = ({
   selectedIds,
   isAll,
   isNone,
+  isMine = false,
+  hasMine = false,
   onToggle,
   onSelectAll,
+  onSelectMine,
   onClear,
 }) => {
   const [open, setOpen] = useState(false);
@@ -40,7 +47,9 @@ export const PlatformFilterMenu: React.FC<PlatformFilterMenuProps> = ({
   const menuId = useId();
   const labelId = useId();
 
-  const buttonLabel = isAll
+  const buttonLabel = isMine
+    ? 'Platforms: Mine'
+    : isAll
     ? 'Platforms: All'
     : isNone
       ? 'Platforms: None'
@@ -126,6 +135,7 @@ export const PlatformFilterMenu: React.FC<PlatformFilterMenuProps> = ({
         ref={buttonRef}
         type="button"
         className={`platform-filter-button ${!isAll ? 'active' : ''}`}
+        aria-label={isMine ? 'Platforms: Mine (My services)' : undefined}
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls={menuId}
@@ -151,6 +161,11 @@ export const PlatformFilterMenu: React.FC<PlatformFilterMenuProps> = ({
               Platforms
             </span>
             <div className="platform-filter-menu-actions">
+              {hasMine && onSelectMine && (
+                <button type="button" className="text-btn" onClick={onSelectMine} disabled={isMine}>
+                  My services
+                </button>
+              )}
               <button
                 ref={selectAllRef}
                 type="button"

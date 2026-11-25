@@ -1,8 +1,10 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import {
+  ArrowLeftRight,
   Bookmark,
   BellRing,
   Check,
+  SquareCheck,
   ChevronDown,
   Download,
   Eye,
@@ -34,7 +36,7 @@ const TABS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Film size={16} aria-hidden="true" />,
     label: 'Discover',
-    text: 'Search a title to see where it streams, plays free, or is for rent or purchase in the US.',
+    text: 'Browse what’s popular on your services, or search any title to see where it streams, plays free, or is for rent or purchase in the US.',
   },
   {
     icon: <Bookmark size={16} aria-hidden="true" />,
@@ -44,11 +46,16 @@ const TABS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Layers size={16} aria-hidden="true" />,
     label: 'Platforms',
-    text: 'Compare hand-checked plan prices and what’s popular on each service.',
+    text: 'Check the services you have. Tap one to see what’s popular there and a link to its site.',
   },
 ];
 
 const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
+  {
+    icon: <SquareCheck size={16} aria-hidden="true" />,
+    label: 'My services',
+    text: 'Check your services on the Platforms tab. Discover shows a Popular row for each, Upcoming starts filtered to them (Platforms: Mine), and where-to-watch lists them first with a check.',
+  },
   {
     icon: <Check size={16} aria-hidden="true" />,
     label: 'Watched',
@@ -73,6 +80,16 @@ const TIPS: { icon: React.ReactNode; label: string; text: string }[] = [
     icon: <Sparkles size={16} aria-hidden="true" />,
     label: 'Watch Next',
     text: 'Tap the heading on the Watchlist tab for suggestions based on what you’ve watched. They refresh about once a day.',
+  },
+  {
+    icon: <Sparkles size={16} aria-hidden="true" />,
+    label: 'More like this',
+    text: 'Open any title and tap More like this for similar shows or movies.',
+  },
+  {
+    icon: <ArrowLeftRight size={16} aria-hidden="true" />,
+    label: 'Swipe tabs',
+    text: 'On a phone, swipe sideways on the bottom tab bar to switch tabs.',
   },
   {
     icon: (

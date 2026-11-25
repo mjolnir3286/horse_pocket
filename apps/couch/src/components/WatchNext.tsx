@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bookmark, BookmarkCheck, ChevronDown, Sparkles } from 'lucide-react';
-import { getRecommendations, peekRecommendations, posterUrl, type TmdbTitle } from '../services/tmdb';
+import { ChevronDown, Sparkles } from 'lucide-react';
+import { getRecommendations, peekRecommendations, type TmdbTitle } from '../services/tmdb';
+import { PosterCard } from './PosterCard';
 import type { WatchedEntry } from '../services/watched';
 
 interface WatchNextProps {
@@ -127,38 +128,16 @@ export const WatchNext: React.FC<WatchNextProps> = ({ sources, isWatched, isFoll
         <div className="panel empty-panel">No new suggestions right now. Check back after marking more titles.</div>
       ) : (
         <div className="watch-next-row" role="list">
-          {suggestions.map(({ title: t, because }) => {
-            const poster = posterUrl(t.posterPath, 'w185');
-            const followed = isFollowed(t);
-            return (
-              <div key={`${t.mediaType}-${t.id}`} className="watch-next-card" role="listitem">
-                <button type="button" className="watch-next-poster" onClick={() => onSelect(t)} aria-label={`${t.title}, details`}>
-                  {poster ? <img src={poster} alt="" loading="lazy" /> : <span>{t.title.slice(0, 2).toUpperCase()}</span>}
-                </button>
-                <div className="watch-next-meta">
-                  <span className="watch-next-title" title={t.title}>
-                    {t.title}
-                  </span>
-                  <span className="muted tiny">
-                    {t.mediaType === 'tv' ? 'Show' : 'Movie'}
-                    {t.year ? ` • ${t.year}` : ''}
-                  </span>
-                  <span className="muted tiny watch-next-because" title={`Similar to ${because}`}>
-                    Similar to {because}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className={`follow-icon-btn watch-next-follow ${followed ? 'following' : ''}`}
-                  aria-label={followed ? `Remove ${t.title} from Watchlist` : `Add ${t.title} to Watchlist`}
-                  title={followed ? 'Watchlisted' : 'Add to Watchlist'}
-                  onClick={() => onToggleFollow(t)}
-                >
-                  {followed ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
-                </button>
-              </div>
-            );
-          })}
+          {suggestions.map(({ title: t, because }) => (
+            <PosterCard
+              key={`${t.mediaType}-${t.id}`}
+              title={t}
+              followed={isFollowed(t)}
+              onSelect={onSelect}
+              onToggleFollow={onToggleFollow}
+              note={`Similar to ${because}`}
+            />
+          ))}
         </div>
       )}
     </section>

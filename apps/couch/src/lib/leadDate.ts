@@ -62,13 +62,41 @@ export function estimateDateIso(text: string | null | undefined, now = new Date(
   return toIso(year, month, day);
 }
 
-/** Sort key: exact ISO when we have one, otherwise a best estimate, otherwise null (sorts last). */
+/**
+ * Sort key: an exact ISO date as-is, otherwise a best estimate from vague text, otherwise null (sorts last).
+ * A vague estimate that is already in the past (a stale "September 2026", or a "This Week" article more
+ * than 7 days old) is not clamped to today; it gets null so it sorts last instead of jumping ahead.
+ */
 export function leadSortDate(lead: UpcomingReleaseLead, now = new Date()): string | null {
-  const raw = lead.parsedDateIso || estimateDateIso(lead.extractedDateText, now);
-  if (!raw) return null;
-  const today = isoFromDate(now);
-  // A stale "September 2026" or "This Fall" should not sort ahead of later confirmed dates.
-  return raw < today ? today : raw;
+  if (lead.parsedDateIso) return lead.parsedDateIso;
+  const text = lead.extractedDateText;
+  const estimate = estimateDateIso(text, now);
+  if (!estimate) return null;
+  if (estimate < isoFromDate(now)) return null;
+  if (text && /this week/i.test(text)) {
+    const published = Date.parse(lead.publishedAt);
+    if (Number.isFinite(published) && now.getTime() - published > 7 * 24 * 60 * 60 * 1000) return null;
+  }
+  return estimate;
+}
+
+/** Date order for Upcoming; undated sort last either way, and confirmed cards win ties. */
+export function compareLeadDates(
+  a: UpcomingReleaseLead,
+  b: UpcomingReleaseLead,
+  latestFirst = false,
+  now = new Date()
+): number {
+  const aDate = leadSortDate(a, now);
+  const bDate = leadSortDate(b, now);
+  if (!aDate && !bDate) return 0;
+  if (!aDate) return 1;
+  if (!bDate) return -1;
+  const cmp = aDate.localeCompare(bDate);
+  if (cmp !== 0) return latestFirst ? -cmp : cmp;
+  const aConfirmed = a.confirmationStatus === 'confirmed' ? 0 : 1;
+  const bConfirmed = b.confirmationStatus === 'confirmed' ? 0 : 1;
+  return aConfirmed - bConfirmed;
 }
 
 export function formatExactDate(iso: string): string {

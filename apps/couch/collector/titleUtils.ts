@@ -17,17 +17,75 @@ export function computeAvailabilityStatus(
 /** "Available now" items stay in the feed this many days after their date, then drop off. */
 export const AVAILABLE_NOW_KEEP_DAYS = 14;
 
+export const SCHEDULE_SOURCE = 'TVmaze web schedule';
+
+/** Kale's rule: keep shows whose TVmaze language is English or missing. */
+export function isEnglishOrMissing(language: string | null | undefined): boolean {
+  const l = language?.trim();
+  return !l || l.toLowerCase() === 'english';
+}
+
+/** Normalized form for tight title comparison: drops "(US)" style tags, a leading "The", punctuation and case. */
+export function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/^\s*the\s+/, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/** Tight match: the two names are the same after normalizing. No substring matching. */
+export function tightNameMatch(a: string, b: string): boolean {
+  const na = normalizeTitle(a);
+  return na.length > 0 && na === normalizeTitle(b);
+}
+
+/** Quoted phrases in a headline, e.g. 'Stick,' 'Being Heumann' -> ["Stick", "Being Heumann"]. */
+export function extractQuotedTitles(headline: string): string[] {
+  const out: string[] = [];
+  const re = /(?:^|[\s(\[:])[‘'“"]([^’'"”]{2,55})[’'"”](?=$|[\s,.;:!?)\]])/g;
+  for (const m of headline.matchAll(re)) {
+    const t = polishTitle(m[1].trim().replace(/[,;:]+$/g, ''));
+    if (t.length >= 2 && !out.some((x) => x.toLowerCase() === t.toLowerCase())) out.push(t);
+  }
+  return out;
+}
+
+/** Split a multi-title string on commas, "and" and "&". Returns [] if it names only one title. */
+export function splitMultiTitle(title: string): string[] {
+  const pieces = title
+    .split(/\s*,\s*|\s+&\s+|\s+and\s+/i)
+    .map((p) => p.trim().replace(/^(?:and|&)\s+/i, ''))
+    .filter((p) => p.length >= 2 && p.length <= 45);
+  return pieces.length > 1 ? pieces : [];
+}
+
+/** A lead is "matched" when TVmaze confirmed the show (schedule leads always are). */
+export function isMatchedLead(lead: { sourceName?: string; tvmaze?: unknown }): boolean {
+  return lead.sourceName === SCHEDULE_SOURCE || Boolean(lead.tvmaze);
+}
+
 /**
- * Drop "available now" leads whose date is more than `keepDays` days ago, so the data file
- * doesn't grow forever. Upcoming leads are always kept.
+ * Expiry for the data file. Matched leads stay until 14 days after their release date, or, with no
+ * date, 14 days after a feed last mentioned them. Sources in `exemptSources` (a failed or empty fetch)
+ * skip the last-mention check so their last good items survive.
  */
-export function pruneStaleLeads<T extends { availabilityStatus: string; parsedDateIso: string | null }>(
-  leads: T[],
-  now = new Date(),
-  keepDays = AVAILABLE_NOW_KEEP_DAYS
-): T[] {
+export function pruneStaleLeads<
+  T extends {
+    availabilityStatus: string;
+    parsedDateIso: string | null;
+    lastSeenAt?: string;
+    sourceName?: string;
+  },
+>(leads: T[], now = new Date(), keepDays = AVAILABLE_NOW_KEEP_DAYS, exemptSources: ReadonlySet<string> = new Set()): T[] {
   const cutoff = todayIso(new Date(now.getTime() - keepDays * 24 * 60 * 60 * 1000));
-  return leads.filter((l) => !(l.availabilityStatus === 'available-now' && l.parsedDateIso && l.parsedDateIso.slice(0, 10) < cutoff));
+  return leads.filter((l) => {
+    if (l.parsedDateIso) {
+      return !(l.availabilityStatus === 'available-now' && l.parsedDateIso.slice(0, 10) < cutoff);
+    }
+    if (!l.lastSeenAt || (l.sourceName && exemptSources.has(l.sourceName))) return true;
+    return l.lastSeenAt.slice(0, 10) >= cutoff;
+  });
 }
 
 /**

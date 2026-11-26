@@ -23,6 +23,7 @@ export interface UpcomingReleaseLead {
   tvmaze?: {
     showId: number;
     matchedName: string;
+    language?: string;
     webChannel?: string;
     nextEpisodeAirDate?: string;
     nextEpisodeName?: string;

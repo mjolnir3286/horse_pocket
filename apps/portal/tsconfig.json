@@ -11,7 +11,11 @@
     "noEmit": true,
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "baseUrl": ".",
+    "paths": {
+      "@hp/shared": ["../../packages/shared/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

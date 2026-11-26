@@ -56,6 +56,11 @@ export function isWatchlistSortKey(value: unknown): value is WatchlistSortKey {
   return WATCHLIST_SORT_OPTIONS.some((option) => option.value === value);
 }
 
+/** Accept a known Watchlist sort key, otherwise fall back to Recently added. */
+export function parseWatchlistSortKey(value: unknown): WatchlistSortKey {
+  return isWatchlistSortKey(value) ? value : 'recent';
+}
+
 export function isWatchlistTypeFilter(value: unknown): value is WatchlistTypeFilter {
   return WATCHLIST_TYPE_FILTERS.some((option) => option.value === value);
 }
@@ -162,13 +167,18 @@ export function compareWatchlistItems(
     return compareTitles(a, b);
   }
 
-  const aNext = upcomingAirdate(a, todayIso);
-  const bNext = upcomingAirdate(b, todayIso);
-  if (aNext === null && bNext === null) return compareTitles(a, b);
-  if (aNext === null) return 1;
-  if (bNext === null) return -1;
-  const cmp = aNext < bNext ? -1 : aNext > bNext ? 1 : 0;
-  return cmp !== 0 ? cmp : compareTitles(a, b);
+  if (sort === 'upcoming') {
+    const aNext = upcomingAirdate(a, todayIso);
+    const bNext = upcomingAirdate(b, todayIso);
+    if (aNext === null && bNext === null) return compareTitles(a, b);
+    if (aNext === null) return 1;
+    if (bNext === null) return -1;
+    const cmp = aNext < bNext ? -1 : aNext > bNext ? 1 : 0;
+    return cmp !== 0 ? cmp : compareTitles(a, b);
+  }
+
+  // Unknown sort keys fall back to Recently added.
+  return compareWatchlistItems(a, b, 'recent', todayIso);
 }
 
 export function sortWatchlist<T extends WatchlistSortableItem>(

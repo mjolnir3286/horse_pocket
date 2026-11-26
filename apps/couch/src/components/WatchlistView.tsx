@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { Bell, BellOff, BellRing, RefreshCw, Trash2, X } from 'lucide-react';
 import type { NewEpisodeAlert } from '../types/streaming';
 import type { NotificationSupportState } from '../services/notifications';
@@ -7,11 +7,11 @@ import { posterUrl } from '../services/tmdb';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import {
   applyWatchlistView,
+  parseWatchlistSortKey,
   readWatchlistView,
   WATCHLIST_SORT_OPTIONS,
   WATCHLIST_TYPE_FILTERS,
   writeWatchlistView,
-  type WatchlistSortKey,
   type WatchlistViewState,
 } from '../lib/watchlistView';
 import { HideWatchedToggle } from './HideWatchedToggle';
@@ -69,6 +69,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
   watchNext,
 }) => {
   const compactSort = useMediaQuery('(max-width: 520px)');
+  const sortSelectId = useId();
   const [view, setView] = useState<WatchlistViewState>(() => readWatchlistView());
 
   useEffect(() => {
@@ -172,13 +173,15 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           </div>
 
           <div className="watchlist-controls-right">
-            <label className="sort-control">
-              <span className="section-meta sort-label">Sort</span>
+            <div className="sort-control">
+              <label className="section-meta sort-label" htmlFor={sortSelectId}>
+                Sort
+              </label>
               <select
+                id={sortSelectId}
                 className="sort-select"
                 value={view.sort}
-                onChange={(e) => setView((prev) => ({ ...prev, sort: e.target.value as WatchlistSortKey }))}
-                aria-label="Sort watchlist"
+                onChange={(e) => setView((prev) => ({ ...prev, sort: parseWatchlistSortKey(e.target.value) }))}
               >
                 {WATCHLIST_SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -186,7 +189,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
             <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} />
           </div>
         </div>

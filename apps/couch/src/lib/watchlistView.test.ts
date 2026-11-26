@@ -2,13 +2,16 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   applyWatchlistView,
+  compareWatchlistItems,
   DEFAULT_WATCHLIST_VIEW,
+  parseWatchlistSortKey,
   readWatchlistView,
   sanitizeWatchlistView,
   sortWatchlist,
   WATCHLIST_VIEW_STORAGE_KEY,
   writeWatchlistView,
   type WatchlistSortableItem,
+  type WatchlistSortKey,
 } from './watchlistView.ts';
 
 function item(
@@ -150,4 +153,31 @@ test('sanitizeWatchlistView and storage helpers fall back cleanly on invalid inp
 
   data.set(WATCHLIST_VIEW_STORAGE_KEY, '{not json');
   assert.deepEqual(readWatchlistView(mockStorage), DEFAULT_WATCHLIST_VIEW);
+});
+
+test('parseWatchlistSortKey keeps known keys and falls back to recent', () => {
+  assert.equal(parseWatchlistSortKey('upcoming'), 'upcoming');
+  assert.equal(parseWatchlistSortKey('title-az'), 'title-az');
+  assert.equal(parseWatchlistSortKey('bogus'), 'recent');
+  assert.equal(parseWatchlistSortKey(undefined), 'recent');
+});
+
+test('unknown sort keys fall back to Recently added, not Upcoming', () => {
+  const older = item({
+    key: 'older',
+    title: 'Older Follow',
+    followedAt: '2026-01-01T00:00:00.000Z',
+    lastStatus: { next: { airdate: '2026-11-26' } },
+  });
+  const newer = item({
+    key: 'newer',
+    title: 'Newer Follow',
+    followedAt: '2026-06-01T00:00:00.000Z',
+    lastStatus: { next: { airdate: '2026-12-01' } },
+  });
+  const unknown = 'not-a-sort' as WatchlistSortKey;
+  const today = '2026-11-25';
+  assert.equal(compareWatchlistItems(newer, older, unknown, today), compareWatchlistItems(newer, older, 'recent', today));
+  assert.notEqual(compareWatchlistItems(newer, older, unknown, today), compareWatchlistItems(newer, older, 'upcoming', today));
+  assert.ok(compareWatchlistItems(newer, older, unknown, today) < 0);
 });

@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { Bell, BellOff, BellRing, RefreshCw, Trash2, X } from 'lucide-react';
 import type { NewEpisodeAlert } from '../types/streaming';
 import type { NotificationSupportState } from '../services/notifications';
 import type { FollowedTitle } from '../services/follows';
 import { posterUrl } from '../services/tmdb';
+import { useMediaQuery } from '../lib/useMediaQuery';
+import {
+  applyWatchlistView,
+  parseWatchlistSortKey,
+  readWatchlistView,
+  WATCHLIST_SORT_OPTIONS,
+  WATCHLIST_TYPE_FILTERS,
+  writeWatchlistView,
+  type WatchlistViewState,
+} from '../lib/watchlistView';
 import { HideWatchedToggle } from './HideWatchedToggle';
 import { WatchedButton } from './WatchedButton';
 
@@ -58,6 +68,14 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
   onHideWatchedChange,
   watchNext,
 }) => {
+  const compactSort = useMediaQuery('(max-width: 520px)');
+  const sortSelectId = useId();
+  const [view, setView] = useState<WatchlistViewState>(() => readWatchlistView());
+
+  useEffect(() => {
+    writeWatchlistView(view);
+  }, [view]);
+
   const permissionLabel =
     permissionState === 'granted'
       ? 'On'
@@ -67,12 +85,15 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           ? 'Not supported in this browser (alerts still show here)'
           : 'Off';
 
-  const sorted = [...follows].sort((a, b) => {
-    const an = a.lastStatus?.next?.airdate ?? '9999';
-    const bn = b.lastStatus?.next?.airdate ?? '9999';
-    return an.localeCompare(bn) || a.title.localeCompare(b.title);
-  });
-  const visible = hideWatched ? sorted.filter((f) => !watchedState(f).caughtUp) : sorted;
+  const { typeFilteredCount, items: visible } = useMemo(
+    () =>
+      applyWatchlistView(
+        follows,
+        view,
+        hideWatched ? (f) => watchedState(f).caughtUp : undefined
+      ),
+    [follows, view, hideWatched, watchedState]
+  );
 
   return (
     <div>
@@ -133,20 +154,67 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           <h2>Your Watchlist</h2>
           <span className="section-meta">Saved on this device</span>
         </div>
-        {follows.length > 0 ? <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} /> : null}
       </div>
+
+      {follows.length > 0 && (
+        <div className="watchlist-controls">
+          <div className="chip-scroll" role="group" aria-label="Filter watchlist by type">
+            {WATCHLIST_TYPE_FILTERS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                className={`filter-chip ${view.typeFilter === value ? 'active' : ''}`}
+                aria-pressed={view.typeFilter === value}
+                onClick={() => setView((prev) => ({ ...prev, typeFilter: value }))}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="watchlist-controls-right">
+            <div className="sort-control">
+              <label className="section-meta sort-label" htmlFor={sortSelectId}>
+                Sort
+              </label>
+              <select
+                id={sortSelectId}
+                className="sort-select"
+                value={view.sort}
+                onChange={(e) => setView((prev) => ({ ...prev, sort: parseWatchlistSortKey(e.target.value) }))}
+              >
+                {WATCHLIST_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {compactSort ? option.shortLabel : option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <HideWatchedToggle hidden={hideWatched} onChange={onHideWatchedChange} />
+          </div>
+        </div>
+      )}
 
       {follows.length === 0 ? (
         <div className="panel empty-panel">
           Nothing here yet. Open a show or movie and tap Add to Watchlist.
         </div>
       ) : visible.length === 0 ? (
-        <div className="panel empty-panel">
-          All caught up.
-          <button type="button" className="text-btn" onClick={() => onHideWatchedChange(false)}>
-            Show watched
-          </button>
-        </div>
+        typeFilteredCount === 0 ? (
+          <div className="panel empty-panel">
+            No {view.typeFilter === 'tv' ? 'shows' : 'movies'} on your Watchlist.
+            <button type="button" className="text-btn" onClick={() => setView((prev) => ({ ...prev, typeFilter: 'all' }))}>
+              Show all
+            </button>
+          </div>
+        ) : (
+          <div className="panel empty-panel">
+            All caught up.
+            <button type="button" className="text-btn" onClick={() => onHideWatchedChange(false)}>
+              Show watched
+            </button>
+          </div>
+        )
       ) : (
         <div className="watch-list">
           {visible.map((f) => {
@@ -181,7 +249,6 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           })}
         </div>
       )}
-
     </div>
   );
 };

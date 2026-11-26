@@ -13,6 +13,7 @@ export interface FollowedTitle {
   tvmazeId: number | null;
   title: string;
   year: string | null;
+  releaseDate?: string | null;
   posterPath: string | null;
   followedAt: string;
   /** Last aired episode we've already accounted for. Only newer ones notify. */

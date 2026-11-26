@@ -378,6 +378,7 @@ export const App: React.FC = () => {
       tvmazeId: null,
       title: item.title,
       year: item.year,
+      releaseDate: item.releaseDate ?? null,
       posterPath: item.posterPath,
       followedAt: new Date().toISOString(),
       lastNotifiedEpisodeId: null,
@@ -402,7 +403,7 @@ export const App: React.FC = () => {
 
   const openFollow = (f: FollowedTitle) => {
     if (f.tmdbId != null) {
-      setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId });
+      setSelected({ id: f.tmdbId, mediaType: f.mediaType, title: f.title, year: f.year, releaseDate: f.releaseDate ?? null, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId });
     } else if (f.tvmazeId != null) {
       setSelected({ id: 0, mediaType: 'tv', title: f.title, year: f.year, overview: '', posterPath: f.posterPath, popularity: 0, tvmazeId: f.tvmazeId, tmdbless: true });
     } else {
@@ -476,6 +477,7 @@ export const App: React.FC = () => {
       tvmazeId,
       title,
       year: null,
+      releaseDate: null,
       posterPath: null,
       followedAt: new Date().toISOString(),
       lastNotifiedEpisodeId: null,
@@ -926,6 +928,7 @@ export const App: React.FC = () => {
 
         {activeTab === 'watchlist' && (
           <WatchlistView
+            key={backupGeneration}
             follows={follows}
             alerts={alerts}
             permissionState={permissionState}

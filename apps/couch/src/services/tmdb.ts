@@ -8,6 +8,7 @@ export interface TmdbTitle {
   mediaType: TmdbMediaType;
   title: string;
   year: string | null;
+  releaseDate?: string | null;
   overview: string;
   posterPath: string | null;
   popularity: number;
@@ -113,11 +114,13 @@ function toTitle(r: RawResult, fallbackType?: TmdbMediaType): TmdbTitle | null {
   const mediaType = (r.media_type as TmdbMediaType | undefined) ?? fallbackType;
   if (mediaType !== 'movie' && mediaType !== 'tv') return null;
   const date = mediaType === 'movie' ? r.release_date : r.first_air_date;
+  const releaseDate = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
   return {
     id: r.id,
     mediaType,
     title: (mediaType === 'movie' ? r.title : r.name) || r.title || r.name || 'Untitled',
     year: date ? date.slice(0, 4) : null,
+    releaseDate,
     overview: r.overview || '',
     posterPath: r.poster_path ?? null,
     popularity: r.popularity ?? 0,

@@ -9,6 +9,15 @@ import { safeHttpUrl } from '../lib/safeUrl';
 import type { TvmazeEpisode } from './tvmaze';
 import { isPlatformId } from '../data/platforms';
 import { sanitizeMyServices, saveMyServices } from './myServices';
+import {
+  isIsoDate,
+  isWatchlistSortKey,
+  isWatchlistTypeFilter,
+  readWatchlistView,
+  writeWatchlistView,
+  type WatchlistSortKey,
+  type WatchlistTypeFilter,
+} from '../lib/watchlistView';
 
 export type StatusFilter = 'all' | 'confirmed' | 'unconfirmed' | 'followed';
 export type SortKey = 'date-soonest' | 'date-latest' | 'provider-az' | 'title-az' | 'confidence';
@@ -146,6 +155,8 @@ export interface CouchBackup {
     upcomingStatus: StatusFilter;
     upcomingPlatforms: PlatformFilterId[];
     upcomingSort: SortKey;
+    watchlistSort?: WatchlistSortKey;
+    watchlistType?: WatchlistTypeFilter;
   };
 }
 
@@ -161,6 +172,7 @@ export interface CouchExportInput {
 }
 
 export function buildCouchBackup(input: CouchExportInput): CouchBackup {
+  const watchlistView = readWatchlistView();
   return {
     app: 'couch',
     version: 1,
@@ -183,6 +195,8 @@ export function buildCouchBackup(input: CouchExportInput): CouchBackup {
       upcomingStatus: readWatchlistOnly() ? 'followed' : 'all',
       upcomingPlatforms: readStorage(PLATFORM_STORAGE_KEY, [] as PlatformFilterId[], isPlatformFilterList),
       upcomingSort: readStorage(SORT_STORAGE_KEY, 'date-soonest' as SortKey, isSortKey),
+      watchlistSort: watchlistView.sort,
+      watchlistType: watchlistView.typeFilter,
     },
   };
 }
@@ -233,6 +247,7 @@ function rebuildFollow(f: FollowedTitle): FollowedTitle {
     lastNotifiedEpisodeId: num(raw.lastNotifiedEpisodeId),
     lastNotifiedAirstamp: str(raw.lastNotifiedAirstamp, 40),
   };
+  if (isIsoDate(raw.releaseDate)) out.releaseDate = raw.releaseDate;
   const ls = raw.lastStatus;
   const url = isPlainObject(ls) ? safeHttpUrl(ls.tvmazeUrl) : null;
   if (isPlainObject(ls) && url && typeof ls.checkedAt === 'string') {
@@ -332,6 +347,8 @@ export function parseCouchBackup(
     return { ok: false, error: friendly };
   }
   const upcomingStatus: StatusFilter = watchlistOnly ? 'followed' : 'all';
+  const watchlistSort: WatchlistSortKey = isWatchlistSortKey(filters.watchlistSort) ? filters.watchlistSort : 'recent';
+  const watchlistType: WatchlistTypeFilter = isWatchlistTypeFilter(filters.watchlistType) ? filters.watchlistType : 'all';
 
   const watched = parsed.watched === undefined ? {} : parsed.watched;
   if (!isPlainObject(watched)) {
@@ -362,6 +379,8 @@ export function parseCouchBackup(
         upcomingStatus,
         upcomingPlatforms,
         upcomingSort: filters.upcomingSort,
+        watchlistSort,
+        watchlistType,
       },
     },
   };
@@ -391,6 +410,10 @@ export function applyCouchBackupToStorage(backup: CouchBackup) {
   writeWatchlistOnly(backup.filters.watchlistOnly);
   writeStorage(PLATFORM_STORAGE_KEY, backup.filters.upcomingPlatforms);
   writeStorage(SORT_STORAGE_KEY, backup.filters.upcomingSort);
+  writeWatchlistView({
+    sort: backup.filters.watchlistSort ?? 'recent',
+    typeFilter: backup.filters.watchlistType ?? 'all',
+  });
   writeWatchedFromBackup(backup.watched);
 }
 

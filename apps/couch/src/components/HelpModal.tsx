@@ -42,7 +42,7 @@ const TABS: { icon: React.ReactNode; label: string; text: string }[] = [
   {
     icon: <Bookmark size={16} aria-hidden="true" />,
     label: 'Watchlist',
-    text: 'Titles you’ve saved. Couch checks for new episodes when you open this tab.',
+    text: 'Titles you’ve saved, with sort and All/Shows/Movies filters. Titles added before this update sort by title at the bottom of Recently added. Couch checks for new episodes when you open this tab.',
   },
   {
     icon: <Layers size={16} aria-hidden="true" />,

@@ -1,5 +1,5 @@
-import { DEFAULT_PROFILE, type Profile } from './energy';
-import { emptyNutrients, NUTRIENT_KEYS, type Nutrients } from './nutrition';
+import { DEFAULT_PROFILE, type Profile } from './energy.ts';
+import { emptyNutrients, NUTRIENT_KEYS, type Nutrients } from './nutrition.ts';
 
 export type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
 
@@ -36,10 +36,25 @@ export interface LogEntry {
   createdAt: string;
 }
 
+export interface PlanEntry {
+  id: string;
+  /** Local day, YYYY-MM-DD. */
+  date: string;
+  meal: Meal;
+  foodId: string | null;
+  name: string;
+  servings: number;
+  amountText: string;
+  /** Copied totals for the planned amount so editing/deleting a saved food won't alter plans. */
+  nutrients: Nutrients;
+  createdAt: string;
+}
+
 export const STORAGE_KEYS = {
   profile: 'shed_profile_v1',
   foods: 'shed_foods_v1',
   log: 'shed_log_v1',
+  plan: 'shed_plan_v1',
 } as const;
 
 export function newId(): string {
@@ -113,25 +128,29 @@ export function cleanFood(v: unknown): FoodItem | null {
 
 const MEAL_KEYS = MEALS.map((m) => m.key);
 
-export function cleanEntry(v: unknown): LogEntry | null {
+function cleanMealEntry(v: unknown): LogEntry | null {
   if (!v || typeof v !== 'object') return null;
   const o = v as Record<string, unknown>;
   const date = str(o.date);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const name = str(o.name).trim();
   if (!name) return null;
+  const rawServings = num(o.servings);
   return {
     id: str(o.id) || newId(),
     date,
     meal: MEAL_KEYS.includes(o.meal as Meal) ? (o.meal as Meal) : 'snacks',
     foodId: typeof o.foodId === 'string' ? o.foodId : null,
     name,
-    servings: num(o.servings) ?? 1,
+    servings: rawServings != null && rawServings > 0 ? rawServings : 1,
     amountText: str(o.amountText),
     nutrients: cleanNutrients(o.nutrients),
     createdAt: str(o.createdAt, new Date().toISOString()),
   };
 }
+
+export const cleanEntry = (v: unknown): LogEntry | null => cleanMealEntry(v);
+export const cleanPlanEntry = (v: unknown): PlanEntry | null => cleanMealEntry(v);
 
 const cleanList = <T,>(v: unknown, clean: (x: unknown) => T | null): T[] =>
   Array.isArray(v) ? v.map(clean).filter((x): x is T => x !== null) : [];
@@ -142,6 +161,23 @@ export const loadFoods = (): FoodItem[] => cleanList(read(STORAGE_KEYS.foods, []
 export const saveFoods = (f: FoodItem[]) => write(STORAGE_KEYS.foods, f);
 export const loadLog = (): LogEntry[] => cleanList(read(STORAGE_KEYS.log, []), cleanEntry);
 export const saveLog = (l: LogEntry[]) => write(STORAGE_KEYS.log, l);
+export const loadPlan = (): PlanEntry[] => cleanList(read(STORAGE_KEYS.plan, []), cleanPlanEntry);
+export const savePlan = (p: PlanEntry[]) => write(STORAGE_KEYS.plan, p);
+
+/** Build a log entry from a planned item without mutating the plan. */
+export function logEntryFromPlan(item: PlanEntry, targetDate: string = item.date, now: Date = new Date()): LogEntry {
+  return {
+    id: newId(),
+    date: targetDate,
+    meal: item.meal,
+    foodId: item.foodId,
+    name: item.name,
+    servings: item.servings,
+    amountText: item.amountText,
+    nutrients: { ...item.nutrients },
+    createdAt: now.toISOString(),
+  };
+}
 
 /** Meal that fits the current time, used as the default when adding food. */
 export function mealForNow(date: Date = new Date()): Meal {

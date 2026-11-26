@@ -179,7 +179,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
               Your Data
             </h3>
             <p className="drawer-data-note">
-              Your log, saved foods, and profile are saved on this device only. Clearing browser data erases them, so
+              Your log, meal plans, saved foods, and profile are saved on this device only. Clearing browser data erases them, so
               export a backup now and then.
             </p>
             <div className="drawer-data-actions">
@@ -266,7 +266,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                   Reset {SITE.name}?
                 </p>
                 <p id={resetDescId} className="drawer-data-note">
-                  This erases your profile, saved foods, and log in {SITE.name} on this device, then reloads. It can’t be
+                  This erases your profile, saved foods, meal plans, and log in {SITE.name} on this device, then reloads. It can’t be
                   undone, so export a backup first. Other Horse Pocket apps aren’t affected.
                 </p>
                 <button type="button" className="secondary-btn drawer-data-btn" onClick={exportNow}>

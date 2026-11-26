@@ -1,7 +1,10 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import {
+  CalendarDays,
   Camera,
+  Check,
   ChevronDown,
+  Clock,
   Download,
   FileDown,
   Frame,
@@ -11,13 +14,13 @@ import {
   Lightbulb,
   RotateCcw,
   FileUp,
-  History,
   Keyboard,
   NotebookPen,
   PlusCircle,
   Scale,
   Target,
   UserRound,
+  Utensils,
   X,
 } from 'lucide-react';
 import { SITE } from '../config/site';
@@ -37,8 +40,17 @@ const SECTIONS: { title: string; items: Item[] }[] = [
     items: [
       { icon: <NotebookPen size={16} />, label: 'Today', text: 'Your log for the day by meal, with calories eaten against your target and a protein, carbs, and fat summary. Use the arrows to look at other days.' },
       { icon: <PlusCircle size={16} />, label: 'Add', text: 'Scan a label or type it in, say how much you ate, and add it to a meal. Saved foods are listed below the form.' },
-      { icon: <History size={16} />, label: 'History', text: 'Past days with their totals. Tap a day to open it.' },
+      { icon: <CalendarDays size={16} />, label: 'Plan', text: 'Week calendar for past logged days and upcoming meal plans. Tap any day to inspect it or open a past day in Today.' },
       { icon: <UserRound size={16} />, label: 'Profile', text: 'Height, weight, age, sex, and activity set your daily calorie target.' },
+    ],
+  },
+  {
+    title: 'Plan & history',
+    items: [
+      { icon: <CalendarDays size={16} />, label: 'Week navigation', text: 'Move week by week from the last 60 days up to the current week plus 4 weeks ahead. Today and past days show what you logged; future days show what you planned (not eaten).' },
+      { icon: <Utensils size={16} />, label: 'Four meal slots', text: 'Each day has Breakfast, Lunch, Dinner, and Snacks. Add saved foods with a serving or gram amount to plan ahead.' },
+      { icon: <Check size={16} />, label: 'I ate this', text: 'Tap I ate this on a planned meal or item to copy it into your log. The plan stays unchanged, and only the log counts as eaten.' },
+      { icon: <Clock size={16} />, label: '60-day history', text: 'The calendar shows past days from the last 60 days. Older log entries are never deleted silently—they stay saved on this device and in JSON backups until you reset app data.' },
     ],
   },
   {
@@ -84,7 +96,7 @@ const SECTIONS: { title: string; items: Item[] }[] = [
       {
         icon: <RotateCcw size={16} />,
         label: 'Reset',
-        text: 'Reset app data in the menu erases Shed’s profile, foods, and log on this device and starts fresh. Export first to keep a copy.',
+        text: 'Reset app data in the menu erases Shed’s profile, saved foods, meal plans, and log on this device and starts fresh. Export first to keep a copy.',
       },
     ],
   },

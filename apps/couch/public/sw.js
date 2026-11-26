@@ -1,5 +1,5 @@
 /* Couch Service Worker: static assets, upcoming JSON, and relay/TVmaze/image caching. */
-const SHELL_CACHE = 'couch-shell-v16';
+const SHELL_CACHE = 'couch-shell-v17';
 const RELAY_CACHE = 'couch-relay-v1';
 // TVmaze responses only; the Upcoming file has its own cache so it is never evicted by TVmaze calls.
 const DATA_CACHE = 'couch-data-v2';

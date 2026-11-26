@@ -9,7 +9,7 @@ All apps are static, client-side web apps with no user accounts or paid services
 | App | Path | Purpose | Stack |
 | --- | --- | --- | --- |
 | **Horse Pocket** | `/horse_pocket/` (`apps/portal`) | Neutral portal hub linking to each mini app | Vite 8, TypeScript |
-| **Couch** | `/horse_pocket/couch/` (`apps/couch`) | Movie and show search with US where-to-watch (TMDB / JustWatch via the relay), follows with new-episode alerts on open (TVmaze), hand-checked plan prices, TVmaze + RSS Upcoming feed | React 19, TypeScript, Vite 6 |
+| **Couch** | `/horse_pocket/couch/` (`apps/couch`) | Movie and show search with US where-to-watch (TMDB / JustWatch via the relay), follows with new-episode alerts on open (TVmaze), hand-checked plan prices, TVmaze + RSS Upcoming feed | React 19, TypeScript, Vite 8 |
 | **Wad** | `/horse_pocket/wad/` (`apps/wad`) | Budget planner for take-home pay, taxes, expenses, savings goals, and CSV export/import (brought in from [`mjolnir3286/wad-app`](https://github.com/mjolnir3286/wad-app)) | React 19, TypeScript, Tailwind CSS, Recharts, Vite 8 |
 
 ## Repository Layout

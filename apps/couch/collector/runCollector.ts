@@ -11,8 +11,17 @@ import {
   polishTitle,
   pruneStaleLeads,
   AVAILABLE_NOW_KEEP_DAYS,
+  SCHEDULE_SOURCE,
+  extractQuotedTitles,
+  isEnglishOrMissing,
+  normalizeTitle,
+  splitMultiTitle,
+  tightNameMatch,
 } from './titleUtils';
-import { fetchTvMazeScheduleLeads, lookupTvMazeShow, TVMAZE_USER_AGENT } from './tvmazeClient';
+import { fetchTvMazeScheduleLeads, lookupTvMazeShow, TVMAZE_USER_AGENT, type TvMazeLookup } from './tvmazeClient';
+
+/** Max TVmaze show lookups per run (the client already rate-limits). */
+const MAX_LOOKUPS_PER_RUN = 250;
 
 interface FeedConfig {
   name: string;
@@ -266,37 +275,41 @@ async function run() {
         if (matchedKeywords.length === 0) continue;
         if (platform.id === 'unknown' && matchedKeywords.length < 2) continue;
 
-        const showTitle = extractShowTitle(rawTitle);
+        // A headline that quotes several titles gets one candidate per title; unmatched ones are dropped later.
+        const quoted = extractQuotedTitles(cleanedHeadline);
+        const titles = quoted.length >= 2 ? quoted : [extractShowTitle(rawTitle)];
         const dateInfo = extractDateInfo(combinedText, refDate);
 
-        let score = 0.2;
-        score += Math.min(0.25, matchedKeywords.length * 0.12);
-        if (platform.id !== 'unknown') score += 0.25;
-        if (showTitle.length >= 3 && showTitle.length <= 45) score += 0.12;
-        if (dateInfo.datePrecision === 'exact') score += 0.2;
-        else if (dateInfo.datePrecision === 'vague') score += 0.06;
+        for (const showTitle of titles) {
+          let score = 0.2;
+          score += Math.min(0.25, matchedKeywords.length * 0.12);
+          if (platform.id !== 'unknown') score += 0.25;
+          if (showTitle.length >= 3 && showTitle.length <= 45) score += 0.12;
+          if (dateInfo.datePrecision === 'exact') score += 0.2;
+          else if (dateInfo.datePrecision === 'vague') score += 0.06;
 
-        const nowIso = refDate.toISOString();
-        const id = leadId(showTitle, platform.id) || `lead-${candidates.length}`;
-        candidates.push({
-          id,
-          showTitle,
-          platformId: platform.id,
-          platformName: platform.name,
-          rawHeadline: rawTitle,
-          sourceName: feed.name,
-          sourceUrl: link,
-          publishedAt: nowIso,
-          firstSeenAt: nowIso,
-          lastSeenAt: nowIso,
-          extractedDateText: dateInfo.extractedDateText,
-          parsedDateIso: dateInfo.parsedDateIso,
-          datePrecision: dateInfo.datePrecision,
-          confirmationStatus: 'unconfirmed',
-          availabilityStatus: computeAvailabilityStatus(dateInfo.parsedDateIso, now),
-          confidenceScore: Number(Math.min(0.95, score).toFixed(2)),
-          matchedKeywords,
-        });
+          const nowIso = refDate.toISOString();
+          const id = leadId(showTitle, platform.id) || `lead-${candidates.length}`;
+          candidates.push({
+            id,
+            showTitle,
+            platformId: platform.id,
+            platformName: platform.name,
+            rawHeadline: rawTitle,
+            sourceName: feed.name,
+            sourceUrl: link,
+            publishedAt: nowIso,
+            firstSeenAt: nowIso,
+            lastSeenAt: nowIso,
+            extractedDateText: dateInfo.extractedDateText,
+            parsedDateIso: dateInfo.parsedDateIso,
+            datePrecision: dateInfo.datePrecision,
+            confirmationStatus: 'unconfirmed',
+            availabilityStatus: computeAvailabilityStatus(dateInfo.parsedDateIso, now),
+            confidenceScore: Number(Math.min(0.95, score).toFixed(2)),
+            matchedKeywords,
+          });
+        }
       }
     } catch (err) {
       feedsPolled.push({
@@ -348,33 +361,98 @@ async function run() {
 
   let allLeads = Array.from(rekeyed.values()).sort((a, b) => b.confidenceScore - a.confidenceScore);
 
-  // Confirm remaining RSS leads via TVmaze singlesearch (no key). Schedule leads are already confirmed.
-  const confirmQueue = [
-    ...allLeads.filter((l) => l.sourceName !== 'TVmaze web schedule' && l.availabilityStatus === 'upcoming' && !l.tvmaze),
-    ...allLeads.filter((l) => l.sourceName !== 'TVmaze web schedule' && l.availabilityStatus === 'available-now' && !l.tvmaze),
-  ].slice(0, 30);
+  // Drop schedule leads (including older copies in the file) for shows that are not English or missing a language.
+  const rejectedShowIds = new Set(tvmaze.rejectedShowIds);
+  allLeads = allLeads.filter(
+    (l) => !(l.sourceName === SCHEDULE_SOURCE && l.tvmaze && rejectedShowIds.has(l.tvmaze.showId))
+  );
+
+  // Headline leads must match a TVmaze show tightly (TMDB is relay-only, so the collector can't use it).
+  // Unmatched leads are dropped, so each daily pull overwrites them. Schedule leads are already matched.
+  const lookupCache = new Map<string, TvMazeLookup | undefined>();
+  let lookups = 0;
+  const lookupTight = async (title: string): Promise<TvMazeLookup | undefined> => {
+    const key = normalizeTitle(title);
+    if (!key) return undefined;
+    if (lookupCache.has(key)) return lookupCache.get(key);
+    if (lookups >= MAX_LOOKUPS_PER_RUN) return undefined;
+    lookups += 1;
+    const found = await lookupTvMazeShow(title);
+    lookupCache.set(key, found);
+    return found;
+  };
 
   let rssConfirmed = 0;
-  for (const lead of confirmQueue) {
-    const lookup = await lookupTvMazeShow(lead.showTitle);
-    if (lookup) {
-      lead.tvmaze = lookup;
-      if (lookup.nextEpisodeAirDate) {
-        lead.confirmationStatus = 'confirmed';
-        lead.parsedDateIso = lookup.nextEpisodeAirDate;
-        lead.datePrecision = 'exact';
-        lead.confidenceScore = Number(Math.min(0.99, lead.confidenceScore + 0.18).toFixed(2));
-        rssConfirmed += 1;
-      } else if (lead.datePrecision === 'exact') {
-        lead.confidenceScore = Number(Math.min(0.96, lead.confidenceScore + 0.1).toFixed(2));
-      }
-      lead.availabilityStatus = computeAvailabilityStatus(lead.parsedDateIso, now);
+  const applyLookup = (lead: UpcomingReleaseLead, lookup: TvMazeLookup) => {
+    lead.tvmaze = lookup;
+    if (lookup.nextEpisodeAirDate) {
+      lead.confirmationStatus = 'confirmed';
+      lead.parsedDateIso = lookup.nextEpisodeAirDate;
+      lead.datePrecision = 'exact';
+      lead.confidenceScore = Number(Math.min(0.99, lead.confidenceScore + 0.18).toFixed(2));
+      rssConfirmed += 1;
+    } else if (lead.datePrecision === 'exact') {
+      lead.confidenceScore = Number(Math.min(0.96, lead.confidenceScore + 0.1).toFixed(2));
     }
+    lead.availabilityStatus = computeAvailabilityStatus(lead.parsedDateIso, now);
+  };
+
+  let unmatchedDropped = 0;
+  const kept = new Map<string, UpcomingReleaseLead>();
+  const keep = (lead: UpcomingReleaseLead) => {
+    const prev = kept.get(lead.id);
+    kept.set(lead.id, prev ? mergeLead(prev, lead, nowIso) : lead);
+  };
+  for (const lead of allLeads) {
+    if (lead.sourceName === SCHEDULE_SOURCE) {
+      keep(lead);
+      continue;
+    }
+    if (lead.tvmaze) {
+      // Matched on an earlier run: re-check with the tight rule and the language rule.
+      if (tightNameMatch(lead.showTitle, lead.tvmaze.matchedName) && isEnglishOrMissing(lead.tvmaze.language)) {
+        keep(lead);
+      } else {
+        unmatchedDropped += 1;
+      }
+      continue;
+    }
+    const whole = await lookupTight(lead.showTitle);
+    if (whole) {
+      applyLookup(lead, whole);
+      keep(lead);
+      continue;
+    }
+    // Multi-title headline ("Stick and Being Huemann"): try each piece, keep only tight matches.
+    let matchedPiece = false;
+    for (const piece of splitMultiTitle(lead.showTitle)) {
+      const found = await lookupTight(piece);
+      if (!found) continue;
+      const clone: UpcomingReleaseLead = {
+        ...lead,
+        id: leadId(piece, lead.platformId),
+        showTitle: piece,
+        matchedKeywords: [...lead.matchedKeywords],
+      };
+      applyLookup(clone, found);
+      keep(clone);
+      matchedPiece = true;
+    }
+    if (!matchedPiece) unmatchedDropped += 1;
+  }
+  allLeads = Array.from(kept.values());
+  console.log(`[collector] Dropped ${unmatchedDropped} headline leads with no tight TVmaze match`);
+
+  // If a source fetch failed or came back empty, keep its last good items (skip the last-mention expiry).
+  const exemptSources = new Set<string>();
+  if (tvmaze.rawItemCount === 0 || tvmaze.feeds.every((f) => f.status === 'error')) exemptSources.add(SCHEDULE_SOURCE);
+  for (const f of feedsPolled) {
+    if (f.status === 'error' || f.itemCount === 0) exemptSources.add(f.name);
   }
 
   const beforePrune = allLeads.length;
-  allLeads = pruneStaleLeads(allLeads, now);
-  console.log(`[collector] Pruned ${beforePrune - allLeads.length} available-now leads older than ${AVAILABLE_NOW_KEEP_DAYS} days`);
+  allLeads = pruneStaleLeads(allLeads, now, AVAILABLE_NOW_KEEP_DAYS, exemptSources);
+  console.log(`[collector] Pruned ${beforePrune - allLeads.length} expired leads (matched leads expire ${AVAILABLE_NOW_KEEP_DAYS} days after release, or after last mention if undated)`);
   allLeads.sort((a, b) => b.confidenceScore - a.confidenceScore);
   const upcomingCount = allLeads.filter((l) => l.availabilityStatus === 'upcoming').length;
   const availableNowCount = allLeads.filter((l) => l.availabilityStatus === 'available-now').length;

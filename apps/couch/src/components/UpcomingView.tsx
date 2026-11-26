@@ -8,7 +8,7 @@ import { WatchlistOnlyToggle } from './WatchlistOnlyToggle';
 import { WatchedButton } from './WatchedButton';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { useMyServices } from '../services/myServices';
-import { episodeLine, leadDateDisplay, leadSortDate } from '../lib/leadDate';
+import { compareLeadDates, episodeLine, leadDateDisplay } from '../lib/leadDate';
 import {
   isPlatformFilterList,
   isSortKey,
@@ -153,13 +153,7 @@ export const UpcomingView: React.FC<UpcomingViewProps> = ({
       if (sortKey === 'confidence') {
         return b.confidenceScore - a.confidenceScore;
       }
-      const aDate = leadSortDate(a);
-      const bDate = leadSortDate(b);
-      if (!aDate && !bDate) return 0;
-      if (!aDate) return 1;
-      if (!bDate) return -1;
-      const cmp = aDate.localeCompare(bDate);
-      return sortKey === 'date-latest' ? -cmp : cmp;
+      return compareLeadDates(a, b, sortKey === 'date-latest');
     });
     return sorted;
   }, [statusFilteredLeads, isAllPlatforms, isNonePlatforms, effectivePlatforms, sortKey]);

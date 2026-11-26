@@ -1,6 +1,6 @@
 import type { UpcomingReleaseLead } from '../src/types/collector';
 import type { PlatformId } from '../src/types/streaming';
-import { computeAvailabilityStatus, leadId, polishTitle } from './titleUtils';
+import { computeAvailabilityStatus, isEnglishOrMissing, leadId, polishTitle, SCHEDULE_SOURCE, tightNameMatch } from './titleUtils';
 
 export const TVMAZE_USER_AGENT =
   'HorsePocket/1.0 (+https://github.com/mjolnir3286/horse_pocket)';
@@ -110,15 +110,16 @@ export function dateRange(around: Date, pastDays: number, futureDays: number): s
   return dates;
 }
 
-interface TvMazeEmbeddedShow {
+export interface TvMazeEmbeddedShow {
   id: number;
   name: string;
   url?: string;
+  language?: string | null;
   webChannel?: { name: string } | null;
   network?: { name: string } | null;
 }
 
-interface TvMazeScheduleEpisode {
+export interface TvMazeScheduleEpisode {
   id: number;
   name?: string;
   url?: string;
@@ -133,6 +134,8 @@ export interface TvMazeScheduleFetchResult {
   feeds: Array<{ name: string; url: string; status: 'ok' | 'error'; itemCount: number }>;
   rawItemCount: number;
   leads: UpcomingReleaseLead[];
+  /** Show ids skipped for language, so older copies already in the data file can be dropped too. */
+  rejectedShowIds: number[];
 }
 
 async function fetchScheduleForDate(
@@ -156,9 +159,11 @@ async function fetchScheduleForDate(
   }
 }
 
-function episodeToLead(episode: TvMazeScheduleEpisode, now: Date, nowIso: string): UpcomingReleaseLead | null {
+/** Map one schedule episode to a lead; null if it has no name, an untracked platform, or a non-English language. */
+export function episodeToLead(episode: TvMazeScheduleEpisode, now: Date, nowIso: string): UpcomingReleaseLead | null {
   const show = episode._embedded?.show ?? episode.show;
   if (!show?.name) return null;
+  if (!isEnglishOrMissing(show.language)) return null;
   const channelName = show.webChannel?.name ?? show.network?.name;
   const platform = mapWebChannel(channelName);
   if (!platform) return null;
@@ -179,7 +184,7 @@ function episodeToLead(episode: TvMazeScheduleEpisode, now: Date, nowIso: string
     platformId: platform.id,
     platformName: platform.name,
     rawHeadline: headline,
-    sourceName: 'TVmaze web schedule',
+    sourceName: SCHEDULE_SOURCE,
     sourceUrl: episode.url || show.url || 'https://www.tvmaze.com',
     publishedAt: airdate ? `${airdate}T00:00:00.000Z` : nowIso,
     firstSeenAt: nowIso,
@@ -194,6 +199,7 @@ function episodeToLead(episode: TvMazeScheduleEpisode, now: Date, nowIso: string
     tvmaze: {
       showId: show.id,
       matchedName: show.name,
+      language: show.language ?? undefined,
       webChannel: channelName ?? undefined,
       nextEpisodeAirDate: airdate ?? undefined,
       nextEpisodeName: epName,
@@ -233,6 +239,7 @@ export async function fetchTvMazeScheduleLeads(
   const dates = dateRange(now, pastDays, futureDays);
   const feeds: TvMazeScheduleFetchResult['feeds'] = [];
   const byId = new Map<string, UpcomingReleaseLead>();
+  const rejectedShowIds = new Set<number>();
   let rawItemCount = 0;
   let globalOk = 0;
   let usOk = 0;
@@ -258,7 +265,11 @@ export async function fetchTvMazeScheduleLeads(
       if (seenEpisode.has(episode.id)) continue;
       seenEpisode.add(episode.id);
       const lead = episodeToLead(episode, now, nowIso);
-      if (!lead) continue;
+      if (!lead) {
+        const show = episode._embedded?.show ?? episode.show;
+        if (show && !isEnglishOrMissing(show.language)) rejectedShowIds.add(show.id);
+        continue;
+      }
       const prev = byId.get(lead.id);
       byId.set(lead.id, prev ? preferScheduleLead(prev, lead) : lead);
     }
@@ -277,12 +288,13 @@ export async function fetchTvMazeScheduleLeads(
     itemCount: usItems,
   });
 
-  return { feeds, rawItemCount, leads: Array.from(byId.values()) };
+  return { feeds, rawItemCount, leads: Array.from(byId.values()), rejectedShowIds: Array.from(rejectedShowIds) };
 }
 
 export interface TvMazeLookup {
   showId: number;
   matchedName: string;
+  language?: string;
   webChannel?: string;
   nextEpisodeAirDate?: string;
   nextEpisodeName?: string;
@@ -302,6 +314,7 @@ export async function lookupTvMazeShow(showTitle: string): Promise<TvMazeLookup 
     interface TvMazeShow {
       id: number;
       name: string;
+      language?: string | null;
       webChannel?: { name: string } | null;
       network?: { name: string } | null;
       _embedded?: {
@@ -315,16 +328,14 @@ export async function lookupTvMazeShow(showTitle: string): Promise<TvMazeLookup 
     }
 
     const data = (await res.json()) as TvMazeShow;
-    const normQuery = showTitle.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const normMatch = data.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (!normMatch.includes(normQuery) && !normQuery.includes(normMatch)) {
-      return undefined;
-    }
+    if (!tightNameMatch(showTitle, data.name)) return undefined;
+    if (!isEnglishOrMissing(data.language)) return undefined;
 
     const nextEp = data._embedded?.nextepisode;
     return {
       showId: data.id,
       matchedName: data.name,
+      language: data.language ?? undefined,
       webChannel: data.webChannel?.name ?? data.network?.name ?? undefined,
       nextEpisodeAirDate: nextEp?.airdate || undefined,
       nextEpisodeName: nextEp?.name || undefined,

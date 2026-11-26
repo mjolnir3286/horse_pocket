@@ -49,7 +49,7 @@ export function parseBackup(rawText: string): ImportResult {
       ? `, ${plan.length} planned ${plan.length === 1 ? 'item' : 'items'} over ${planDays} ${planDays === 1 ? 'day' : 'days'}`
       : '';
   const when = backup.exportedAt ? ` from ${new Date(backup.exportedAt).toLocaleDateString()}` : '';
-  const summary = `Backup${when}: ${log.length} log ${log.length === 1 ? 'entry' : 'entries'} over ${days} ${days === 1 ? 'day' : 'days'}${planPart}, ${foods.length} saved ${foods.length === 1 ? 'food' : 'foods'}, and your profile. This replaces what’s on this device.`;
+  const summary = `Backup${when}: ${log.length} log ${log.length === 1 ? 'entry' : 'entries'} over ${days} ${days === 1 ? 'day' : 'days'}${planPart}, ${foods.length} saved ${foods.length === 1 ? 'food' : 'foods'}, and your profile. This replaces what’s on this device, including any existing meal plans.`;
   return { ok: true, backup, summary };
 }
 

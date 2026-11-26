@@ -240,6 +240,9 @@ export const PlanView: React.FC<PlanViewProps> = ({
                 : hasItems
                   ? `${Math.round(kcal)} kcal eaten`
                   : 'nothing logged';
+            const dayLabel = formatDay(d, today);
+            const longLabel = formatLongDay(d, today);
+            const dateLabel = dayLabel === longLabel ? dayLabel : `${dayLabel}, ${longLabel}`;
 
             return (
               <button
@@ -247,7 +250,7 @@ export const PlanView: React.FC<PlanViewProps> = ({
                 type="button"
                 disabled={!inWindow}
                 aria-pressed={cellSelected}
-                aria-label={`${formatDay(d, today)}, ${formatLongDay(d, today)}, ${stateText}`}
+                aria-label={`${dateLabel}, ${stateText}`}
                 className={[
                   'week-cell',
                   cellSelected ? 'is-selected' : '',
@@ -406,11 +409,12 @@ export const PlanView: React.FC<PlanViewProps> = ({
                     <span className="entry-kcal">{fmt(item.nutrients.calories)}</span>
                     <button
                       type="button"
-                      className="secondary-btn pill-btn"
+                      className="ghost-btn icon-btn"
+                      aria-label={`I ate this: ${item.name}`}
+                      title="I ate this"
                       onClick={() => onEatPlanItems([item], selectedDate)}
                     >
-                      <Check size={13} aria-hidden="true" />
-                      I ate this
+                      <Check size={16} aria-hidden="true" />
                     </button>
                     <button
                       type="button"

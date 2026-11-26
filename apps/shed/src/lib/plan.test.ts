@@ -26,7 +26,9 @@ test('week and horizon bounds match 60-day history and +4 weeks', () => {
   assert.equal(days[6], '2026-11-28');
 
   const bounds = planBounds(today);
-  assert.equal(bounds.minDay, shiftDay(today, -HISTORY_DAYS));
+  // 2026-09-27 through 2026-11-25 is 60 days inclusive of today.
+  assert.equal(bounds.minDay, shiftDay(today, -(HISTORY_DAYS - 1)));
+  assert.equal(bounds.minDay, '2026-09-27');
   assert.equal(bounds.currentWeekStart, '2026-11-22');
   assert.equal(bounds.maxWeekStart, shiftDay('2026-11-22', PLAN_WEEKS_AHEAD * 7));
   assert.equal(bounds.maxDay, shiftDay(bounds.maxWeekStart, 6));
@@ -179,6 +181,7 @@ test('backup imports older v1 backups without plan and exports/imports plan when
   assert.deepEqual(legacyRes.backup.plan, []);
   assert.equal(legacyRes.backup.log.length, 1);
   assert.equal(legacyRes.summary.includes('planned'), false);
+  assert.ok(legacyRes.summary.includes('including any existing meal plans'));
 
   const plan: PlanEntry[] = [
     {
@@ -202,4 +205,5 @@ test('backup imports older v1 backups without plan and exports/imports plan when
   if (!roundTrip.ok) return;
   assert.equal(roundTrip.backup.plan?.length, 1);
   assert.ok(roundTrip.summary.includes('1 planned item over 1 day'));
+  assert.ok(roundTrip.summary.includes('including any existing meal plans'));
 });

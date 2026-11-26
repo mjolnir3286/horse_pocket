@@ -1074,6 +1074,10 @@ select.input {
   padding: 6px 1px 5px;
 }
 
+.week-cell.is-future.is-selected {
+  border-style: dashed;
+}
+
 .week-cell.is-outside {
   opacity: 0.35;
 }

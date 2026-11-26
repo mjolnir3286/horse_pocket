@@ -39,9 +39,9 @@ export interface PlanBounds {
   maxWeekStart: string;
 }
 
-/** Calendar navigation bounds: last 60 days through current week + 4 weeks ahead. */
+/** Calendar navigation bounds: 60 days inclusive of today, through current week + 4 weeks ahead. */
 export function planBounds(today: string = dayKey()): PlanBounds {
-  const minDay = shiftDay(today, -HISTORY_DAYS);
+  const minDay = shiftDay(today, -(HISTORY_DAYS - 1));
   const currentWeekStart = startOfWeek(today);
   const maxWeekStart = shiftDay(currentWeekStart, PLAN_WEEKS_AHEAD * 7);
   return {

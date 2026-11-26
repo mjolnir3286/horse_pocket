@@ -48,9 +48,21 @@ function parseTab(raw: string | null): Tab | null {
   return TABS.some((t) => t.key === raw) ? (raw as Tab) : null;
 }
 
+function rewriteHistoryHash() {
+  if (window.location.hash.replace('#', '') !== 'history') return;
+  try {
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#plan`);
+  } catch {
+    // ignore
+  }
+}
+
 function initialTab(): Tab {
   const fromHash = parseTab(window.location.hash.replace('#', ''));
-  if (fromHash) return fromHash;
+  if (fromHash) {
+    rewriteHistoryHash();
+    return fromHash;
+  }
   try {
     const fromStorage = parseTab(sessionStorage.getItem(TAB_STORAGE));
     if (fromStorage) return fromStorage;
@@ -96,11 +108,14 @@ export default function App() {
 
   useEffect(() => {
     const onHash = () => {
-      const next = parseTab(window.location.hash.replace("#", ""));
-      if (next) setTab(next);
+      const next = parseTab(window.location.hash.replace('#', ''));
+      if (next) {
+        rewriteHistoryHash();
+        setTab(next);
+      }
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
   // Roll "today" forward if the app stays open past midnight.

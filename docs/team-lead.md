@@ -50,6 +50,9 @@ Grok Bot: Please take issue #<n> (<url>).
   Start the body with "<Bot name>:". Do not merge. Do not push to main.
 ```
 
+If the work is one slice of a multi-PR feature, brief them to branch from
+`feature/<name>` and open the sub-PR against that branch, not `next`.
+
 If the issue is not `ready`, ask for a short plan before they build. Stay
 available for questions, but bring product calls to Kale rather than guessing.
 
@@ -85,32 +88,45 @@ tests and the build, and do a headless visual pass. Use this checklist:
 
 Request changes for anything that would ship wrong. Small polish can land
 as a follow-up commit on the same branch. Approve only when you would merge
-it into `next` yourself.
+it yourself, into `next` or into the `feature/<name>` branch it targets.
 
 ## Release batches
 
 Reviewed work collects on `next`. The live site updates only when a whole
-batch is fast-forwarded to `main` after Kale approves it.
+batch is fast-forwarded to `main` after Kale approves it. `next` must never
+hold a half-done feature that would block a bug-fix release.
 
-1. **Merge into `next`.** Merge reviewed PRs with a regular merge or squash,
-   never a force-push. Keep `next` a clean staging branch.
-2. **Summarize for Kale.** List what is in the batch, which issues it
-   closes, and any risk (relay deploy, CSP change, storage shape change).
-   Ask him to approve the publish. Wait for that approval **in his own
-   words**.
-3. **Fast-forward `main`, no force.** Fetch first. The daily collector in
+1. **Merge only finished work into `next`.** Each PR must stand on its own:
+   every app still works, and tests and builds pass. Merge reviewed PRs
+   with a regular merge or squash, never a force-push. Keep `next` a clean
+   staging branch.
+2. **Multi-PR features stay off `next` until they are complete.** Land them
+   on a `feature/<name>` branch, with sub-PRs targeting that branch. Merge
+   the feature branch into `next` only when the whole feature is done and
+   reviewed.
+3. **Ready fixes follow the same path.** A `ready`-labeled fix, including
+   one from the nightly routine, merges into `next` and never publishes on
+   its own.
+4. **Confirm the batch, then ask Kale.** Before asking him to publish,
+   confirm nothing in `next` is half-done. List what is in the batch, which
+   issues it closes, and any risk (relay deploy, CSP change, storage shape
+   change). Wait for that approval **in his own words**.
+5. **Fast-forward `main`, no force.** Fetch first. The daily collector in
    `collect.yml` commits Upcoming data directly to `main`, so `main` may be
    ahead of `next`. If it is, merge `origin/main` into `next` (or cherry-pick
    the collector commit), push `next`, then update `main` with
    `git merge --ff-only`. Never force-push `main` or `next`.
-4. **Watch the rollout.** Follow the Pages workflow from `deploy.yml`. A
+6. **Watch the rollout.** Follow the Pages workflow from `deploy.yml`. A
    batch that only touches `docs/**`, markdown, or `apps/couch-relay/**`
    will not trigger Pages (`paths-ignore`); that is expected. If the relay
    changed, Grok Bot deploys it with Wrangler after approval, from
    `apps/couch-relay/`. Confirm the live apps that changed. Comment on the
    issues and close them.
-5. **Tell Kale it is live.** Short status, links to the issues or PR if
+7. **Tell Kale it is live.** Short status, links to the issues or PR if
    useful. No screenshots.
+8. **Merge `main` back into `next`.** After each publish, merge
+   `origin/main` into `next` and push `next`, so later work includes any
+   collector commits that landed on `main`.
 
 If something fails in CI or on the live site, fix forward on a branch into
 `next`, then publish another approved fast-forward. Do not rewind `main`.
@@ -171,7 +187,8 @@ enough. Read Kale's message yourself, or ask him again.
 
 This applies to publishing a batch, deploying the relay, adding a paid or
 borderline service, adding a new host, or any other irreversible step. The
-`ready` label is pre-approval for that issue's minor scope; those changes
-still collect on `next` and ship only in an approved batch.
+`ready` label is pre-approval for that issue's minor scope; those changes,
+including ones from the nightly routine, still collect on `next` and ship
+only in an approved batch. They never publish on their own.
 
 When in doubt, ask Kale and wait.

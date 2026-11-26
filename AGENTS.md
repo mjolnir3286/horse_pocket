@@ -42,12 +42,18 @@ Stay in your apps unless Grok Bot asks you to help elsewhere.
   switch the shared checkout out from under someone else.
 - Branch from the latest `origin/next` as `<bot>/<app>-<issue>-<slug>`
   (example: `wrok-dot/couch-22-watchlist-sort-filter`). Repo-wide work may
-  omit the app and issue (`grok-bot/agents-md`).
-- Open pull requests against `next`. Never push to `main`. A push to `main`
-  publishes the live site.
+  omit the app and issue (`grok-bot/agents-md`). A feature that needs
+  several PRs uses `feature/<name>`; sub-PRs target that branch, not `next`.
+- Open pull requests against `next`, unless you are on a `feature/<name>`
+  branch. Never push to `main`. A push to `main` publishes the live site.
+- Only finished, standalone work merges into `next`. Each PR must leave
+  every app working on its own, with tests and builds passing. A
+  `feature/<name>` branch merges into `next` only when the whole feature is
+  complete and reviewed.
 - Grok Bot reviews and merges into `next`. After Kale approves a release
   batch in his own words, Grok Bot fast-forwards `main` from `next` (no
-  force). That is one publish per batch.
+  force). That is one publish per batch. After each publish, merge `main`
+  back into `next`, because the daily collector commits to `main`.
 - Labels: owner labels `grok-bot`, `trot-tot`, `crok-pot`, `wrok-dot`; app
   labels (`couch`, `wad`, `shed`, `portal`, and later `loft`); plus `idea`,
   `ready`, and `research`.
@@ -57,7 +63,9 @@ Stay in your apps unless Grok Bot asks you to help elsewhere.
 - New ideas become GitHub issues (label `idea` plus an app label). Refine
   them in comments. Do not start a large build off a chat-only idea.
 - The `ready` label means the work is minor and already pre-approved. Still
-  open a PR against `next`; do not merge it yourself.
+  open a PR against `next`; do not merge it yourself. Ready fixes, including
+  ones from the nightly routine, collect on `next` and never publish on
+  their own.
 
 ## Kale's rules
 
@@ -96,6 +104,7 @@ Stay in your apps unless Grok Bot asks you to help elsewhere.
 ## PR checklist
 
 - [ ] Branched from `origin/next`; PR targets `next`, not `main`
+      (sub-PRs of a multi-PR feature target `feature/<name>` instead)
 - [ ] Body starts with `<Bot name>:` and names the issue it closes
 - [ ] Owner and app labels are set
 - [ ] Tests and build passed locally

@@ -1,5 +1,5 @@
-import type { Profile } from './energy';
-import { cleanEntry, cleanFood, cleanProfile, type FoodItem, type LogEntry } from './storage';
+import type { Profile } from './energy.ts';
+import { cleanEntry, cleanFood, cleanPlanEntry, cleanProfile, type FoodItem, type LogEntry, type PlanEntry } from './storage.ts';
 
 export interface ShedBackupV1 {
   app: 'shed';
@@ -8,10 +8,11 @@ export interface ShedBackupV1 {
   profile: Profile;
   foods: FoodItem[];
   log: LogEntry[];
+  plan?: PlanEntry[];
 }
 
-export function buildBackup(profile: Profile, foods: FoodItem[], log: LogEntry[]): ShedBackupV1 {
-  return { app: 'shed', version: 1, exportedAt: new Date().toISOString(), profile, foods, log };
+export function buildBackup(profile: Profile, foods: FoodItem[], log: LogEntry[], plan: PlanEntry[] = []): ShedBackupV1 {
+  return { app: 'shed', version: 1, exportedAt: new Date().toISOString(), profile, foods, log, plan };
 }
 
 export type ImportResult =
@@ -31,6 +32,7 @@ export function parseBackup(rawText: string): ImportResult {
   if (o.version !== 1) return { ok: false, error: `This backup is version ${String(o.version)}, which this Shed can’t read.` };
   const foods = Array.isArray(o.foods) ? o.foods.map(cleanFood).filter((x): x is FoodItem => x !== null) : [];
   const log = Array.isArray(o.log) ? o.log.map(cleanEntry).filter((x): x is LogEntry => x !== null) : [];
+  const plan = Array.isArray(o.plan) ? o.plan.map(cleanPlanEntry).filter((x): x is PlanEntry => x !== null) : [];
   const backup: ShedBackupV1 = {
     app: 'shed',
     version: 1,
@@ -38,10 +40,16 @@ export function parseBackup(rawText: string): ImportResult {
     profile: cleanProfile(o.profile),
     foods,
     log,
+    plan,
   };
   const days = new Set(log.map((e) => e.date)).size;
+  const planDays = new Set(plan.map((e) => e.date)).size;
+  const planPart =
+    plan.length > 0
+      ? `, ${plan.length} planned ${plan.length === 1 ? 'item' : 'items'} over ${planDays} ${planDays === 1 ? 'day' : 'days'}`
+      : '';
   const when = backup.exportedAt ? ` from ${new Date(backup.exportedAt).toLocaleDateString()}` : '';
-  const summary = `Backup${when}: ${log.length} log ${log.length === 1 ? 'entry' : 'entries'} over ${days} ${days === 1 ? 'day' : 'days'}, ${foods.length} saved ${foods.length === 1 ? 'food' : 'foods'}, and your profile. This replaces what’s on this device.`;
+  const summary = `Backup${when}: ${log.length} log ${log.length === 1 ? 'entry' : 'entries'} over ${days} ${days === 1 ? 'day' : 'days'}${planPart}, ${foods.length} saved ${foods.length === 1 ? 'food' : 'foods'}, and your profile. This replaces what’s on this device.`;
   return { ok: true, backup, summary };
 }
 

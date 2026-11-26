@@ -438,9 +438,14 @@ summary:focus-visible {
 
   .view > .view-title,
   .view > .day-nav,
+  .view > .week-nav,
+  .view > .week-card,
+  .view > .plan-day-head,
+  .view > .plan-section-heading,
+  .view > .plan-section-full,
+  .view > .plan-retention-note,
   .view > .summary-card,
   .view > .scan-card,
-  .view > .history-list,
   .view > .empty-card {
     grid-column: 1 / -1;
   }
@@ -611,7 +616,7 @@ summary:focus-visible {
 
 .entry-list,
 .saved-list,
-.history-list {
+.plan-food-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1006,92 +1011,340 @@ select.input {
   background: var(--subtle-fill);
 }
 
-/* ---------- History ---------- */
-.history-list {
+/* ---------- Plan & Week Calendar ---------- */
+.week-nav {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
 }
 
-.history-row {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text);
+.week-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  min-width: 0;
+  flex: 0 1 auto;
+  padding: 0 4px;
 }
 
-.history-row:hover {
+.week-card {
+  padding: 10px;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.week-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 68px;
+  padding: 7px 2px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.week-cell:hover:not(:disabled) {
   border-color: var(--border-strong);
 }
 
-.history-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+.week-cell.is-future {
+  border-style: dashed;
+  background: transparent;
 }
 
-.history-day {
-  font-weight: 700;
+.week-cell.is-today .week-cell-num {
+  color: var(--accent-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.history-meta {
-  font-size: 0.76rem;
+.week-cell.is-selected {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 6px 1px 5px;
+}
+
+.week-cell.is-outside {
+  opacity: 0.35;
+}
+
+.week-cell-dow {
+  font-size: 0.66rem;
+  font-weight: 650;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.week-cell-num {
+  font-size: 0.94rem;
+  font-weight: 750;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-cell-kcal {
+  font-size: 0.66rem;
+  font-weight: 650;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
-.history-bar {
-  position: relative;
-  height: 6px;
+.week-cell-kcal.is-over {
+  color: var(--warning-text);
+}
+
+.week-cell-tag {
+  min-height: 11px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent-bright);
+  line-height: 1;
+}
+
+.week-cell-bar {
+  width: calc(100% - 8px);
+  height: 4px;
+  margin-top: auto;
   border-radius: 999px;
   background: var(--subtle-fill);
-  margin-top: 4px;
+  overflow: hidden;
+  position: relative;
 }
 
-.history-bar-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
+.week-cell-fill {
+  display: block;
+  height: 100%;
   border-radius: inherit;
   background: var(--accent);
 }
 
-.history-bar-fill.is-over {
+.week-cell-fill.is-planned {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent-bright),
+    var(--accent-bright) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  opacity: 0.85;
+}
+
+.week-cell-fill.is-over {
   background: var(--warning);
 }
 
-.history-bar-target {
-  position: absolute;
-  top: -3px;
-  bottom: -3px;
-  width: 2px;
-  background: var(--text-muted);
-  border-radius: 1px;
+.plan-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.history-kcal {
-  font-weight: 750;
-  font-size: 1.05rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.plan-day-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.history-kcal small {
-  font-size: 0.74rem;
+.plan-day-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.plan-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.plan-status-badge.is-logged {
+  background: var(--subtle-fill);
   color: var(--text-muted);
-  font-weight: 600;
+  border: 1px solid var(--border);
 }
 
-.history-kcal.is-over {
-  color: var(--warning-text);
+.plan-status-badge.is-planned {
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  border: 1px dashed var(--accent);
 }
 
-.history-chevron {
-  color: var(--text-soft);
-  flex-shrink: 0;
+.progress.is-planned .progress-fill {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent),
+    var(--accent) 6px,
+    var(--accent-soft) 6px,
+    var(--accent-soft) 10px
+  );
+}
+
+.progress.is-planned.is-over .progress-fill {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--warning),
+    var(--warning) 6px,
+    var(--warning-soft) 6px,
+    var(--warning-soft) 10px
+  );
+}
+
+.plan-today-note {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--accent-bright);
+}
+
+.plan-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.plan-subheading {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.plan-retention-note {
+  margin: 0;
+  text-align: center;
+}
+
+.plan-modal-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-modal-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-modal-empty p {
+  margin: 0;
+}
+
+.plan-food-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.plan-food-option {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 9px 11px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-food-list li:last-child .plan-food-option {
+  border-bottom: none;
+}
+
+.plan-food-option:hover {
+  background: var(--subtle-fill);
+}
+
+.plan-food-option.is-active {
+  background: var(--accent-soft);
+}
+
+.plan-food-option.is-active .entry-name {
+  color: var(--accent-bright);
+}
+
+.plan-food-none {
+  padding: 12px;
+}
+
+.plan-modal-amount-row {
+  align-items: flex-end;
+}
+
+.plan-modal-amount-field {
+  flex: 0 0 100px;
+}
+
+.plan-modal-amount-field .input {
+  width: 100%;
+}
+
+.plan-modal-actions {
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (min-width: 768px) {
+  .week-card {
+    padding: 14px;
+  }
+
+  .week-grid {
+    gap: 8px;
+  }
+
+  .week-cell {
+    min-height: 76px;
+    padding: 8px 6px 7px;
+  }
+
+  .week-cell.is-selected {
+    padding: 7px 5px 6px;
+  }
+
+  .week-cell-dow {
+    font-size: 0.72rem;
+  }
+
+  .week-cell-kcal {
+    font-size: 0.74rem;
+  }
+
+  .week-cell-tag {
+    font-size: 0.62rem;
+  }
 }
 
 .empty-card {

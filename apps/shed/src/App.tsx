@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, History, Menu, NotebookPen, PlusCircle, UserRound } from 'lucide-react';
+import { CalendarDays, Download, Menu, NotebookPen, PlusCircle, UserRound } from 'lucide-react';
 import { SITE } from './config/site';
 import { computeEnergy, type Profile } from './lib/energy';
 import {
   loadFoods,
   loadLog,
+  loadPlan,
   loadProfile,
+  logEntryFromPlan,
+  MEALS,
   mealForNow,
   newId,
   saveFoods,
   saveLog,
+  savePlan,
   saveProfile,
   type FoodItem,
   type LogEntry,
   type Meal,
+  type PlanEntry,
 } from './lib/storage';
 import { backupFilename, buildBackup, downloadJsonFile, parseBackup } from './lib/backup';
-import { dayKey } from './lib/dates';
+import { dayKey, formatDay } from './lib/dates';
 import { registerServiceWorker, useInstallPrompt } from './lib/pwa';
 import { ShedMark } from './components/ShedMark';
 import { SideMenu, type PendingImport } from './components/SideMenu';
@@ -24,26 +29,31 @@ import { HelpModal } from './components/HelpModal';
 import { AboutModal } from './components/AboutModal';
 import { TodayView } from './components/TodayView';
 import { AddView, type AddPayload } from './components/AddView';
-import { HistoryView } from './components/HistoryView';
+import { PlanView } from './components/PlanView';
 import { ProfileView } from './components/ProfileView';
 
-type Tab = 'today' | 'add' | 'history' | 'profile';
+type Tab = 'today' | 'add' | 'plan' | 'profile';
 
 const TABS: { key: Tab; label: string; icon: typeof NotebookPen }[] = [
   { key: 'today', label: 'Today', icon: NotebookPen },
   { key: 'add', label: 'Add', icon: PlusCircle },
-  { key: 'history', label: 'History', icon: History },
+  { key: 'plan', label: 'Plan', icon: CalendarDays },
   { key: 'profile', label: 'Profile', icon: UserRound },
 ];
 
 const TAB_STORAGE = 'shed_tab_v1';
 
+function parseTab(raw: string | null): Tab | null {
+  if (raw === 'history') return 'plan';
+  return TABS.some((t) => t.key === raw) ? (raw as Tab) : null;
+}
+
 function initialTab(): Tab {
-  const hash = window.location.hash.replace('#', '') as Tab;
-  if (TABS.some((t) => t.key === hash)) return hash;
+  const fromHash = parseTab(window.location.hash.replace('#', ''));
+  if (fromHash) return fromHash;
   try {
-    const saved = sessionStorage.getItem(TAB_STORAGE) as Tab | null;
-    if (saved && TABS.some((t) => t.key === saved)) return saved;
+    const fromStorage = parseTab(sessionStorage.getItem(TAB_STORAGE));
+    if (fromStorage) return fromStorage;
   } catch {
     // ignore
   }
@@ -55,7 +65,9 @@ export default function App() {
   const [profile, setProfile] = useState<Profile>(loadProfile);
   const [foods, setFoods] = useState<FoodItem[]>(loadFoods);
   const [log, setLog] = useState<LogEntry[]>(loadLog);
-  const [date, setDate] = useState<string>(dayKey());
+  const [plan, setPlan] = useState<PlanEntry[]>(loadPlan);
+  const [today, setToday] = useState<string>(() => dayKey());
+  const [date, setDate] = useState<string>(() => dayKey());
   const [meal, setMeal] = useState<Meal>(mealForNow());
   const [dataVersion, setDataVersion] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -73,6 +85,7 @@ export default function App() {
   useEffect(() => saveProfile(profile), [profile]);
   useEffect(() => saveFoods(foods), [foods]);
   useEffect(() => saveLog(log), [log]);
+  useEffect(() => savePlan(plan), [plan]);
   useEffect(() => {
     try {
       sessionStorage.setItem(TAB_STORAGE, tab);
@@ -81,12 +94,22 @@ export default function App() {
     }
   }, [tab]);
 
+  useEffect(() => {
+    const onHash = () => {
+      const next = parseTab(window.location.hash.replace("#", ""));
+      if (next) setTab(next);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
   // Roll "today" forward if the app stays open past midnight.
   useEffect(() => {
     let current = dayKey();
     const id = window.setInterval(() => {
       const now = dayKey();
       if (now !== current) {
+        setToday(now);
         setDate((d) => (d === current ? now : d));
         current = now;
       }
@@ -159,11 +182,41 @@ export default function App() {
 
   const handleDeleteFood = (food: FoodItem) => {
     setFoods((list) => list.filter((f) => f.id !== food.id));
-    showToast(`Deleted ${food.name} from saved foods. Your log is unchanged.`);
+    showToast(`Deleted ${food.name} from saved foods. Your log and plans are unchanged.`);
+  };
+
+  const handleAddPlanItem = (item: Omit<PlanEntry, 'id' | 'createdAt'>) => {
+    const entry: PlanEntry = {
+      ...item,
+      id: newId(),
+      createdAt: new Date().toISOString(),
+    };
+    setPlan((list) => [...list, entry]);
+    const mealLabel = MEALS.find((m) => m.key === item.meal)?.label.toLowerCase() ?? item.meal;
+    showToast(`Planned ${item.name} for ${formatDay(item.date, today)} · ${mealLabel}.`);
+  };
+
+  const handleDeletePlanItem = (item: PlanEntry) => {
+    setPlan((list) => list.filter((e) => e.id !== item.id));
+    showToast(`Removed ${item.name} from plan.`);
+  };
+
+  const handleEatPlanItems = (items: PlanEntry[], targetDate: string) => {
+    if (items.length === 0) return;
+    const now = new Date();
+    const added = items.map((item) => logEntryFromPlan(item, targetDate, now));
+    setLog((l) => [...l, ...added]);
+    const dayLabel = targetDate === today ? 'today' : formatDay(targetDate, today);
+    if (items.length === 1) {
+      showToast(`Logged ${items[0].name} to ${dayLabel}.`);
+    } else {
+      const mealLabel = MEALS.find((m) => m.key === items[0].meal)?.label.toLowerCase() ?? 'meal';
+      showToast(`Logged ${items.length} ${mealLabel} items to ${dayLabel}.`);
+    }
   };
 
   const handleExport = () => {
-    downloadJsonFile(buildBackup(profile, foods, log), backupFilename());
+    downloadJsonFile(buildBackup(profile, foods, log, plan), backupFilename());
   };
 
   const validateImport = (raw: string): { ok: true; pending: PendingImport } | { ok: false; error: string } => {
@@ -177,6 +230,7 @@ export default function App() {
           setProfile(res.backup.profile);
           setFoods(res.backup.foods);
           setLog(res.backup.log);
+          setPlan(res.backup.plan ?? []);
           setDataVersion((v) => v + 1);
         },
       },
@@ -266,14 +320,22 @@ export default function App() {
         {tab === 'add' && (
           <AddView date={date} meal={meal} onMealChange={setMeal} foods={foods} onAdd={handleAdd} onDeleteFood={handleDeleteFood} />
         )}
-        {tab === 'history' && (
-          <HistoryView
+        {tab === 'plan' && (
+          <PlanView
+            today={today}
             log={log}
-            target={energy?.target ?? null}
+            plan={plan}
+            foods={foods}
+            energy={energy}
             onOpenDay={(d) => {
               setDate(d);
               goTab('today');
             }}
+            onOpenAdd={() => goTab('add')}
+            onOpenProfile={() => goTab('profile')}
+            onAddPlanItem={handleAddPlanItem}
+            onDeletePlanItem={handleDeletePlanItem}
+            onEatPlanItems={handleEatPlanItems}
           />
         )}
         {tab === 'profile' && <ProfileView key={dataVersion} profile={profile} onChange={setProfile} />}

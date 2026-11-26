@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -31,8 +32,18 @@ const securityMeta = (): Plugin => ({
   ],
 });
 
+
+const appRoot = fileURLToPath(new URL('.', import.meta.url));
+const sharedRoot = fileURLToPath(new URL('../../packages/shared', import.meta.url));
+const sharedSrc = fileURLToPath(new URL('../../packages/shared/src', import.meta.url));
+
 export default defineConfig({
   base: '/horse_pocket/shed/',
+  resolve: {
+    alias: {
+      '@hp/shared': sharedSrc,
+    },
+  },
   plugins: [react(), securityMeta()],
   build: {
     outDir: 'dist',
@@ -40,6 +51,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 4175,
+    fs: {
+      allow: [appRoot, sharedRoot],
+    },
   },
   preview: {
     host: '0.0.0.0',
